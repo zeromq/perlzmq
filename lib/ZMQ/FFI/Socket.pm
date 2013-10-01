@@ -7,6 +7,7 @@ use FFI::Raw;
 use Carp;
 
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
+use ZMQ::Constants qw(ZMQ_FD ZMQ_EVENTS ZMQ_POLLIN);
 
 has ctx_ptr => (
     is       => 'ro',
@@ -23,11 +24,19 @@ has _socket_ptr => (
 );
 
 my $zmq_socket = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_socket',
-    FFI::Raw::ptr,
-    FFI::Raw::ptr,
-    FFI::Raw::int
+    'libzmq.so' => 'zmq_socket',
+    FFI::Raw::ptr, # returns socket ptr
+    FFI::Raw::ptr, # takes ctx ptr
+    FFI::Raw::int  # socket type
+);
+
+my $zmq_getsockopt = FFI::Raw->new(
+    'libzmq.so' => 'zmq_getsockopt',
+    FFI::Raw::int, # retval
+    FFI::Raw::ptr, # socket ptr,
+    FFI::Raw::int, # option constant
+    FFI::Raw::ptr, # buf for option value
+    FFI::Raw::ptr  # buf for size of option value
 );
 
 my $zmq_connect = FFI::Raw->new(
@@ -108,6 +117,11 @@ sub BUILD {
     $self->_socket_ptr( $zmq_socket->($self->ctx_ptr, $self->type) );
 
     zcheck_null('zmq_socket', $self->_socket_ptr);
+
+    # ensure clean edge state
+    while ( $self->has_pollin ) {
+        $self->recv();
+    }
 }
 
 sub connect {
@@ -160,6 +174,53 @@ sub recv {
     $zmq_msg_close->($msg_ptr);
 
     return $content_ptr->tostr($msg_size);
+}
+
+sub get_fd {
+    my $self = shift;
+
+    my $fd     = pack 'I!', 0;
+    my $fd_len = pack 'L!', length($fd);
+
+    my $fd_ptr     = unpack('L!', pack('P', $fd));
+    my $fd_len_ptr = unpack('L!', pack('P', $fd_len));
+
+    zcheck_error(
+        'zmq_getsockopt',
+        $zmq_getsockopt->(
+            $self->_socket_ptr,
+            ZMQ_FD,
+            $fd_ptr,
+            $fd_len_ptr
+        )
+    );
+
+    $fd = unpack 'I!', $fd;
+    return $fd;
+}
+
+sub has_pollin {
+    my $self = shift;
+
+    my $zmq_events = pack 'I!', 0;
+    my $ze_len     = pack 'L!', length($zmq_events);
+
+    my $ze_ptr     = unpack('L!', pack('P', $zmq_events));
+    my $ze_len_ptr = unpack('L!', pack('P', $ze_len));
+
+
+    zcheck_error(
+        'zmq_getscokopt',
+        $zmq_getsockopt->(
+            $self->_socket_ptr,
+            ZMQ_EVENTS,
+            $ze_ptr,
+            $ze_len_ptr
+        )
+    );
+
+    $zmq_events = unpack 'I!', $zmq_events;
+    return $zmq_events & ZMQ_POLLIN;
 }
 
 sub close {
