@@ -26,11 +26,10 @@ my $zmq_strerror = FFI::Raw->new(
     FFI::Raw::int
 );
 
-
 sub zcheck_error {
     my ($func, $rc) = @_;
-    
-    if ( $rc == -1 ) { 
+
+    if ( $rc == -1 ) {
         zdie($func);
     }
 }

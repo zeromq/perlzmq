@@ -16,7 +16,7 @@ $s2->bind($endpoint);
 
 $s1->send('ohhai', ZMQ_DONTWAIT);
 
-is 
+is
     $s2->recv(),
     'ohhai',
     'received message';
