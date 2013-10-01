@@ -18,7 +18,7 @@ has max_sockets => (
     predicate => 'has_max_sockets',
 );
 
-has _ctx => (
+has _ctx_ptr => (
     is => 'rw',
 );
 
@@ -38,19 +38,21 @@ my $zmq_ctx_destroy = FFI::Raw->new(
 sub BUILD {
     my $self = shift;
 
-    $self->_ctx( $zmq_ctx_new->() );
+    $self->_ctx_ptr( $zmq_ctx_new->() );
 
-    zcheck_null('zmq_ctx_new', $self->_ctx);
+    zcheck_null('zmq_ctx_new', $self->_ctx_ptr);
 }
 
 sub socket {
     my ($self, $type) = @_;
 
-    return ZMQ::FFI::Socket->new( ctx => $self->_ctx, type => $type );
+    return ZMQ::FFI::Socket->new( ctx_ptr => $self->_ctx_ptr, type => $type );
 }
 
 sub destroy {
-    zcheck_error( 'zmq_ctx_destroy', $zmq_ctx_destroy->($self->_ctx) );
+    my $self = shift;
+
+    zcheck_error('zmq_ctx_destroy', $zmq_ctx_destroy->($self->_ctx_ptr));
 };
 
 sub DEMOLISH {

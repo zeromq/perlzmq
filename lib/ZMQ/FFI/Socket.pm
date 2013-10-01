@@ -7,12 +7,14 @@ use FFI::Raw;
 
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
 
-has ctx => (
-    is => 'ro',
+has ctx_ptr => (
+    is       => 'ro',
+    required => 1,
 );
 
 has type => (
-    is => 'ro',
+    is       => 'ro',
+    required => 1,
 );
 
 has _socket => (
@@ -53,7 +55,7 @@ my $zmq_close = FFI::Raw->new(
 sub BUILD {
     my $self = shift;
 
-    $zmq_socket->($self->ctx, $self->type);
+    $self->_socket( $zmq_socket->($self->ctx_ptr, $self->type) );
 
     zcheck_null('zmq_socket', $self->_socket);
 }
@@ -61,7 +63,7 @@ sub BUILD {
 sub connect {
     my ($self, $endpoint) = @_;
 
-    zcheck_error('zmq_connect', $zmq_connect->($endpoint));
+    zcheck_error('zmq_connect', $zmq_connect->($self->_socket, $endpoint));
 }
 
 sub bind {
@@ -71,7 +73,9 @@ sub bind {
 }
 
 sub close {
-    zcheck_error($zmq_close->($self->_socket));
+    my $self = shift;
+
+    zcheck_error('zmq_close', $zmq_close->($self->_socket));
 }
 
 sub DEMOLISH {

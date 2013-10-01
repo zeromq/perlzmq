@@ -46,7 +46,7 @@ sub zcheck_null {
 sub zdie {
     my ($func) = @_;
 
-    confess "$func: ".$zmq_strerror->($zmq_errno->());
+    croak "$func: ".$zmq_strerror->($zmq_errno->());
 }
 
 1;
