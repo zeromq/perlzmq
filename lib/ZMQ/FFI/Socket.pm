@@ -5,7 +5,7 @@ use namespace::autoclean;
 
 use FFI::Raw;
 
-use ZMQ::FFI::Util qw(check_zerror check_znull);
+use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
 
 has ctx => (
     is => 'ro',
@@ -55,23 +55,23 @@ sub BUILD {
 
     $zmq_socket->($self->ctx, $self->type);
 
-    check_znull('zmq_socket', $self->_socket);
+    zcheck_null('zmq_socket', $self->_socket);
 }
 
 sub connect {
     my ($self, $endpoint) = @_;
 
-    check_zerror('zmq_connect', $zmq_connect->($endpoint));
+    zcheck_error('zmq_connect', $zmq_connect->($endpoint));
 }
 
 sub bind {
     my ($self, $endpoint) = @_;
 
-    check_zerror('zmq_bind', $zmq_bind->($endpoint));
+    zcheck_error('zmq_bind', $zmq_bind->($endpoint));
 }
 
 sub close {
-    check_zerror($zmq_close->($self->_socket));
+    zcheck_error($zmq_close->($self->_socket));
 }
 
 sub DEMOLISH {

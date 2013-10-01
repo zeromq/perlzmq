@@ -8,8 +8,8 @@ use Carp;
 
 use Sub::Exporter -setup => {
     exports => [qw(
-        check_zerror
-        check_znull
+        zcheck_error
+        zcheck_null
     )],
 };
 
@@ -27,7 +27,7 @@ my $zmq_strerror = FFI::Raw->new(
 );
 
 
-sub check_zerror {
+sub zcheck_error {
     my ($func, $rc) = @_;
     
     if ( $rc == -1 ) { 
@@ -35,7 +35,7 @@ sub check_zerror {
     }
 }
 
-sub check_znull {
+sub zcheck_null {
     my ($func, $obj) = @_;
 
     unless ($obj) {

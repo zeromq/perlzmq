@@ -6,7 +6,7 @@ use namespace::autoclean;
 use FFI::Raw;
 
 use ZMQ::FFI::Socket;
-use ZMQ::FFI::Util qw(check_zerror check_znull);
+use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
 
 has threads => (
     is        => 'ro',
@@ -40,7 +40,7 @@ sub BUILD {
 
     $self->_ctx( $zmq_ctx_new->() );
 
-    check_znull('zmq_ctx_new', $self->_ctx);
+    zcheck_null('zmq_ctx_new', $self->_ctx);
 }
 
 sub socket {
@@ -50,7 +50,7 @@ sub socket {
 }
 
 sub destroy {
-    check_zerror( 'zmq_ctx_destroy', $zmq_ctx_destroy->($self->_ctx) );
+    zcheck_error( 'zmq_ctx_destroy', $zmq_ctx_destroy->($self->_ctx) );
 };
 
 sub DEMOLISH {
