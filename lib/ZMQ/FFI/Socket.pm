@@ -3,11 +3,14 @@ package ZMQ::FFI::Socket;
 use Moo;
 use namespace::autoclean;
 
+no if $] >= 5.018, warnings => "experimental";
+use feature 'switch';
+
 use FFI::Raw;
 use Carp;
 
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
-use ZMQ::FFI::Constants qw(ZMQ_FD ZMQ_EVENTS ZMQ_POLLIN);
+use ZMQ::FFI::Constants qw(ZMQ_FD ZMQ_EVENTS ZMQ_POLLIN ZMQ_POLLOUT);
 
 has ctx_ptr => (
     is       => 'ro',
@@ -176,51 +179,62 @@ sub recv {
     return $content_ptr->tostr($msg_size);
 }
 
-sub get_fd {
-    my $self = shift;
+sub get {
+    my ($self, $opt, $opt_type) = @_;
 
-    my $fd     = pack 'I!', 0;
-    my $fd_len = pack 'L!', length($fd);
+    my $pack_type = $self->_get_pack_type($opt_type);
 
-    my $fd_ptr     = unpack('L!', pack('P', $fd));
-    my $fd_len_ptr = unpack('L!', pack('P', $fd_len));
+    my $optval     = pack $pack_type, 0;
+    my $optval_len = pack 'L!', length($optval);
+
+    my $optval_ptr     = unpack('L!', pack('P', $optval));
+    my $optval_len_ptr = unpack('L!', pack('P', $optval_len));
 
     zcheck_error(
         'zmq_getsockopt',
         $zmq_getsockopt->(
             $self->_socket,
-            ZMQ_FD,
-            $fd_ptr,
-            $fd_len_ptr
+            $opt,
+            $optval_ptr,
+            $optval_len_ptr
         )
     );
 
-    $fd = unpack 'I!', $fd;
-    return $fd;
+    $optval = unpack $pack_type, $optval;
+    return $optval;
+}
+
+sub _get_pack_type {
+    my ($self, $zmqtype) = @_;
+
+    given ($zmqtype) {
+        when (/^int$/)      { return 'i!' }
+        when (/^int64_t$/)  { return 'l!' }
+        when (/^uint64_t$/) { return 'L!' }
+        when (/^binary$/)   { return 'C'  }
+
+        default { croak "unsupported type '$zmqtype'" }
+    }
+}
+
+sub get_fd {
+    my $self = shift;
+
+    return $self->get(ZMQ_FD, 'int');
 }
 
 sub has_pollin {
     my $self = shift;
 
-    my $zmq_events = pack 'I!', 0;
-    my $ze_len     = pack 'L!', length($zmq_events);
-
-    my $ze_ptr     = unpack('L!', pack('P', $zmq_events));
-    my $ze_len_ptr = unpack('L!', pack('P', $ze_len));
-
-
-    zcheck_error(
-        'zmq_getscokopt',
-        $zmq_getsockopt->(
-            $self->_socket,
-            ZMQ_EVENTS,
-            $ze_ptr,
-            $ze_len_ptr
-        )
-    );
-
-    $zmq_events = unpack 'I!', $zmq_events;
+    my $zmq_events = $self->get(ZMQ_EVENTS, 'int');
     return $zmq_events & ZMQ_POLLIN;
+}
+
+sub has_pollout {
+    my $self = shift;
+
+    my $zmq_events = $self->get(ZMQ_EVENTS, 'int');
+    return $zmq_events & ZMQ_POLLOUT;
 }
 
 sub close {
