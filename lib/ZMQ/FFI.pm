@@ -8,8 +8,7 @@ use FFI::Raw;
 use ZMQ::FFI::Socket;
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
 
-# ZMQ::Constants doesn't export these
-use enum qw(ZMQ_IO_THREADS=1 ZMQ_MAX_SOCKETS);
+use ZMQ::FFI::Constants qw(ZMQ_IO_THREADS ZMQ_MAX_SOCKETS);
 
 has threads => (
     is        => 'ro',

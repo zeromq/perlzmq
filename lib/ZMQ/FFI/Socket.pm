@@ -7,7 +7,7 @@ use FFI::Raw;
 use Carp;
 
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
-use ZMQ::Constants qw(ZMQ_FD ZMQ_EVENTS ZMQ_POLLIN);
+use ZMQ::FFI::Constants qw(ZMQ_FD ZMQ_EVENTS ZMQ_POLLIN);
 
 has ctx_ptr => (
     is       => 'ro',

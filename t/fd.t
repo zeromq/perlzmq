@@ -5,7 +5,7 @@ use Test::More;
 
 use AnyEvent;
 use ZMQ::FFI;
-use ZMQ::Constants qw(ZMQ_PUSH ZMQ_PULL);
+use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
 
 
 my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";

@@ -8,7 +8,7 @@ use FFI::Raw;
 use Errno qw(EINVAL);
 
 use ZMQ::FFI;
-use ZMQ::Constants qw(ZMQ_REQ);
+use ZMQ::FFI::Constants qw(ZMQ_REQ);
 
 
 my $ctx = ZMQ::FFI->new();

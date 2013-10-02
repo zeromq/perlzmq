@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 use ZMQ::FFI;
-use ZMQ::Constants qw(ZMQ_REQ ZMQ_REP ZMQ_DONTWAIT);
+use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP ZMQ_DONTWAIT);
 
 my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new( threads => 1 );
