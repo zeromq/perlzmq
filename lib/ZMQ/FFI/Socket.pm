@@ -223,11 +223,17 @@ sub get_identity {
     return shift->get(ZMQ_IDENTITY, 'binary');
 }
 
-#sub subscribe {
-#}
+sub subscribe {
+    my ($self, $topic) = @_;
 
-#sub unsubscribe {
-#}
+    $self->set(ZMQ_SUBSCRIBE, 'binary', $topic);
+}
+
+sub unsubscribe {
+    my ($self, $topic) = @_;
+
+    $self->set(ZMQ_UNSUBSCRIBE, 'binary', $topic);
+}
 
 sub has_pollin {
     my $self = shift;
