@@ -1,6 +1,6 @@
 package ZMQ::FFI::Constants;
 
-# Module generated on Wed Oct  2 06:37:10 2013
+# Module generated on Wed Oct  2 06:46:29 2013
 # Generated using ZMQ versions v2.1.0-v3.2.4
 
 use Exporter 'import';
@@ -88,6 +88,8 @@ ZMQ_XREP
 ZMQ_XREQ
 ZMQ_XSUB
 );
+
+%EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub ZMQ_AFFINITY { 4 }
 sub ZMQ_BACKLOG { 19 }

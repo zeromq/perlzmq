@@ -56,6 +56,8 @@ use Exporter 'import';
 $exports
 );
 
+%EXPORT_TAGS = (all => [\@EXPORT_OK]);
+
 $subs
 
 1;
