@@ -59,50 +59,32 @@ sub BUILD {
     $self->_ctx( $zmq_ctx_new->() );
 
     if ( $self->has_threads ) {
-        $self->set_threads($self->_threads);
+        $self->set(ZMQ_IO_THREADS, $self->_threads);
     }
 
     if ( $self->has_max_sockets ) {
-        $self->set_max_sockets($self->_max_sockets);
+        $self->set(ZMQ_MAX_SOCKETS, $self->_max_sockets);
     }
 
     zcheck_null('zmq_ctx_new', $self->_ctx);
 }
 
-sub set_threads {
-    my ($self, $thread_count) = @_;
+sub set {
+    my ($self, $option, $option_val) = @_;
 
     zcheck_error(
         'zmq_ctx_set',
-        $zmq_ctx_set->($self->_ctx, ZMQ_IO_THREADS, $thread_count)
+        $zmq_ctx_set->($self->_ctx, $option, $option_val)
     );
 }
 
-sub get_threads {
-    my $self = shift;
+sub get {
+    my ($self, $option) = @_;
 
-    my $threads = $zmq_ctx_get->($self->_ctx, ZMQ_IO_THREADS);
-    zcheck_error('zmq_ctx_get', $threads);
+    my $option_val = $zmq_ctx_get->($self->_ctx, $option);
+    zcheck_error('zmq_ctx_get', $option_val);
 
-    return $threads;
-}
-
-sub set_max_sockets {
-    my ($self, $socket_count) = @_;
-
-    zcheck_error(
-        'zmq_ctx_set',
-        $zmq_ctx_set->($self->_ctx, ZMQ_MAX_SOCKETS, $socket_count)
-    );
-}
-
-sub get_max_sockets {
-    my $self = shift;
-
-    my $max_sockets = $zmq_ctx_get->($self->_ctx, ZMQ_MAX_SOCKETS);
-    zcheck_error('zmq_ctx_get', $max_sockets);
-
-    return $max_sockets;
+    return $option_val;
 }
 
 sub socket {
