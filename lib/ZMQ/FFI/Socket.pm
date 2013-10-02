@@ -10,7 +10,7 @@ use FFI::Raw;
 use Carp;
 
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
-use ZMQ::FFI::Constants qw(ZMQ_FD ZMQ_EVENTS ZMQ_POLLIN ZMQ_POLLOUT);
+use ZMQ::FFI::Constants qw(:all);
 
 has ctx_ptr => (
     is       => 'ro',
@@ -40,6 +40,15 @@ my $zmq_getsockopt = FFI::Raw->new(
     FFI::Raw::int, # option constant
     FFI::Raw::ptr, # buf for option value
     FFI::Raw::ptr  # buf for size of option value
+);
+
+my $zmq_setsockopt = FFI::Raw->new(
+    'libzmq.so' => 'zmq_setsockopt',
+    FFI::Raw::int, # retval
+    FFI::Raw::ptr, # socket ptr,
+    FFI::Raw::int, # option constant
+    FFI::Raw::ptr, # ptr to option value
+    FFI::Raw::int  # size of option value
 );
 
 my $zmq_connect = FFI::Raw->new(
@@ -179,6 +188,49 @@ sub recv {
     return $content_ptr->tostr($msg_size);
 }
 
+sub get_fd {
+    my $self = shift;
+
+    return $self->get(ZMQ_FD, 'int');
+}
+
+sub set_linger {
+    my ($self, $linger) = @_;
+
+    $self->set(ZMQ_LINGER, 'int', $linger);
+}
+
+sub get_linger {
+    return shift->get(ZMQ_LINGER, 'int');
+}
+
+#sub set_identity {
+#}
+
+#sub get_identity {
+    #return shift->get(ZMQ_IDENTITY, 'binary');
+#}
+
+#sub subscribe {
+#}
+
+#sub unsubscribe {
+#}
+
+sub has_pollin {
+    my $self = shift;
+
+    my $zmq_events = $self->get(ZMQ_EVENTS, 'int');
+    return $zmq_events & ZMQ_POLLIN;
+}
+
+sub has_pollout {
+    my $self = shift;
+
+    my $zmq_events = $self->get(ZMQ_EVENTS, 'int');
+    return $zmq_events & ZMQ_POLLOUT;
+}
+
 sub get {
     my ($self, $opt, $opt_type) = @_;
 
@@ -204,6 +256,26 @@ sub get {
     return $optval;
 }
 
+sub set {
+    my ($self, $opt, $opt_type, $opt_val) = @_;
+
+    my $pack_type = $self->_get_pack_type($opt_type);
+    my $packed    = pack $pack_type, $opt_val;
+
+    my $opt_ptr   = unpack('L!', pack('P', $packed));
+    my $opt_len   = length(pack($pack_type, 0));
+
+    zcheck_error(
+        'zmq_setsockopt',
+        $zmq_setsockopt->(
+            $self->_socket,
+            $opt,
+            $opt_ptr,
+            $opt_len
+        )
+    );
+}
+
 sub _get_pack_type {
     my ($self, $zmqtype) = @_;
 
@@ -215,26 +287,6 @@ sub _get_pack_type {
 
         default { croak "unsupported type '$zmqtype'" }
     }
-}
-
-sub get_fd {
-    my $self = shift;
-
-    return $self->get(ZMQ_FD, 'int');
-}
-
-sub has_pollin {
-    my $self = shift;
-
-    my $zmq_events = $self->get(ZMQ_EVENTS, 'int');
-    return $zmq_events & ZMQ_POLLIN;
-}
-
-sub has_pollout {
-    my $self = shift;
-
-    my $zmq_events = $self->get(ZMQ_EVENTS, 'int');
-    return $zmq_events & ZMQ_POLLOUT;
 }
 
 sub close {
