@@ -11,13 +11,12 @@ for my $v (2,3) {
 
     for my $t (qx(git tag)) {
         chomp $t;
-        #say "Getting constants for $t";
         push @versions, $t;
 
         my %c =
-            map  { split ' ' }
+            map  { split '\s+' }
             grep { !/ZMQ_VERSION/ }
-            grep { /\b(ZMQ_[^ ]+ \d+)/; $_ = $1; }
+            grep { /\b(ZMQ_[^ ]+\s+\d+)/; $_ = $1; }
             qx(git show $t:include/zmq.h);
 
         while ( my ($k,$v) = each %c ) {
