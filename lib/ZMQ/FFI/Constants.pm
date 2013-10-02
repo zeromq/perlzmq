@@ -1,6 +1,6 @@
 package ZMQ::FFI::Constants;
 
-# Module generated on Wed Oct  2 06:29:18 2013
+# Module generated on Wed Oct  2 06:37:10 2013
 # Generated using ZMQ versions v2.1.0-v3.2.4
 
 use Exporter 'import';
@@ -29,6 +29,8 @@ ZMQ_FORWARDER
 ZMQ_HAUSNUMERO
 ZMQ_HWM
 ZMQ_IDENTITY
+ZMQ_IO_THREADS
+ZMQ_IO_THREADS_DFLT
 ZMQ_IPV4ONLY
 ZMQ_LAST_ENDPOINT
 ZMQ_LINGER
@@ -110,6 +112,8 @@ sub ZMQ_FORWARDER { 2 }
 sub ZMQ_HAUSNUMERO { 156384712 }
 sub ZMQ_HWM { 1 }
 sub ZMQ_IDENTITY { 5 }
+sub ZMQ_IO_THREADS { 1 }
+sub ZMQ_IO_THREADS_DFLT { 1 }
 sub ZMQ_IPV4ONLY { 31 }
 sub ZMQ_LAST_ENDPOINT { 32 }
 sub ZMQ_LINGER { 17 }
