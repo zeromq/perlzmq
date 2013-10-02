@@ -253,13 +253,11 @@ sub get {
 
     my $sizeof_ptr     = length(pack('L!'));
 
-    my $optval_ptr;
-    if ($opt_type eq 'binary') {
-        $optval_ptr = FFI::Raw::memptr($sizeof_ptr);
-    }
-    else {
-        $optval_ptr = unpack('L!', pack('P', $optval));
-    }
+    my $optval_ptr =
+        $opt_type eq 'binary' ?
+            FFI::Raw::memptr($sizeof_ptr)
+            : unpack('L!', pack('P', $optval))
+            ;
 
     my $optval_len_ptr = unpack('L!', pack('P', $optval_len));
 
