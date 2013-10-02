@@ -48,7 +48,4 @@ $t = AE::timer 0, .1, sub {
 
 EV::run();
 
-$push->close();
-$pull->close();
-
 done_testing;
