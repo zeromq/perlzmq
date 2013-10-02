@@ -176,6 +176,23 @@ sub send {
     );
 }
 
+sub send_multipart {
+    my ($self, $partsref, $flags) = @_;
+
+    $flags //= 0;
+
+    my @parts = @{$partsref // []};
+    unless (@parts) {
+        croak 'usage: send_multipart($parts, $flags)';
+    }
+
+    for my $i (0..$#parts-1) {
+        $self->send($parts[$i], ZMQ_SNDMORE);
+    }
+
+    $self->send($parts[$#parts], $flags);
+}
+
 sub recv {
     my ($self, $flags) = @_;
 
@@ -195,6 +212,18 @@ sub recv {
     $zmq_msg_close->($msg_ptr);
 
     return $content_ptr->tostr($msg_size);
+}
+
+sub recv_multipart {
+    my ($self, $flags) = @_;
+
+    my @parts = ( $self->recv($flags) );
+
+    while ( $self->get(ZMQ_RCVMORE, 'int') ){
+        push @parts, $self->recv($flags);
+    }
+
+    return @parts;
 }
 
 sub get_fd {
