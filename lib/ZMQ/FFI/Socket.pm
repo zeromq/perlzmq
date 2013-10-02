@@ -19,7 +19,7 @@ has type => (
     required => 1,
 );
 
-has _socket_ptr => (
+has _socket => (
     is => 'rw',
 );
 
@@ -114,9 +114,9 @@ my $memcpy = FFI::Raw->new(
 sub BUILD {
     my $self = shift;
 
-    $self->_socket_ptr( $zmq_socket->($self->ctx_ptr, $self->type) );
+    $self->_socket( $zmq_socket->($self->ctx_ptr, $self->type) );
 
-    zcheck_null('zmq_socket', $self->_socket_ptr);
+    zcheck_null('zmq_socket', $self->_socket);
 
     # ensure clean edge state
     while ( $self->has_pollin ) {
@@ -131,7 +131,7 @@ sub connect {
         croak 'usage: $socket->connect($endpoint)'
     }
 
-    zcheck_error('zmq_connect', $zmq_connect->($self->_socket_ptr, $endpoint));
+    zcheck_error('zmq_connect', $zmq_connect->($self->_socket, $endpoint));
 }
 
 sub bind {
@@ -141,7 +141,7 @@ sub bind {
         croak 'usage: $socket->bind($endpoint)'
     }
 
-    zcheck_error('zmq_bind', $zmq_bind->($self->_socket_ptr, $endpoint));
+    zcheck_error('zmq_bind', $zmq_bind->($self->_socket, $endpoint));
 }
 
 sub send {
@@ -151,7 +151,7 @@ sub send {
 
     zcheck_error(
         'zmq_send',
-        $zmq_send->($self->_socket_ptr, $msg, length($msg), $flags)
+        $zmq_send->($self->_socket, $msg, length($msg), $flags)
     );
 }
 
@@ -164,7 +164,7 @@ sub recv {
 
     zcheck_error('zmq_msg_init', $zmq_msg_init->($msg_ptr));
 
-    my $msg_size = $zmq_msg_recv->($msg_ptr, $self->_socket_ptr, $flags);
+    my $msg_size = $zmq_msg_recv->($msg_ptr, $self->_socket, $flags);
     zcheck_error('zmq_msg_recv', $msg_size);
 
     my $data_ptr    = $zmq_msg_data->($msg_ptr);
@@ -188,7 +188,7 @@ sub get_fd {
     zcheck_error(
         'zmq_getsockopt',
         $zmq_getsockopt->(
-            $self->_socket_ptr,
+            $self->_socket,
             ZMQ_FD,
             $fd_ptr,
             $fd_len_ptr
@@ -212,7 +212,7 @@ sub has_pollin {
     zcheck_error(
         'zmq_getscokopt',
         $zmq_getsockopt->(
-            $self->_socket_ptr,
+            $self->_socket,
             ZMQ_EVENTS,
             $ze_ptr,
             $ze_len_ptr
@@ -226,7 +226,7 @@ sub has_pollin {
 sub close {
     my $self = shift;
 
-    zcheck_error('zmq_close', $zmq_close->($self->_socket_ptr));
+    zcheck_error('zmq_close', $zmq_close->($self->_socket));
 }
 
 sub DEMOLISH {
