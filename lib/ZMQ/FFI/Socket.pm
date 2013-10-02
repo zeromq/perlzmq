@@ -42,12 +42,21 @@ my $zmq_getsockopt = FFI::Raw->new(
     FFI::Raw::ptr  # buf for size of option value
 );
 
-my $zmq_setsockopt = FFI::Raw->new(
+my $int_zmq_setsockopt = FFI::Raw->new(
     'libzmq.so' => 'zmq_setsockopt',
     FFI::Raw::int, # retval
     FFI::Raw::ptr, # socket ptr,
     FFI::Raw::int, # option constant
-    FFI::Raw::ptr, # ptr to option value
+    FFI::Raw::ptr, # ptr to value int
+    FFI::Raw::int  # size of option value
+);
+
+my $str_zmq_setsockopt = FFI::Raw->new(
+    'libzmq.so' => 'zmq_setsockopt',
+    FFI::Raw::int, # retval
+    FFI::Raw::ptr, # socket ptr,
+    FFI::Raw::int, # option constant
+    FFI::Raw::str, # ptr to value string
     FFI::Raw::int  # size of option value
 );
 
@@ -204,12 +213,15 @@ sub get_linger {
     return shift->get(ZMQ_LINGER, 'int');
 }
 
-#sub set_identity {
-#}
+sub set_identity {
+    my ($self, $id) = @_;
 
-#sub get_identity {
-    #return shift->get(ZMQ_IDENTITY, 'binary');
-#}
+    $self->set(ZMQ_IDENTITY, 'binary', $id);
+}
+
+sub get_identity {
+    return shift->get(ZMQ_IDENTITY, 'binary');
+}
 
 #sub subscribe {
 #}
@@ -239,7 +251,16 @@ sub get {
     my $optval     = pack $pack_type, 0;
     my $optval_len = pack 'L!', length($optval);
 
-    my $optval_ptr     = unpack('L!', pack('P', $optval));
+    my $sizeof_ptr     = length(pack('L!'));
+
+    my $optval_ptr;
+    if ($opt_type eq 'binary') {
+        $optval_ptr = FFI::Raw::memptr($sizeof_ptr);
+    }
+    else {
+        $optval_ptr = unpack('L!', pack('P', $optval));
+    }
+
     my $optval_len_ptr = unpack('L!', pack('P', $optval_len));
 
     zcheck_error(
@@ -252,28 +273,53 @@ sub get {
         )
     );
 
-    $optval = unpack $pack_type, $optval;
+    if ($opt_type eq 'binary') {
+        $optval_len = unpack 'L!', $optval_len;
+
+        if ($optval_len == 0) {
+            return;
+        }
+
+        $optval = $optval_ptr->tostr($optval_len);
+    }
+    else {
+        $optval = unpack $pack_type, $optval;
+    }
+
     return $optval;
 }
 
 sub set {
     my ($self, $opt, $opt_type, $opt_val) = @_;
 
-    my $pack_type = $self->_get_pack_type($opt_type);
-    my $packed    = pack $pack_type, $opt_val;
+    if ($opt_type eq 'binary') {
+        zcheck_error(
+            'zmq_setsockopt',
+            $str_zmq_setsockopt->(
+                $self->_socket,
+                $opt,
+                $opt_val,
+                length($opt_val)
+            )
+        );
+    }
+    else {
+        my $pack_type = $self->_get_pack_type($opt_type);
+        my $packed    = pack $pack_type, $opt_val;
 
-    my $opt_ptr   = unpack('L!', pack('P', $packed));
-    my $opt_len   = length(pack($pack_type, 0));
+        my $opt_ptr   = unpack('L!', pack('P', $packed));
+        my $opt_len   = length(pack($pack_type, 0));
 
-    zcheck_error(
-        'zmq_setsockopt',
-        $zmq_setsockopt->(
-            $self->_socket,
-            $opt,
-            $opt_ptr,
-            $opt_len
-        )
-    );
+        zcheck_error(
+            'zmq_setsockopt',
+            $int_zmq_setsockopt->(
+                $self->_socket,
+                $opt,
+                $opt_ptr,
+                $opt_len
+            )
+        );
+    }
 }
 
 sub _get_pack_type {
@@ -283,7 +329,7 @@ sub _get_pack_type {
         when (/^int$/)      { return 'i!' }
         when (/^int64_t$/)  { return 'l!' }
         when (/^uint64_t$/) { return 'L!' }
-        when (/^binary$/)   { return 'C'  }
+        when (/^binary$/)   { return 'L!' }
 
         default { croak "unsupported type '$zmqtype'" }
     }
