@@ -166,4 +166,4 @@ EV::run();
 
 
 ### DOCUMENTATION ###
-Full documentation can be found on [cpan](http://search.cpan.org/search?query=ZMQ%3A%3AFFI&mode=all)
+Full documentation can be found on [cpan](https://metacpan.org/module/ZMQ::FFI)
