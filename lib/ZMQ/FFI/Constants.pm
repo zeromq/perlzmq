@@ -181,11 +181,11 @@ __END__
 
 =head1 SYNOPSIS
 
-use ZMQ::FFI::Constants qw(ZMQ_LINGER ZMQ_FD);
+    use ZMQ::FFI::Constants qw(ZMQ_LINGER ZMQ_FD);
 
-# or
+    # or
 
-use ZMQ::FFI::Constants q(:all)
+    use ZMQ::FFI::Constants q(:all)
 
 =head1 DESCRIPTION
 
@@ -193,9 +193,8 @@ This module includes every zmq constant from every stable version of zeromq.
 Currently that is v2.1.0-v3.2.4.  It was generated using the zeromq2-x and
 zeromq3-x git repos at L<https://github.com/zeromq>.
 
-There is the possibility it may eventually be merged with the L<ZMQ::Constants>
-module and go away. However at present L<ZMQ::Constants> does not have every
-zmq constant, and so this module was created as a stop-gap.
+There is the possibility it may eventually be merged with L<ZMQ::Constants> and
+go away.
 
 =head1 SEE ALSO
 

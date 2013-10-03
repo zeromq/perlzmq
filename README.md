@@ -110,6 +110,7 @@ use v5.10;
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
 use AnyEvent;
+use EV;
 
 my $endpoint = "ipc://zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new();
@@ -162,3 +163,7 @@ EV::run();
     cpanm Dist::Zilla # if not already installed
     dzil authordeps | cpanm
     dzil build
+
+
+### DOCUMENTATION ###
+Full documentation can be found on [cpan](http://search.cpan.org/search?query=ZMQ%3A%3AFFI&mode=all)

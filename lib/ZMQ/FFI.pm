@@ -270,7 +270,7 @@ add C<$topic> to the subscription list
 
 =head2 unsubscribe($topic)
 
-remove $topic from the subscription list
+remove C<$topic> from the subscription list
 
 =head2 send($msg, [$flags])
 
