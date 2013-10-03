@@ -95,6 +95,7 @@ sub destroy {
     my $self = shift;
 
     zcheck_error('zmq_ctx_destroy', $zmq_ctx_destroy->($self->_ctx));
+    $self->_ctx(-1);
 };
 
 __PACKAGE__->meta->make_immutable();

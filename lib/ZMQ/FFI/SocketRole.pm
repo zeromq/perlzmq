@@ -44,7 +44,7 @@ sub DEMOLISH {
     my $self = shift;
 
     unless ($self->_socket == -1) {
-        shift->close();
+        $self->close();
     }
 }
 

@@ -316,6 +316,7 @@ sub close {
     my $self = shift;
 
     zcheck_error('zmq_close', $zmq_close->($self->_socket));
+    $self->_socket(-1);
 }
 
 __PACKAGE__->meta->make_immutable();

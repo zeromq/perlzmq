@@ -81,6 +81,7 @@ sub destroy {
     my $self = shift;
 
     zcheck_error('zmq_term', $zmq_term->($self->_ctx));
+    $self->_ctx(-1);
 }
 
 __PACKAGE__->meta->make_immutable();

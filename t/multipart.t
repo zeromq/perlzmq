@@ -25,7 +25,4 @@ is_deeply
     [qw(mydealer ABC DEF GHI)],
     'got dealer ident and message';
 
-$d->close();
-$r->close();
-
 done_testing;

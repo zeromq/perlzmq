@@ -44,8 +44,6 @@ sub {
     is $s->get_identity(), undef, 'got default identity';
     $s->set_identity('foo');
     is $s->get_identity(), 'foo', 'set identity';
-
-    $s->close();
 };
 
 done_testing;

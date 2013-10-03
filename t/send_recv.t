@@ -22,6 +22,12 @@ is
     'received message';
 
 $s1->close();
+is $s1->_socket, -1, 's1 socket ptr set to -1 after explicit close';
+
 $s2->close();
+is $s2->_socket, -1, 's2 socket ptr set to -1 after explicit close';
+
+$ctx->destroy();
+is $ctx->_ctx, -1, 'ctx ptr set to -1 after explicit destroy';
 
 done_testing;
