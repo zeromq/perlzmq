@@ -4,7 +4,8 @@ use Moo::Role;
 use ZMQ::FFI::Util qw(zmq_version);
 
 has _ctx => (
-    is => 'rw'
+    is      => 'rw',
+    default => -1,
 );
 
 has threads => (
@@ -31,7 +32,11 @@ sub version {
 }
 
 sub DEMOLISH {
-    shift->destroy();
+    my $self = shift;
+
+    unless ($self->_ctx == -1) {
+        $self->destroy();
+    }
 }
 
 1;

@@ -5,6 +5,7 @@ use namespace::autoclean;
 
 use FFI::Raw;
 use Carp;
+use Try::Tiny;
 
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null zmq_version);
 use ZMQ::FFI::ZMQ2::Socket;
@@ -37,7 +38,14 @@ sub BUILD {
     }
 
     $self->_ctx( $zmq_init->($self->_threads) );
-    zcheck_null('zmq_init', $self->_ctx);
+
+    try {
+        zcheck_null('zmq_init', $self->_ctx);
+    }
+    catch {
+        $self->_ctx(-1);
+        croak $_;
+    };
 }
 
 sub get {

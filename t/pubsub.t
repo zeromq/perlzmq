@@ -48,6 +48,9 @@ sub {
         my $msg = $s->recv();
         is $msg, 'mytopic ohhai', 'got msg sent to mytopic';
     }
+
+    $s->close();
+    $p->close();
 };
 
 done_testing;

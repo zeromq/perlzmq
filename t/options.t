@@ -37,7 +37,6 @@ sub {
     my $ctx = ZMQ::FFI->new();
 
     my $s = $ctx->socket(ZMQ_REQ);
-
     is $s->get_linger(), -1, 'got default linger';
     $s->set_linger(42);
     is $s->get_linger(), 42, 'set linger';
@@ -45,6 +44,8 @@ sub {
     is $s->get_identity(), undef, 'got default identity';
     $s->set_identity('foo');
     is $s->get_identity(), 'foo', 'set identity';
+
+    $s->close();
 };
 
 done_testing;

@@ -22,5 +22,6 @@ my $socket = $ctx->socket(ZMQ_REQ);
 throws_ok { $socket->connect('foo') } qr/invalid argument/i,
     q(invalid endpoint dies with EINVAL);
 
+$socket->close();
 
 done_testing;

@@ -10,6 +10,8 @@ use Carp;
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null zmq_version);
 use ZMQ::FFI::Constants qw(:all);
 
+use Try::Tiny;
+
 my $zmq_socket = FFI::Raw->new(
     'libzmq.so' => 'zmq_socket',
     FFI::Raw::ptr, # returns socket ptr
@@ -102,7 +104,13 @@ sub BUILD {
 
     $self->_socket( $zmq_socket->($self->ctx_ptr, $self->type) );
 
-    zcheck_null('zmq_socket', $self->_socket);
+    try {
+        zcheck_null('zmq_socket', $self->_socket);
+    }
+    catch {
+        $self->_socket(-1);
+        croak $_;
+    };
 
     # ensure clean edge state
     while ( $self->has_pollin ) {

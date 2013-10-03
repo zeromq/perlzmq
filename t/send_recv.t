@@ -21,4 +21,7 @@ is
     'ohhai',
     'received message';
 
+$s1->close();
+$s2->close();
+
 done_testing;

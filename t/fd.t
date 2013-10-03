@@ -14,7 +14,6 @@ my @expected = qw(foo bar baz);
 my $ctx      = ZMQ::FFI->new();
 
 my $pull = $ctx->socket(ZMQ_PULL);
-
 $pull->bind($endpoint);
 
 my $fd = $pull->get_fd();
@@ -48,5 +47,8 @@ $t = AE::timer 0, .1, sub {
 };
 
 EV::run();
+
+$pull->close();
+$push->close();
 
 done_testing;

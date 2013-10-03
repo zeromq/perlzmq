@@ -15,7 +15,8 @@ has type => (
 );
 
 has _socket => (
-    is => 'rw',
+    is      => 'rw',
+    default => -1,
 );
 
 requires qw(
@@ -40,7 +41,11 @@ requires qw(
 );
 
 sub DEMOLISH {
-    shift->close();
+    my $self = shift;
+
+    unless ($self->_socket == -1) {
+        shift->close();
+    }
 }
 
 1;
