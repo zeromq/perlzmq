@@ -129,6 +129,7 @@ __END__
     use ZMQ::FFI;
     use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
     use AnyEvent;
+    use EV;
 
     my $endpoint = "ipc://zmq-ffi-$$";
     my $ctx      = ZMQ::FFI->new();
