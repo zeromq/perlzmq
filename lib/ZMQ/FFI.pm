@@ -309,7 +309,7 @@ associated with the option value in the zeromq API (C<zmq_getsockopt> man page)
 
 =head2 set($option, $option_type, $option_value)
 
-    $socket->set(ZMQ_LINGER, 'int', 42)
+    $socket->set(ZMQ_IDENTITY, 'binary', 'foo')
 
 set the socket option to the specified value. C<$option_type> is the type
 associated with the option value in the zeromq API (C<zmq_setsockopt> man page)
@@ -318,6 +318,14 @@ associated with the option value in the zeromq API (C<zmq_setsockopt> man page)
 
 close the underlying zmq socket. This is called automatically when the object
 goes out of scope
+
+=head1 ERROR HANDLING
+
+ZMQ::FFI checks the return codes of underlying zmq functions for you, and in the
+case of an error it will die with the plain english system error message.
+
+    $ctx->socket(-1);
+    # dies with 'zmq_socket: Invalid argument'
 
 =head1 SEE ALSO
 
