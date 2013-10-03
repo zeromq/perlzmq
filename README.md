@@ -3,7 +3,7 @@
 
 ZMQ::FFI exposes a high level, transparent, OO interface to zeromq independent of the underlying libzmq version.  Where semantics differ, it will dispatch to the appropriate backend for you.  As it uses ffi, there is no dependency on XS or compilation.
 
-### Examples ###
+### EXAMPLES ###
 
 #### send/recv ####
 ```perl
@@ -151,3 +151,14 @@ $t = AE::timer 0, .1, sub {
 
 EV::run();
 ```
+
+### INSTALL ###
+    # if simply wanting to use ZMQ::FFI
+    cpanm ZMQ::FFI
+
+    # if wanting to hack on the source and build the dist
+    git clone git@github.com:calid/zmq-ffi.git
+    cd zmq-ffi
+    cpanm Dist::Zilla # if not already installed
+    dzil authordeps | cpanm
+    dzil build
