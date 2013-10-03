@@ -4,11 +4,18 @@ use Test::More;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(:all);
+use ZMQ::FFI::Util qw(zmq_version);
 
-my $ctx = ZMQ::FFI->new( threads => 42, max_sockets => 42 );
+my ($major) = zmq_version();
 
 subtest 'ctx options',
 sub {
+    if ($major == 2) {
+        plan skip_all =>
+            "libzmq 2.x found, don't test 3.x style ctx options";
+    }
+
+    my $ctx = ZMQ::FFI->new( threads => 42, max_sockets => 42 );
 
     is $ctx->get(ZMQ_IO_THREADS),  42, 'threads set to 42';
     is $ctx->get(ZMQ_MAX_SOCKETS), 42, 'max sockets set to 42';
@@ -22,6 +29,8 @@ sub {
 
 subtest 'socket options',
 sub {
+    my $ctx = ZMQ::FFI->new();
+
     my $s = $ctx->socket(ZMQ_REQ);
 
     is $s->get_linger(), -1, 'got default linger';
