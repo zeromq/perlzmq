@@ -7,5 +7,5 @@ do
     echo -e "\nlibzmq ${v}.x"
 
     export LD_LIBRARY_PATH="$repodir/zeromq$v-x/src/.libs"
-    prove -lvr
+    prove -lvr t
 done
