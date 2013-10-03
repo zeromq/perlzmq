@@ -1,4 +1,4 @@
-package ZMQ::FFI::Socket;
+package ZMQ::FFI::SocketBase;
 
 use Moo;
 use namespace::autoclean;
@@ -6,25 +6,9 @@ use namespace::autoclean;
 no if $] >= 5.018, warnings => "experimental";
 use feature 'switch';
 
-use FFI::Raw;
 use Carp;
-
 use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
 use ZMQ::FFI::Constants qw(:all);
-
-has ctx_ptr => (
-    is       => 'ro',
-    required => 1,
-);
-
-has type => (
-    is       => 'ro',
-    required => 1,
-);
-
-has _socket => (
-    is => 'rw',
-);
 
 my $zmq_socket = FFI::Raw->new(
     'libzmq.so' => 'zmq_socket',
@@ -91,15 +75,6 @@ my $zmq_msg_init = FFI::Raw->new(
     'zmq_msg_init',
     FFI::Raw::int, # retval
     FFI::Raw::ptr, # zmq_msg_t ptr
-);
-
-my $zmq_msg_recv = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_msg_recv',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr, # msg ptr
-    FFI::Raw::ptr, # socket
-    FFI::Raw::int  # flags
 );
 
 my $zmq_msg_data = FFI::Raw->new(
@@ -191,27 +166,6 @@ sub send_multipart {
     }
 
     $self->send($parts[$#parts], $flags);
-}
-
-sub recv {
-    my ($self, $flags) = @_;
-
-    $flags //= 0;
-
-    my $msg_ptr = FFI::Raw::memptr(40); # large enough to hold zmq_msg_t
-
-    zcheck_error('zmq_msg_init', $zmq_msg_init->($msg_ptr));
-
-    my $msg_size = $zmq_msg_recv->($msg_ptr, $self->_socket, $flags);
-    zcheck_error('zmq_msg_recv', $msg_size);
-
-    my $data_ptr    = $zmq_msg_data->($msg_ptr);
-    my $content_ptr = FFI::Raw::memptr($msg_size);
-
-    $memcpy->($content_ptr, $data_ptr, $msg_size);
-    $zmq_msg_close->($msg_ptr);
-
-    return $content_ptr->tostr($msg_size);
 }
 
 sub recv_multipart {
@@ -372,10 +326,6 @@ sub close {
     my $self = shift;
 
     zcheck_error('zmq_close', $zmq_close->($self->_socket));
-}
-
-sub DEMOLISH {
-    shift->close();
 }
 
 __PACKAGE__->meta->make_immutable();
