@@ -1,5 +1,5 @@
 # ZMQ::FFI #
-##  Perl bindings for zeromq using libffi and FFI::Raw ##
+##  Perl zeromq bindings using libffi and FFI::Raw ##
 
 ZMQ::FFI exposes a high level, transparent, OO interface to zeromq independent of the underlying libzmq version.  Where semantics differ, it will dispatch to the appropriate backend for you.  As it uses ffi, there is no dependency on XS or compilation.
 
@@ -81,7 +81,6 @@ $p->bind($endpoint);
 }
 ```
 
-
 #### multipart ####
 ```perl
 use v5.10;
@@ -104,7 +103,6 @@ $d->send_multipart([qw(ABC DEF GHI)], ZMQ_DONTWAIT);
 say join ' ', $r->recv_multipart;
 # dealer ABC DEF GHI
 ```
-
 
 #### nonblocking ####
 ```perl
