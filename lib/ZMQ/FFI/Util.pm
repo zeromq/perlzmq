@@ -1,5 +1,7 @@
 package ZMQ::FFI::Util;
 
+# ABSTRACT: zmq convenience functions
+
 use strict;
 use warnings;
 
@@ -67,3 +69,16 @@ sub zmq_version {
 }
 
 1;
+
+__END__
+
+=head1 SYNOPSIS
+
+    use ZMQ::FFI::Util q(zmq_version)
+
+    my ($major, $minor, $patch) = zmq_version();
+
+=head1 SEE ALSO
+
+=for :list
+* L<ZMQ::FFI>

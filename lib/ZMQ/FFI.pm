@@ -200,6 +200,12 @@ max number of sockets allowed for context. Default: 1024
 
 =back
 
+=head2 version()
+
+return the libzmq version as the string 'X.Y.Z'. You can also call
+ZMQ::FFI::Util::zmq_version directly if you want the raw list of ($major,
+$minor, $patch) without needing to C<split>
+
 =head2 get($option)
 
 I<only for zeromq 3.x>
@@ -316,4 +322,5 @@ goes out of scope
 
 =for :list
 * L<ZMQ::FFI::Constants>
+* L<ZMQ::FFI::Util>
 

@@ -1,6 +1,7 @@
 package ZMQ::FFI::ContextRole;
 
 use Moo::Role;
+use ZMQ::FFI::Util qw(zmq_version);
 
 has _ctx => (
     is => 'rw'
@@ -24,6 +25,10 @@ requires qw(
     socket
     destroy
 );
+
+sub version {
+    return join '.', zmq_version();
+}
 
 sub DEMOLISH {
     shift->destroy();
