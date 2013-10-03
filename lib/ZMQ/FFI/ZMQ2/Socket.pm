@@ -4,6 +4,7 @@ use Moo;
 use namespace::autoclean;
 
 use FFI::Raw;
+use ZMQ::FFI::Util qw(zcheck_error);
 
 extends q(ZMQ::FFI::SocketBase);
 
@@ -13,6 +14,13 @@ my $zmq_msg_init = FFI::Raw->new(
     'libzmq.so' => 'zmq_msg_init',
     FFI::Raw::int, # retval
     FFI::Raw::ptr, # zmq_msg_t ptr
+);
+
+my $zmq_msg_init_size = FFI::Raw->new(
+    'libzmq.so' => 'zmq_msg_init_size',
+    FFI::Raw::int,
+    FFI::Raw::ptr,
+    FFI::Raw::int
 );
 
 my $zmq_msg_data = FFI::Raw->new(
@@ -41,6 +49,14 @@ my $zmq_msg_size = FFI::Raw->new(
     FFI::Raw::ptr  # msg ptr
 );
 
+my $zmq_send = FFI::Raw->new(
+    'libzmq.so' => 'zmq_send',
+    FFI::Raw::int, # retval
+    FFI::Raw::ptr, # socket
+    FFI::Raw::ptr, # ptr to zmq_msg_t
+    FFI::Raw::int  # flags
+);
+
 my $zmq_recv = FFI::Raw->new(
     'libzmq.so' => 'zmq_recv',
     FFI::Raw::int, # retval
@@ -49,21 +65,49 @@ my $zmq_recv = FFI::Raw->new(
     FFI::Raw::int  # flags
 );
 
+sub send {
+    my ($self, $msg, $flags) = @_;
+
+    $flags //= 0;
+
+    my $bytes_size = length($msg);
+    my $bytes      = pack "a$bytes_size", $msg;
+    my $bytes_ptr  = unpack('L!', pack('P', $bytes));
+
+    my $msg_ptr = FFI::Raw::memptr(40); # large enough to hold zmq_msg_t
+
+    zcheck_error(
+        'zmq_msg_init_size',
+        $zmq_msg_init_size->($msg_ptr, $bytes_size)
+    );
+
+    my $msg_data_ptr = $zmq_msg_data->($msg_ptr);
+    $memcpy->($msg_data_ptr, $bytes_ptr, $bytes_size);
+
+    zcheck_error(
+        'zmq_send',
+        $zmq_send->($self->_socket, $msg_ptr, $flags)
+    );
+
+    $zmq_msg_close->($msg_ptr);
+}
+
 sub recv {
     my ($self, $flags) = @_;
 
     $flags //= 0;
 
-    my $msg_ptr = FFI::Raw::memptr(40); # large enough to hold zmq_msg_t
+    my $msg_ptr = FFI::Raw::memptr(40);
 
     zcheck_error('zmq_msg_init', $zmq_msg_init->($msg_ptr));
-    zcheck_error('zmq_recvmsg', $zmq_recv->($self->_socket, $msg_ptr, $flags));
+    zcheck_error('zmq_recv', $zmq_recv->($self->_socket, $msg_ptr, $flags));
 
-    my $data_ptr    = $zmq_msg_data->($msg_ptr);
+    my $data_ptr = $zmq_msg_data->($msg_ptr);
 
-    my $msg_size = zcheck_error(
+    my $msg_size = $zmq_msg_size->($msg_ptr);
+    zcheck_error(
         'zmq_msg_size',
-        $zmq_msg_size->($msg_ptr)
+        $msg_size
     );
 
     my $content_ptr = FFI::Raw::memptr($msg_size);

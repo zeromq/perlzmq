@@ -40,6 +40,16 @@ my $memcpy = FFI::Raw->new(
     FFI::Raw::int   # buf size
 );
 
+my $zmq_send = FFI::Raw->new(
+    'libzmq.so',
+    'zmq_send',
+    FFI::Raw::int, # retval
+    FFI::Raw::ptr, # socket
+    FFI::Raw::str, # message
+    FFI::Raw::int, # length
+    FFI::Raw::int  # flags
+);
+
 my $zmq_msg_recv = FFI::Raw->new(
     'libzmq.so',
     'zmq_msg_recv',
@@ -48,6 +58,17 @@ my $zmq_msg_recv = FFI::Raw->new(
     FFI::Raw::ptr, # socket
     FFI::Raw::int  # flags
 );
+
+sub send {
+    my ($self, $msg, $flags) = @_;
+
+    $flags //= 0;
+
+    zcheck_error(
+        'zmq_send',
+        $zmq_send->($self->_socket, $msg, length($msg), $flags)
+    );
+}
 
 sub recv {
     my ($self, $flags) = @_;

@@ -7,7 +7,7 @@ no if $] >= 5.018, warnings => "experimental";
 use feature 'switch';
 
 use Carp;
-use ZMQ::FFI::Util qw(zcheck_error zcheck_null);
+use ZMQ::FFI::Util qw(zcheck_error zcheck_null zmq_version);
 use ZMQ::FFI::Constants qw(:all);
 
 my $zmq_socket = FFI::Raw->new(
@@ -58,16 +58,6 @@ my $zmq_bind = FFI::Raw->new(
     FFI::Raw::int,
     FFI::Raw::ptr,
     FFI::Raw::str
-);
-
-my $zmq_send = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_send',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr, # socket
-    FFI::Raw::str, # message
-    FFI::Raw::int, # length
-    FFI::Raw::int  # flags
 );
 
 my $zmq_msg_init = FFI::Raw->new(
@@ -140,17 +130,6 @@ sub bind {
     zcheck_error('zmq_bind', $zmq_bind->($self->_socket, $endpoint));
 }
 
-sub send {
-    my ($self, $msg, $flags) = @_;
-
-    $flags //= 0;
-
-    zcheck_error(
-        'zmq_send',
-        $zmq_send->($self->_socket, $msg, length($msg), $flags)
-    );
-}
-
 sub send_multipart {
     my ($self, $partsref, $flags) = @_;
 
@@ -173,7 +152,10 @@ sub recv_multipart {
 
     my @parts = ( $self->recv($flags) );
 
-    while ( $self->get(ZMQ_RCVMORE, 'int') ){
+    my ($major) = zmq_version();
+    my $type    = $major == 2 ? 'int64_t' : 'int';
+
+    while ( $self->get(ZMQ_RCVMORE, $type) ){
         push @parts, $self->recv($flags);
     }
 
