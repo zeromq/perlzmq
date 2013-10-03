@@ -4,6 +4,7 @@ use warnings;
 use Test::More;
 
 use AnyEvent;
+use EV;
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
 
