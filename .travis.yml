@@ -7,4 +7,20 @@ perl:
     - "5.12"
     - "5.10"
 
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install libzmq3
+
+install:
+    - cpanm Module::ScanDeps
+
+before_script:
+    - >-
+        echo $PERL_CPANM_OPT &&
+        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib
+        scandeps.pl lib/ZMQ/* 2>/dev/null
+        | awk '{print $1}'
+        | sed -e "s/'//g"
+        | cpanm --mirror http://cpan.mirrors.travis-ci.org --notest || /bin/true
+
 script: prove -lvr t
