@@ -12,6 +12,7 @@ before_install:
     - sudo apt-get install libzmq3
     - sudo apt-get install apt-file
     - apt-file update
+    - find /usr/lib -type f -name 'libzmq*'
     - apt-file list libzmq3
 
 install:
