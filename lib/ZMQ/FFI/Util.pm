@@ -89,13 +89,15 @@ __END__
 =head2 zmq_soname
 
 Tries to load libzmq.so, libzmq.so.1, libzmq.so.3 in that order, returning the
-first one that was successful
+first one that was successful, or undef
 
 =head2 ($major, $minor, $patch) = zmq_version([$soname])
 
 return the libzmq version as the list C<($major, $minor, $patch)>. C<$soname>
 can either be a filename available in the ld cache or the path to a library
 file. If C<$soname> is not specified it is resolved using C<zmq_soname> above
+
+If C<$soname> cannot be resolved undef is returned
 
 =head1 SEE ALSO
 
