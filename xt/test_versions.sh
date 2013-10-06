@@ -60,4 +60,5 @@ then
     LD_LIBRARY_PATH+="$HOME/git/zeromq3-x/src/.libs:"
     export LD_LIBRARY_PATH
 fi
-perl xt/sonames.t
+
+PERL5LIB=lib:$PERL5LIB perl xt/sonames.t
