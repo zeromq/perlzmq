@@ -8,7 +8,6 @@ use warnings;
 use FFI::Raw;
 use Carp;
 use Try::Tiny;
-use Const::Fast;
 
 use Sub::Exporter -setup => {
     exports => [qw(

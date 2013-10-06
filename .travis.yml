@@ -9,18 +9,14 @@ perl:
 
 before_install:
     - sudo apt-get update
-    - sudo apt-get install libzmq3
-    - sudo apt-get install apt-file
-    - apt-file update
-    - find /usr/lib -type f -name 'libzmq*'
-    - apt-file list libzmq3
+    - wget https://launchpad.net/ubuntu/+archive/primary/+files/libzmq1_2.1.11-1ubuntu1_amd64.deb -qO /tmp/libzmq1.deb
+    - sudo dpkg -i /tmp/libzmq1.deb
 
 install:
     - cpanm --notest Module::ScanDeps AnyEvent EV
 
 before_script:
     - >-
-        echo $PERL_CPANM_OPT &&
         PERL5LIB=/home/travis/build/calid/zmq-ffi/lib
         scandeps.pl lib/ZMQ/* 2>/dev/null
         | awk '{print $1}'
