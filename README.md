@@ -156,6 +156,19 @@ $t = AE::timer 0, .1, sub {
 EV::run();
 ```
 
+#### specifying versions ####
+```perl
+use ZMQ::FFI;
+
+# 2.x context
+my $ctx = ZMQ::FFI->new( soname => 'libzmq.so.1' );
+my ($major, $minor, $patch) = $ctx->version;
+
+# 3.x context
+my $ctx = ZMQ::FFI->new( soname => 'libzmq.so.3' );
+my ($major, $minor, $patch) = $ctx->version;
+```
+
 ### INSTALL ###
     # if simply wanting to use ZMQ::FFI
     cpanm ZMQ::FFI

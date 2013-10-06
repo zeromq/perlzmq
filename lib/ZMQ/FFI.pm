@@ -182,6 +182,20 @@ __END__
 
     EV::run();
 
+
+    #### specifying versions ####
+
+    use ZMQ::FFI;
+
+    # 2.x context
+    my $ctx = ZMQ::FFI->new( soname => 'libzmq.so.1' );
+    my ($major, $minor, $patch) = $ctx->version;
+
+    # 3.x context
+    my $ctx = ZMQ::FFI->new( soname => 'libzmq.so.3' );
+    my ($major, $minor, $patch) = $ctx->version;
+
+
 =head1 DESCRIPTION
 
 ZMQ::FFI exposes a high level, transparent, OO interface to zeromq independent
@@ -210,13 +224,21 @@ I<only for zeromq 3.x>
 
 max number of sockets allowed for context. Default: 1024
 
+=item soname
+
+specify the libzmq library name to load.  By default ZMQ::FFI will try the
+linker name, C<libzmq.so>, and then the sonames C<libzmq.so.3> and
+C<libzmq.so.1>, in that order. C<soname> can also be the path to a particular
+libzmq so file
+
+It is technically possible to have multiple contexts of different versions in
+the same process, though the utility of doing such a thing is dubious
+
 =back
 
-=head2 version()
+=head2 ($major, $minor, $patch) = version()
 
-return the libzmq version as the string 'X.Y.Z'. You can also call
-ZMQ::FFI::Util::zmq_version directly if you want the raw list of ($major,
-$minor, $patch) without needing to C<split>
+return the libzmq version as the list C<($major, $minor, $patch)>
 
 =head2 get($option)
 
@@ -255,6 +277,10 @@ provided that will work independent of version.
 
 As attributes are constantly being added/removed from zeromq, it is unlikely the
 'static' accessors will grow much beyond the current set.
+
+=head2 ($major, $minor, $patch) = version()
+
+same as Context version() above
 
 =head2 connect($endpoint)
 

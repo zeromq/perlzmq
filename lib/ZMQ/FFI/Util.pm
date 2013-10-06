@@ -84,6 +84,19 @@ __END__
     my $soname = zmq_soname();
     my ($major, $minor, $patch) = zmq_version($soname);
 
+=head1 FUNCTIONS
+
+=head2 zmq_soname
+
+Tries to load libzmq.so, libzmq.so.1, libzmq.so.3 in that order, returning the
+first one that was successful
+
+=head2 ($major, $minor, $patch) = zmq_version([$soname])
+
+return the libzmq version as the list C<($major, $minor, $patch)>. C<$soname>
+can either be a filename available in the ld cache or the path to a library
+file. If C<$soname> is not specified it is resolved using C<zmq_soname> above
+
 =head1 SEE ALSO
 
 =for :list
