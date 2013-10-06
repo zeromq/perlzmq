@@ -2,12 +2,27 @@ package ZMQ::FFI::ContextRole;
 
 use Moose::Role;
 use ZMQ::FFI::Util qw(zmq_version);
-
-with q(ZMQ::FFI::ErrorHandler);
+use ZMQ::FFI::ErrorHandler;
 
 has _ctx => (
     is      => 'rw',
     default => -1,
+);
+
+# this is better composed as a role,
+# but need to work around a bug in Moo
+has _err_handler => (
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {
+        return ZMQ::FFI::ErrorHandler->new(
+            soname => shift->soname
+        );
+    },
+    handles => [qw(
+        check_error
+        check_null
+    )],
 );
 
 has threads => (

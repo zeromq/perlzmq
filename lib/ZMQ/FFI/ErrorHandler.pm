@@ -56,4 +56,4 @@ sub fatal {
     croak "$func: ".$zmq_strerror->($zmq_errno->());
 }
 
-1;
+__PACKAGE__->meta->make_immutable;
