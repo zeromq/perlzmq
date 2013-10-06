@@ -19,6 +19,7 @@ before_script:
     - >-
         PERL5LIB=/home/travis/build/calid/zmq-ffi/lib
         scandeps.pl lib/ZMQ/* 2>/dev/null
+        | grep -v ZMQ::FFI
         | awk '{print $1}'
         | sed -e "s/'//g"
         | cpanm --notest || /bin/true
