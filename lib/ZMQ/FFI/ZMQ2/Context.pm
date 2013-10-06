@@ -15,14 +15,14 @@ has '+threads' => (
     default => 1,
 );
 
-# ffi functions
-my $zmq_init;
-my $zmq_term;
+has ffi => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_init_ffi',
+);
 
 sub BUILD {
     my $self = shift;
-
-    $self->_init_zmq2_ffi();
 
     if ($self->has_max_sockets) {
         croak
@@ -31,7 +31,7 @@ sub BUILD {
     }
 
     try {
-        $self->_ctx( $zmq_init->($self->_threads) );
+        $self->_ctx( $self->ffi->{zmq_init}->($self->_threads) );
         $self->check_null('zmq_init', $self->_ctx);
     }
     catch {
@@ -71,28 +71,31 @@ sub destroy {
 
     $self->check_error(
         'zmq_term',
-        $zmq_term->($self->_ctx)
+        $self->ffi->{zmq_term}->($self->_ctx)
     );
 
     $self->_ctx(-1);
 }
 
-sub _init_zmq2_ffi {
+sub _init_ffi {
     my $self = shift;
 
+    my $ffi    = {};
     my $soname = $self->soname;
 
-    $zmq_init = FFI::Raw->new(
+    $ffi->{zmq_init} = FFI::Raw->new(
         $soname => 'zmq_init',
         FFI::Raw::ptr, # returns ctx ptr
         FFI::Raw::int  # num threads
     );
 
-    $zmq_term = FFI::Raw->new(
+    $ffi->{zmq_term} = FFI::Raw->new(
         $soname => 'zmq_term',
         FFI::Raw::int, # retval
         FFI::Raw::ptr  # ctx pt
     );
+
+    return $ffi;
 }
 
 __PACKAGE__->meta->make_immutable();

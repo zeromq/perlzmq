@@ -17,19 +17,17 @@ has '+threads' => (
     default => 1,
 );
 
-# ffi functions
-my $zmq_ctx_new;
-my $zmq_ctx_set;
-my $zmq_ctx_get;
-my $zmq_ctx_destroy;
+has ffi => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_init_ffi',
+);
 
 sub BUILD {
     my $self = shift;
 
-    $self->_init_zmq3_ffi();
-
     try {
-        $self->_ctx( $zmq_ctx_new->() );
+        $self->_ctx( $self->ffi->{zmq_ctx_new}->() );
         $self->check_null('zmq_ctx_new', $self->_ctx);
     }
     catch {
@@ -49,7 +47,7 @@ sub BUILD {
 sub get {
     my ($self, $option) = @_;
 
-    my $option_val = $zmq_ctx_get->($self->_ctx, $option);
+    my $option_val = $self->ffi->{zmq_ctx_get}->($self->_ctx, $option);
     $self->check_error('zmq_ctx_get', $option_val);
 
     return $option_val;
@@ -60,7 +58,7 @@ sub set {
 
     $self->check_error(
         'zmq_ctx_set',
-        $zmq_ctx_set->($self->_ctx, $option, $option_val)
+        $self->ffi->{zmq_ctx_set}->($self->_ctx, $option, $option_val)
     );
 }
 
@@ -79,24 +77,25 @@ sub destroy {
 
     $self->check_error(
         'zmq_ctx_destroy',
-        $zmq_ctx_destroy->($self->_ctx)
+        $self->ffi->{zmq_ctx_destroy}->($self->_ctx)
     );
 
     $self->_ctx(-1);
 };
 
-sub _init_zmq3_ffi {
+sub _init_ffi {
     my $self = shift;
 
+    my $ffi    = {};
     my $soname = $self->soname;
 
-    $zmq_ctx_new = FFI::Raw->new(
+    $ffi->{zmq_ctx_new} = FFI::Raw->new(
         $soname => 'zmq_ctx_new',
         FFI::Raw::ptr, # returns ctx ptr
         # void
     );
 
-    $zmq_ctx_set = FFI::Raw->new(
+    $ffi->{zmq_ctx_set} = FFI::Raw->new(
         $soname => 'zmq_ctx_set',
         FFI::Raw::int, # error code,
         FFI::Raw::ptr, # ctx
@@ -104,18 +103,20 @@ sub _init_zmq3_ffi {
         FFI::Raw::int  # opt value
     );
 
-    $zmq_ctx_get = FFI::Raw->new(
+    $ffi->{zmq_ctx_get} = FFI::Raw->new(
         $soname => 'zmq_ctx_get',
         FFI::Raw::int, # opt value,
         FFI::Raw::ptr, # ctx
         FFI::Raw::int  # opt constant
     );
 
-    $zmq_ctx_destroy = FFI::Raw->new(
+    $ffi->{zmq_ctx_destroy} = FFI::Raw->new(
         $soname => 'zmq_ctx_destroy',
         FFI::Raw::int, # retval
         FFI::Raw::ptr  # ctx to destroy
     );
+
+    return $ffi;
 }
 
 __PACKAGE__->meta->make_immutable();

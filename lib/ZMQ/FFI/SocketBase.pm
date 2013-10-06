@@ -195,10 +195,12 @@ sub get {
 sub set {
     my ($self, $opt, $opt_type, $opt_val) = @_;
 
+    my $ffi = $self->ffi;
+
     if ($opt_type eq 'binary') {
         $self->check_error(
             'zmq_setsockopt',
-            $self->ffi->{str_zmq_setsockopt}->(
+            $ffi->{str_zmq_setsockopt}->(
                 $self->_socket,
                 $opt,
                 $opt_val,
@@ -215,7 +217,7 @@ sub set {
 
         $self->check_error(
             'zmq_setsockopt',
-            $self->ffi->{int_zmq_setsockopt}->(
+            $ffi->{int_zmq_setsockopt}->(
                 $self->_socket,
                 $opt,
                 $opt_ptr,
@@ -307,6 +309,19 @@ sub _init_ffi {
         $soname => 'zmq_msg_init',
         FFI::Raw::int, # retval
         FFI::Raw::ptr, # zmq_msg_t ptr
+    );
+
+    $ffi->{zmq_msg_init_size} = FFI::Raw->new(
+        $soname => 'zmq_msg_init_size',
+        FFI::Raw::int,
+        FFI::Raw::ptr,
+        FFI::Raw::int
+    );
+
+    $ffi->{zmq_msg_size} = FFI::Raw->new(
+        $soname => 'zmq_msg_size',
+        FFI::Raw::int, # returns msg size in bytes
+        FFI::Raw::ptr  # msg ptr
     );
 
     $ffi->{zmq_msg_data} = FFI::Raw->new(
