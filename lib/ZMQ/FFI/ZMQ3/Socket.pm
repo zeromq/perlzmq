@@ -26,7 +26,7 @@ sub send {
 
     $flags //= 0;
 
-    zcheck_error(
+    $self->check_error(
         'zmq_send',
         $zmq_send->($self->_socket, $msg, length($msg), $flags)
     );
@@ -39,10 +39,13 @@ sub recv {
 
     my $msg_ptr = FFI::Raw::memptr(40); # large enough to hold zmq_msg_t
 
-    zcheck_error('zmq_msg_init', $zmq_msg_init->($msg_ptr));
+    $self->check_error(
+        'zmq_msg_init',
+        $zmq_msg_init->($msg_ptr)
+    );
 
     my $msg_size = $zmq_msg_recv->($msg_ptr, $self->_socket, $flags);
-    zcheck_error('zmq_msg_recv', $msg_size);
+    $self->check_error('zmq_msg_recv', $msg_size);
 
     my $data_ptr    = $zmq_msg_data->($msg_ptr);
     my $content_ptr = FFI::Raw::memptr($msg_size);

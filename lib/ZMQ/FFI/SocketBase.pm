@@ -94,7 +94,7 @@ sub recv_multipart {
 
     my @parts = ( $self->recv($flags) );
 
-    my ($major) = zmq_version();
+    my ($major) = $self->version;
     my $type    = $major == 2 ? 'int64_t' : 'int';
 
     while ( $self->get(ZMQ_RCVMORE, $type) ){

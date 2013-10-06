@@ -25,6 +25,17 @@ has _err_handler => (
     )],
 );
 
+has _versioner => (
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {
+        return ZMQ::FFI::Versioner->new(
+            soname => shift->soname
+        );
+    },
+    handles => [qw(version)],
+);
+
 has soname => (
     is       => 'ro',
     required => 1,

@@ -1,16 +1,14 @@
 package ZMQ::FFI::ContextRole;
 
 use Moose::Role;
-use ZMQ::FFI::Util qw(zmq_version);
 use ZMQ::FFI::ErrorHandler;
+use ZMQ::FFI::Versioner;
 
 has _ctx => (
     is      => 'rw',
     default => -1,
 );
 
-# this is better composed as a role,
-# but need to work around a bug in Moo
 has _err_handler => (
     is      => 'ro',
     lazy    => 1,
@@ -23,6 +21,17 @@ has _err_handler => (
         check_error
         check_null
     )],
+);
+
+has _versioner => (
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {
+        return ZMQ::FFI::Versioner->new(
+            soname => shift->soname
+        );
+    },
+    handles => [qw(version)],
 );
 
 has threads => (
@@ -41,18 +50,6 @@ has soname => (
     is       => 'ro',
     required => 1,
 );
-
-has version => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_version',
-);
-
-sub _build_version {
-    my $self = shift;
-
-    return join '.', zmq_version($self->soname);
-}
 
 requires qw(
     get
