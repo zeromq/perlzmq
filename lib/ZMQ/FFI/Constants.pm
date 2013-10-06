@@ -193,9 +193,6 @@ This module includes every zmq constant from every stable version of zeromq.
 Currently that is v2.1.0-v3.2.4.  It was generated using the zeromq2-x and
 zeromq3-x git repos at L<https://github.com/zeromq>.
 
-There is the possibility this module will be merged with L<ZMQ::Constants> and
-go away.
-
 =head1 SEE ALSO
 
 =for :list
