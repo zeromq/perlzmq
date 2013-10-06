@@ -1,6 +1,6 @@
 package ZMQ::FFI::SocketRole;
 
-use Moose::Role;
+use Moo::Role;
 
 use FFI::Raw;
 

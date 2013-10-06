@@ -1,6 +1,6 @@
 package ZMQ::FFI::ErrorHandler;
 
-use Moose;
+use Moo;
 use namespace::autoclean;
 
 use Carp;

@@ -1,6 +1,6 @@
 package ZMQ::FFI::Versioner;
 
-use Moose;
+use Moo;
 
 use ZMQ::FFI::Util qw(zmq_version);
 
