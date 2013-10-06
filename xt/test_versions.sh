@@ -17,8 +17,7 @@ function travis_test {
     echo -e "\n$soname"
 
     sudo ln -svf $soname $sodir/libzmq.so
-    sudo ldconfig -v
-    ls -l $sodir
+    sudo ldconfig
 
     # sanity test
     ver=$(perl -M'ZMQ::FFI::Util q(zmq_version)' -E 'say((zmq_version)[0])')
