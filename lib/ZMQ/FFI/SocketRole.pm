@@ -4,37 +4,9 @@ use Moo::Role;
 
 use FFI::Raw;
 
+with q(ZMQ::FFI::SoWrapper);
+
 has ctx_ptr => (
-    is       => 'ro',
-    required => 1,
-);
-
-has _err_handler => (
-    is      => 'ro',
-    lazy    => 1,
-    default => sub {
-        return ZMQ::FFI::ErrorHandler->new(
-            soname => shift->soname
-        );
-    },
-    handles => [qw(
-        check_error
-        check_null
-    )],
-);
-
-has _versioner => (
-    is      => 'ro',
-    lazy    => 1,
-    default => sub {
-        return ZMQ::FFI::Versioner->new(
-            soname => shift->soname
-        );
-    },
-    handles => [qw(version)],
-);
-
-has soname => (
     is       => 'ro',
     required => 1,
 );
