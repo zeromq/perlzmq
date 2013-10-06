@@ -17,7 +17,13 @@ install:
 
 before_script:
     - >-
-        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib
+        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib:$PERL5LIB
+        scandeps.pl lib/ZMQ/*
+    - >-
+        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib:$PERL5LIB
+        scandeps.pl lib/ZMQ/* | grep -v ZMQ::FFI
+    - >-
+        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib:$PERL5LIB
         scandeps.pl lib/ZMQ/* 2>/dev/null
         | grep -v ZMQ::FFI
         | awk '{print $1}'
