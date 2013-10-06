@@ -1,6 +1,6 @@
 package ZMQ::FFI::ContextRole;
 
-use Moo::Role;
+use Moose::Role;
 use ZMQ::FFI::Util qw(zmq_version);
 
 with q(ZMQ::FFI::ErrorHandler);

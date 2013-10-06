@@ -1,6 +1,6 @@
 package ZMQ::FFI::SocketBase;
 
-use Moo;
+use Moose;
 use namespace::autoclean;
 
 no if $] >= 5.018, warnings => "experimental";

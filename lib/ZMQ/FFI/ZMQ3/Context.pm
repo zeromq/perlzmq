@@ -1,6 +1,6 @@
 package ZMQ::FFI::ZMQ3::Context;
 
-use Moo;
+use Moose;
 use namespace::autoclean;
 
 use FFI::Raw;

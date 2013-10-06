@@ -1,6 +1,6 @@
 package ZMQ::FFI::ZMQ2::Socket;
 
-use Moo;
+use Moose;
 use namespace::autoclean;
 
 use FFI::Raw;
