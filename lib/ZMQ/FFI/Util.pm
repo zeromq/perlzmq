@@ -32,7 +32,13 @@ sub zmq_soname {
         try {
             $soname = $_;
 
-            zmq_version($soname);
+            my $zmq_version = FFI::Raw->new(
+                $soname => 'zmq_version',
+                FFI::Raw::void,
+                FFI::Raw::ptr,  # major
+                FFI::Raw::ptr,  # minor
+                FFI::Raw::ptr   # patch
+            );
         }
         catch {
             undef $soname;
@@ -47,9 +53,9 @@ sub zmq_soname {
 sub zmq_version {
     my $soname = shift;
 
-    unless ($soname) {
-        croak q(usage: zmq_version($soname));
-    }
+    $soname //= zmq_soname();
+
+    return unless $soname;
 
     my $zmq_version = FFI::Raw->new(
         $soname => 'zmq_version',

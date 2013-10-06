@@ -6,7 +6,7 @@ use Carp;
 
 sub new {
     my $self = shift;
-    my @args = @_;
+    my %args = @_;
 
     $args{soname} //= zmq_soname();
 
