@@ -13,7 +13,7 @@ before_install:
     - sudo dpkg -i /tmp/libzmq1.deb
 
 install:
-    - cpanm --notest Module::ScanDeps AnyEvent EV
+    - cpanm --notest Module::ScanDeps AnyEvent EV Test::Exception
 
 before_script:
     - >-
