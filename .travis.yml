@@ -13,21 +13,13 @@ before_install:
     - sudo dpkg -i /tmp/libzmq1.deb
 
 install:
-    - cpanm --notest Module::ScanDeps AnyEvent EV Test::Exception
+    - cpanm --notest AnyEvent EV Test::Exception Perl::PrereqScanner
 
 before_script:
     - >-
-        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib:$PERL5LIB
-        scandeps.pl lib/ZMQ/*
-    - >-
-        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib:$PERL5LIB
-        scandeps.pl lib/ZMQ/* | grep -v ZMQ::FFI
-    - >-
-        PERL5LIB=/home/travis/build/calid/zmq-ffi/lib:$PERL5LIB
-        scandeps.pl lib/ZMQ/* 2>/dev/null
+        scan_prereqs --combine lib
         | grep -v ZMQ::FFI
-        | awk '{print $1}'
-        | sed -e "s/'//g"
+        | awk '{ print $1 }'
         | cpanm --notest || /bin/true
 
 script: xt/test_versions.sh
