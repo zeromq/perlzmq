@@ -6,8 +6,6 @@ use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(:all);
 use ZMQ::FFI::Util qw(zmq_version);
 
-my ($major) = zmq_version();
-
 subtest 'ctx version',
 sub {
     my $ctx = ZMQ::FFI->new();
@@ -20,10 +18,10 @@ sub {
 
 subtest 'ctx options',
 sub {
-    if ($major == 2) {
-        plan skip_all =>
-            "libzmq 2.x found, don't test 3.x style ctx options";
-    }
+
+    plan skip_all =>
+        "libzmq 2.x found, don't test 3.x style ctx options"
+        if (zmq_version())[0] == 2;
 
     my $ctx = ZMQ::FFI->new( threads => 42, max_sockets => 42 );
 
