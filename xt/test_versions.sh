@@ -61,4 +61,4 @@ then
     export LD_LIBRARY_PATH
 fi
 
-PERL5LIB=lib:$PERL5LIB perl xt/sonames.t
+PERL5LIB=lib:$PERL5LIB perl xt/sonames.pl
