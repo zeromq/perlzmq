@@ -9,6 +9,11 @@ has ctx_ptr => (
     required => 1,
 );
 
+has soname => (
+    is       => 'ro',
+    required => 1,
+);
+
 has type => (
     is       => 'ro',
     required => 1,

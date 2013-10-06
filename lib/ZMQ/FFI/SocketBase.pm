@@ -7,105 +7,33 @@ no if $] >= 5.018, warnings => "experimental";
 use feature 'switch';
 
 use Carp;
-use ZMQ::FFI::Util qw(zcheck_error zcheck_null zmq_version);
+use FFI::Raw;
 use ZMQ::FFI::Constants qw(:all);
 
 use Try::Tiny;
 
-my $zmq_socket = FFI::Raw->new(
-    'libzmq.so' => 'zmq_socket',
-    FFI::Raw::ptr, # returns socket ptr
-    FFI::Raw::ptr, # takes ctx ptr
-    FFI::Raw::int  # socket type
-);
-
-my $zmq_getsockopt = FFI::Raw->new(
-    'libzmq.so' => 'zmq_getsockopt',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr, # socket ptr,
-    FFI::Raw::int, # option constant
-    FFI::Raw::ptr, # buf for option value
-    FFI::Raw::ptr  # buf for size of option value
-);
-
-my $int_zmq_setsockopt = FFI::Raw->new(
-    'libzmq.so' => 'zmq_setsockopt',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr, # socket ptr,
-    FFI::Raw::int, # option constant
-    FFI::Raw::ptr, # ptr to value int
-    FFI::Raw::int  # size of option value
-);
-
-my $str_zmq_setsockopt = FFI::Raw->new(
-    'libzmq.so' => 'zmq_setsockopt',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr, # socket ptr,
-    FFI::Raw::int, # option constant
-    FFI::Raw::str, # ptr to value string
-    FFI::Raw::int  # size of option value
-);
-
-my $zmq_connect = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_connect',
-    FFI::Raw::int,
-    FFI::Raw::ptr,
-    FFI::Raw::str
-);
-
-my $zmq_bind = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_bind',
-    FFI::Raw::int,
-    FFI::Raw::ptr,
-    FFI::Raw::str
-);
-
-my $zmq_msg_init = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_msg_init',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr, # zmq_msg_t ptr
-);
-
-my $zmq_msg_data = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_msg_data',
-    FFI::Raw::ptr, # msg data ptr
-    FFI::Raw::ptr  # msg ptr
-);
-
-my $zmq_msg_close = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_msg_data',
-    FFI::Raw::int, # retval
-    FFI::Raw::ptr  # msg ptr
-);
-
-my $zmq_close = FFI::Raw->new(
-    'libzmq.so',
-    'zmq_close',
-    FFI::Raw::int,
-    FFI::Raw::ptr,
-);
-
-my $memcpy = FFI::Raw->new(
-    'libc.so.6',
-    'memcpy',
-    FFI::Raw::ptr,  # dest filled
-    FFI::Raw::ptr,  # dest buf
-    FFI::Raw::ptr,  # src
-    FFI::Raw::int   # buf size
-);
+# ffi functions
+my $zmq_socket;
+my $zmq_getsockopt;
+my $int_zmq_setsockopt;
+my $str_zmq_setsockopt;
+my $zmq_connect;
+my $zmq_bind;
+my $zmq_msg_init;
+my $zmq_msg_data;
+my $zmq_msg_close;
+my $zmq_close;
+my $memcpy;
 
 sub BUILD {
     my $self = shift;
 
+    $self->_init_ffi();
+
     $self->_socket( $zmq_socket->($self->ctx_ptr, $self->type) );
 
     try {
-        zcheck_null('zmq_socket', $self->_socket);
+        $self->check_null('zmq_socket', $self->_socket);
     }
     catch {
         $self->_socket(-1);
@@ -125,7 +53,10 @@ sub connect {
         croak 'usage: $socket->connect($endpoint)'
     }
 
-    zcheck_error('zmq_connect', $zmq_connect->($self->_socket, $endpoint));
+    $self->check_error(
+        'zmq_connect',
+        $zmq_connect->($self->_socket, $endpoint)
+    );
 }
 
 sub bind {
@@ -135,7 +66,10 @@ sub bind {
         croak 'usage: $socket->bind($endpoint)'
     }
 
-    zcheck_error('zmq_bind', $zmq_bind->($self->_socket, $endpoint));
+    $self->check_error(
+        'zmq_bind',
+        $zmq_bind->($self->_socket, $endpoint)
+    );
 }
 
 sub send_multipart {
@@ -240,7 +174,7 @@ sub get {
 
     my $optval_len_ptr = unpack('L!', pack('P', $optval_len));
 
-    zcheck_error(
+    $self->check_error(
         'zmq_getsockopt',
         $zmq_getsockopt->(
             $self->_socket,
@@ -270,7 +204,7 @@ sub set {
     my ($self, $opt, $opt_type, $opt_val) = @_;
 
     if ($opt_type eq 'binary') {
-        zcheck_error(
+        $self->check_error(
             'zmq_setsockopt',
             $str_zmq_setsockopt->(
                 $self->_socket,
@@ -287,7 +221,7 @@ sub set {
         my $opt_ptr   = unpack('L!', pack('P', $packed));
         my $opt_len   = length(pack($pack_type, 0));
 
-        zcheck_error(
+        $self->check_error(
             'zmq_setsockopt',
             $int_zmq_setsockopt->(
                 $self->_socket,
@@ -315,8 +249,98 @@ sub _get_pack_type {
 sub close {
     my $self = shift;
 
-    zcheck_error('zmq_close', $zmq_close->($self->_socket));
+    $self->check_error(
+        'zmq_close',
+        $zmq_close->($self->_socket)
+    );
+
     $self->_socket(-1);
+}
+
+sub _init_ffi {
+    my $self = shift;
+
+    my $soname = $self->soname;
+
+    $zmq_socket = FFI::Raw->new(
+        $soname => 'zmq_socket',
+        FFI::Raw::ptr, # returns socket ptr
+        FFI::Raw::ptr, # takes ctx ptr
+        FFI::Raw::int  # socket type
+    );
+
+    $zmq_getsockopt = FFI::Raw->new(
+        $soname => 'zmq_getsockopt',
+        FFI::Raw::int, # retval
+        FFI::Raw::ptr, # socket ptr,
+        FFI::Raw::int, # option constant
+        FFI::Raw::ptr, # buf for option value
+        FFI::Raw::ptr  # buf for size of option value
+    );
+
+    $int_zmq_setsockopt = FFI::Raw->new(
+        $soname => 'zmq_setsockopt',
+        FFI::Raw::int, # retval
+        FFI::Raw::ptr, # socket ptr,
+        FFI::Raw::int, # option constant
+        FFI::Raw::ptr, # ptr to value int
+        FFI::Raw::int  # size of option value
+    );
+
+    $str_zmq_setsockopt = FFI::Raw->new(
+        $soname => 'zmq_setsockopt',
+        FFI::Raw::int, # retval
+        FFI::Raw::ptr, # socket ptr,
+        FFI::Raw::int, # option constant
+        FFI::Raw::str, # ptr to value string
+        FFI::Raw::int  # size of option value
+    );
+
+    $zmq_connect = FFI::Raw->new(
+        $soname => 'zmq_connect',
+        FFI::Raw::int,
+        FFI::Raw::ptr,
+        FFI::Raw::str
+    );
+
+    $zmq_bind = FFI::Raw->new(
+        $soname => 'zmq_bind',
+        FFI::Raw::int,
+        FFI::Raw::ptr,
+        FFI::Raw::str
+    );
+
+    $zmq_msg_init = FFI::Raw->new(
+        $soname => 'zmq_msg_init',
+        FFI::Raw::int, # retval
+        FFI::Raw::ptr, # zmq_msg_t ptr
+    );
+
+    $zmq_msg_data = FFI::Raw->new(
+        $soname => 'zmq_msg_data',
+        FFI::Raw::ptr, # msg data ptr
+        FFI::Raw::ptr  # msg ptr
+    );
+
+    $zmq_msg_close = FFI::Raw->new(
+        $soname => 'zmq_msg_data',
+        FFI::Raw::int, # retval
+        FFI::Raw::ptr  # msg ptr
+    );
+
+    $zmq_close = FFI::Raw->new(
+        $soname => 'zmq_close',
+        FFI::Raw::int,
+        FFI::Raw::ptr,
+    );
+
+    $memcpy = FFI::Raw->new(
+        'libc.so.6' => 'memcpy',
+        FFI::Raw::ptr,  # dest filled
+        FFI::Raw::ptr,  # dest buf
+        FFI::Raw::ptr,  # src
+        FFI::Raw::int   # buf size
+    );
 }
 
 __PACKAGE__->meta->make_immutable();

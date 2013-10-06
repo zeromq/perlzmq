@@ -1,12 +1,23 @@
 package ZMQ::FFI;
 # ABSTRACT: zeromq bindings using libffi and FFI::Raw
 
-use ZMQ::FFI::Util qw(zmq_version);
+use ZMQ::FFI::Util qw(zmq_soname zmq_version);
+use Carp;
 
 sub new {
     my $self = shift;
+    my @args = @_;
 
-    my ($major) = zmq_version();
+    $args{soname} //= zmq_soname();
+
+    unless ($args{soname}) {
+        croak
+            q(Could not load libzmq, tried: ).
+            qq(libzmq.so, libzmq.so.3, libzmq.so.1\n).
+            q(Is libzmq on your ld path?);
+    }
+
+    my ($major) = zmq_version($args{soname});
 
     if ($major == 2) {
         require ZMQ::FFI::ZMQ2::Context;

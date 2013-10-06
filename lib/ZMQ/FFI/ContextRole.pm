@@ -3,6 +3,8 @@ package ZMQ::FFI::ContextRole;
 use Moo::Role;
 use ZMQ::FFI::Util qw(zmq_version);
 
+with q(ZMQ::FFI::ErrorHandler);
+
 has _ctx => (
     is      => 'rw',
     default => -1,
@@ -20,16 +22,29 @@ has max_sockets => (
     predicate => 'has_max_sockets',
 );
 
+has soname => (
+    is       => 'ro',
+    required => 1,
+);
+
+has version => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_version',
+);
+
+sub _build_version {
+    my $self = shift;
+
+    return join '.', zmq_version($self->soname);
+}
+
 requires qw(
     get
     set
     socket
     destroy
 );
-
-sub version {
-    return join '.', zmq_version();
-}
 
 sub DEMOLISH {
     my $self = shift;
