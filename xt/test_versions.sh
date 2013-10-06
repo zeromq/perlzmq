@@ -46,3 +46,10 @@ do
     fi
 done
 
+if [[ -z $TRAVIS ]]
+then
+    LD_LIBRARY_PATH="$HOME/git/zeromq2-x/src/.libs:"
+    LD_LIBRARY_PATH+="$HOME/git/zeromq3-x/src/.libs:"
+    export LD_LIBRARY_PATH
+fi
+perl xt/sonames.t
