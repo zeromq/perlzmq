@@ -1,5 +1,13 @@
 #!/bin/bash
 
+function zmq_major {
+    echo $(\
+        PERL5LIB=lib:$PERL5LIB \
+        perl -M'ZMQ::FFI::Util q(zmq_version)' \
+        -E 'say((zmq_version)[0])'\
+    )
+}
+
 function travis_test {
     sudo rm -f /usr/lib/libzmq.so /usr/lib/x86_64-linux-gnu/libzmq.so
 
@@ -20,7 +28,7 @@ function travis_test {
     sudo ldconfig
 
     # sanity test
-    ver=$(perl -M'ZMQ::FFI::Util q(zmq_version)' -E 'say((zmq_version)[0])')
+    ver=$(zmq_major)
     if [[ $ver != $1 ]];
     then
         echo "unexpected version $ver != $1"
