@@ -9,8 +9,6 @@ has ctx_ptr => (
     required => 1,
 );
 
-# this is better composed as a role,
-# but need to work around a bug in Moo
 has _err_handler => (
     is      => 'ro',
     lazy    => 1,

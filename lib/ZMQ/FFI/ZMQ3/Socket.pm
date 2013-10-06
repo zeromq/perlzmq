@@ -57,7 +57,9 @@ sub recv {
 }
 
 sub _init_zmq3_ffi {
-    my $soname = zmq_soname();
+    my $self = shift;
+
+    my $soname = $self->soname;
 
     $zmq_msg_init = FFI::Raw->new(
         $soname => 'zmq_msg_init',

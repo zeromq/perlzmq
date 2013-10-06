@@ -90,13 +90,13 @@ sub _init_zmq3_ffi {
 
     my $soname = $self->soname;
 
-    my $zmq_ctx_new = FFI::Raw->new(
+    $zmq_ctx_new = FFI::Raw->new(
         $soname => 'zmq_ctx_new',
         FFI::Raw::ptr, # returns ctx ptr
         # void
     );
 
-    my $zmq_ctx_set = FFI::Raw->new(
+    $zmq_ctx_set = FFI::Raw->new(
         $soname => 'zmq_ctx_set',
         FFI::Raw::int, # error code,
         FFI::Raw::ptr, # ctx
@@ -104,14 +104,14 @@ sub _init_zmq3_ffi {
         FFI::Raw::int  # opt value
     );
 
-    my $zmq_ctx_get = FFI::Raw->new(
+    $zmq_ctx_get = FFI::Raw->new(
         $soname => 'zmq_ctx_get',
         FFI::Raw::int, # opt value,
         FFI::Raw::ptr, # ctx
         FFI::Raw::int  # opt constant
     );
 
-    my $zmq_ctx_destroy = FFI::Raw->new(
+    $zmq_ctx_destroy = FFI::Raw->new(
         $soname => 'zmq_ctx_destroy',
         FFI::Raw::int, # retval
         FFI::Raw::ptr  # ctx to destroy
