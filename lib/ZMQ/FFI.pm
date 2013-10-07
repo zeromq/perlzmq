@@ -205,7 +205,7 @@ or compilation.
 
 =head1 CONTEXT API
 
-=head2 new([threads, max_sockets])
+=head2 new([threads, max_sockets, soname])
 
     ZMQ::FFI->new( threads => 42, max_sockets => 42 )
 
