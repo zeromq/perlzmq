@@ -5,7 +5,6 @@ use Test::More;
 use Test::Exception;
 
 use FFI::Raw;
-use Errno qw(EINVAL);
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ);
