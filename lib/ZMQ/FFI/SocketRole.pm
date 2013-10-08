@@ -11,7 +11,7 @@ has ctx => (
     required => 1,
 );
 
-has ctx_ptr => (
+has _ctx => (
     is      => 'ro',
     lazy    => 1,
     default => sub { shift->ctx->_ctx },

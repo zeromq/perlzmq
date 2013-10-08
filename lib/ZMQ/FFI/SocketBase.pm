@@ -22,7 +22,7 @@ has ffi => (
 sub BUILD {
     my $self = shift;
 
-    $self->_socket( $self->ffi->{zmq_socket}->($self->ctx_ptr, $self->type) );
+    $self->_socket( $self->ffi->{zmq_socket}->($self->_ctx, $self->type) );
 
     try {
         $self->check_null('zmq_socket', $self->_socket);
