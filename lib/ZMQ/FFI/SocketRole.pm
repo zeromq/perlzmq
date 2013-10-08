@@ -6,9 +6,15 @@ use FFI::Raw;
 
 with q(ZMQ::FFI::SoWrapper);
 
-has ctx_ptr => (
+has ctx => (
     is       => 'ro',
     required => 1,
+);
+
+has ctx_ptr => (
+    is      => 'ro',
+    lazy    => 1,
+    default => sub { shift->ctx->_ctx },
 );
 
 has type => (

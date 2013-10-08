@@ -66,7 +66,7 @@ sub socket {
     my ($self, $type) = @_;
 
     return ZMQ::FFI::ZMQ3::Socket->new(
-        ctx_ptr => $self->_ctx,
+        ctx     => $self,
         soname  => $self->soname,
         type    => $type
     );
