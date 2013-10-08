@@ -13,11 +13,11 @@ before_install:
     - sudo dpkg -i /tmp/libzmq1.deb
 
 install:
-    - cpanm --notest AnyEvent EV Test::Exception Perl::PrereqScanner
+    - cpanm --notest Perl::PrereqScanner
 
 before_script:
     - >-
-        scan_prereqs --combine lib
+        scan_prereqs --combine lib t
         | grep -v ZMQ::FFI
         | awk '{ print $1 }'
         | cpanm --notest || /bin/true
