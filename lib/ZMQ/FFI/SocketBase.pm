@@ -153,7 +153,18 @@ sub get {
 
     my $pack_type = $self->_get_pack_type($opt_type);
 
-    my $optval     = pack $pack_type, 0;
+    # Packing may fail on 32 bit Perls
+    local $@;
+    my $optval     = eval { pack $pack_type, 0; };
+
+    if (!defined($optval) && $pack_type eq 'q' && $@) {
+        $pack_type = 'ii';
+        $optval = pack $pack_type, 0, 0;
+    }
+    elsif ($@) {
+        die $@;
+    }
+
     my $optval_len = pack 'L!', length($optval);
 
     my $sizeof_ptr     = length(pack('L!'));
@@ -184,6 +195,13 @@ sub get {
         }
 
         $optval = $optval_ptr->tostr($optval_len);
+    }
+    elsif ($pack_type eq 'ii') {
+        # Let's hope there wasn't too much precision, and mush the two values into a double.
+        # XXX assumes little endian
+        my ($lsb, $msb) = unpack $pack_type, $optval;
+
+        $optval = $lsb + $msb * 2**32;
     }
     else {
         $optval = unpack $pack_type, $optval;
@@ -232,7 +250,7 @@ sub _get_pack_type {
 
     given ($zmqtype) {
         when (/^int$/)      { return 'i!' }
-        when (/^int64_t$/)  { return 'l!' }
+        when (/^int64_t$/)  { return 'q' }
         when (/^uint64_t$/) { return 'L!' }
         when (/^binary$/)   { return 'L!' }
 
