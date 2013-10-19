@@ -35,13 +35,20 @@ function travis_test {
         exit 1
     fi
 
-    prove -lvr t
+    run_prove
 }
 
 function local_test {
     echo -e "\nlibzmq ${1}.x"
     export LD_LIBRARY_PATH="$HOME/git/zeromq$1-x/src/.libs"
+    run_prove
+}
+
+function run_prove {
     prove -lvr t
+
+    # test with different locale
+    LANG=fr_FR.utf8 prove -lvr t
 }
 
 for v in 2 3
