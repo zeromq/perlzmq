@@ -157,15 +157,17 @@ sub get {
     local $@;
     my $optval     = eval { pack $pack_type, 0; };
 
-    if (!defined($optval) && $pack_type eq 'q' && $@) {
-        $pack_type = 'ii';
-        $optval = pack $pack_type, 0, 0;
+    my $optval_len;
+    my $thirtytwo;
+
+    if (!defined($optval) && lc($pack_type) eq 'q' && $@) {
+        $thirtytwo = 1;
+        $optval = pack "ii", 0, 0;
     }
     elsif ($@) {
         die $@;
     }
-
-    my $optval_len = pack 'L!', length($optval);
+    $optval_len = pack 'L!', length($optval);
 
     my $sizeof_ptr     = length(pack('L!'));
 
@@ -196,12 +198,41 @@ sub get {
 
         $optval = $optval_ptr->tostr($optval_len);
     }
-    elsif ($pack_type eq 'ii') {
-        # Let's hope there wasn't too much precision, and mush the two values into a double.
-        # XXX assumes little endian
-        my ($lsb, $msb) = unpack $pack_type, $optval;
+    elsif ($pack_type eq 'q' && $thirtytwo) {
+        # Signed 64 bit
+        my ($lsb, $msb) = unpack "ii", $optval;
+
+        if ($msb == 0) {
+            if ($lsb >= 0) {
+                $optval = $lsb;
+            }
+            else {
+                die "Out of range for a 32 bit machine";
+            }
+        }
+        elsif ($msb == -1) {
+            if ($lsb < 0) {
+                $optval = $lsb;
+            }
+            else {
+                die "Out of range for a 32 bit machine";
+            }
+        }
+        else {
+            die "Out of range for a 32 bit machine";
+        }
 
         $optval = $lsb + $msb * 2**32;
+    }
+    elsif ($pack_type eq 'Q' && $thirtytwo) {
+        # Unsigned 64 bit
+        my ($lsb, $msb) = unpack "II", $optval;
+        if ($msb != 0) {
+            die "Out of range for a 32 bit machine";
+        }
+        else {
+            $optval = $lsb;
+        }
     }
     else {
         $optval = unpack $pack_type, $optval;
@@ -228,7 +259,31 @@ sub set {
     }
     else {
         my $pack_type = $self->_get_pack_type($opt_type);
-        my $packed    = pack $pack_type, $opt_val;
+
+        local $@;
+
+        my $packed    = eval { pack $pack_type, $opt_val; };
+        if (!defined($packed) && $pack_type eq 'q' && $@) {
+            if ($opt_val >= -2147483647 && $opt_val <= 2147483647) {
+                $pack_type = "ii";
+                $packed = pack $pack_type, $opt_val, ($opt_val < 0 ? -1 : 0);
+            }
+            else {
+                die "Out of range for a 32 bit machine";
+            }
+        }
+        elsif (!defined($packed) && $pack_type eq 'Q' && $@) {
+            if ($opt_val <= 4294967295) {
+                $pack_type = "II";
+                $packed = pack $pack_type, $opt_val, 0;
+            }
+            else {
+                die "Out of range for a 32 bit machine";
+            }
+        }
+        elsif ($@) {
+            die $@;
+        }
 
         my $opt_ptr   = unpack('L!', pack('P', $packed));
         my $opt_len   = length(pack($pack_type, 0));
@@ -251,7 +306,7 @@ sub _get_pack_type {
     given ($zmqtype) {
         when (/^int$/)      { return 'i!' }
         when (/^int64_t$/)  { return 'q' }
-        when (/^uint64_t$/) { return 'L!' }
+        when (/^uint64_t$/) { return 'Q' }
         when (/^binary$/)   { return 'L!' }
 
         default { croak "unsupported type '$self->ffi->{zmqtype}'" }
