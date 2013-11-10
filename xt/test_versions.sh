@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function zmq_major {
     echo $(\
         PERL5LIB=lib:$PERL5LIB \
