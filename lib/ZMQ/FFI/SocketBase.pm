@@ -178,7 +178,7 @@ sub get {
         )
     );
 
-    $optval = $self->_unpack($opt_type, \$optval, $optval_ptr, $optval_len);
+    $optval = $self->_unpack($opt_type, $optval, $optval_ptr, $optval_len);
     return $optval;
 }
 
@@ -219,24 +219,22 @@ sub set {
 sub _pack {
     my ($self, $opt_type, $val) = @_;
 
-    my $pack_type = $self->_get_pack_type($opt_type);
-
     my $packed;
     for ($opt_type) {
         when (/^int64_t$/)  { $packed = int64_to_native($val)  }
         when (/^uint64_t$/) { $packed = uint64_to_native($val) }
-        default             { $packed = pack $pack_type, $val  }
+
+        default {
+            $packed = pack $self->_pack_type($opt_type), $val;
+        }
     }
 
     return $packed;
 }
 
 sub _unpack {
-    my ($self, $opt_type, $optval_ref, $optval_ptr, $optval_len) = @_;
+    my ($self, $opt_type, $optval, $optval_ptr, $optval_len) = @_;
 
-    my $pack_type = $self->_get_pack_type($opt_type);
-
-    my $optval = $$optval_ref;
     for ($opt_type) {
         when (/^binary$/) {
             $optval_len = unpack 'L!', $optval_len;
@@ -250,19 +248,21 @@ sub _unpack {
 
         when (/^int64_t$/)  { $optval = native_to_int64($optval)   }
         when (/^uint64_t$/) { $optval = native_to_uint64($optval)  }
-        default             { $optval = unpack $pack_type, $optval }
+
+        default {
+            $optval = unpack $self->_pack_type($opt_type), $optval;
+        }
     }
 
     return $optval;
 }
 
-sub _get_pack_type {
+sub _pack_type {
     my ($self, $zmqtype) = @_;
 
+    # these are the only opts we use native perl packing for
     for ($zmqtype) {
         when (/^int$/)      { return 'i!' }
-        when (/^int64_t$/)  { return 'q'  }
-        when (/^uint64_t$/) { return 'Q'  }
         when (/^binary$/)   { return 'L!' }
 
         default { croak "unsupported type '$self->ffi->{zmqtype}'" }
