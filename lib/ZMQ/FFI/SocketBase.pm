@@ -11,6 +11,10 @@ use FFI::Raw;
 use ZMQ::FFI::Constants qw(:all);
 
 use Try::Tiny;
+use Math::Int64 qw(
+    int64_to_native  native_to_int64
+    uint64_to_native native_to_uint64
+);
 
 has ffi => (
     is => 'ro',
@@ -151,12 +155,10 @@ sub has_pollout {
 sub get {
     my ($self, $opt, $opt_type) = @_;
 
-    my $pack_type = $self->_get_pack_type($opt_type);
+    my $optval = $self->_pack($opt_type, 0);
 
-    my $optval     = pack $pack_type, 0;
     my $optval_len = pack 'L!', length($optval);
-
-    my $sizeof_ptr     = length(pack('L!'));
+    my $sizeof_ptr = length(pack('L!'));
 
     my $optval_ptr =
         $opt_type eq 'binary' ?
@@ -176,19 +178,7 @@ sub get {
         )
     );
 
-    if ($opt_type eq 'binary') {
-        $optval_len = unpack 'L!', $optval_len;
-
-        if ($optval_len == 0) {
-            return;
-        }
-
-        $optval = $optval_ptr->tostr($optval_len);
-    }
-    else {
-        $optval = unpack $pack_type, $optval;
-    }
-
+    $optval = $self->_unpack($opt_type, \$optval, $optval_ptr, $optval_len);
     return $optval;
 }
 
@@ -209,11 +199,10 @@ sub set {
         );
     }
     else {
-        my $pack_type = $self->_get_pack_type($opt_type);
-        my $packed    = pack $pack_type, $opt_val;
+        my $packed = $self->_pack($opt_type, $opt_val);
 
         my $opt_ptr   = unpack('L!', pack('P', $packed));
-        my $opt_len   = length(pack($pack_type, 0));
+        my $opt_len   = length($packed);
 
         $self->check_error(
             'zmq_setsockopt',
@@ -227,13 +216,53 @@ sub set {
     }
 }
 
+sub _pack {
+    my ($self, $opt_type, $val) = @_;
+
+    my $pack_type = $self->_get_pack_type($opt_type);
+
+    my $packed;
+    for ($opt_type) {
+        when (/^int64_t$/)  { $packed = int64_to_native($val)  }
+        when (/^uint64_t$/) { $packed = uint64_to_native($val) }
+        default             { $packed = pack $pack_type, $val  }
+    }
+
+    return $packed;
+}
+
+sub _unpack {
+    my ($self, $opt_type, $optval_ref, $optval_ptr, $optval_len) = @_;
+
+    my $pack_type = $self->_get_pack_type($opt_type);
+
+    my $optval = $$optval_ref;
+    for ($opt_type) {
+        when (/^binary$/) {
+            $optval_len = unpack 'L!', $optval_len;
+
+            if ($optval_len == 0) {
+                return;
+            }
+
+            $optval = $optval_ptr->tostr($optval_len);
+        }
+
+        when (/^int64_t$/)  { $optval = native_to_int64($optval)   }
+        when (/^uint64_t$/) { $optval = native_to_uint64($optval)  }
+        default             { $optval = unpack $pack_type, $optval }
+    }
+
+    return $optval;
+}
+
 sub _get_pack_type {
     my ($self, $zmqtype) = @_;
 
-    given ($zmqtype) {
+    for ($zmqtype) {
         when (/^int$/)      { return 'i!' }
-        when (/^int64_t$/)  { return 'l!' }
-        when (/^uint64_t$/) { return 'L!' }
+        when (/^int64_t$/)  { return 'q'  }
+        when (/^uint64_t$/) { return 'Q'  }
         when (/^binary$/)   { return 'L!' }
 
         default { croak "unsupported type '$self->ffi->{zmqtype}'" }
