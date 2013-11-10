@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Math::BigInt;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(:all);
@@ -54,27 +55,21 @@ sub {
 
 subtest 'uint64_t options',
 sub {
-    use bigint;
-
-    my $max_uint64 = 2**64-1;
+    my $max_uint64 = Math::BigInt->new('18446744073709551615');
     my $ctx        = ZMQ::FFI->new();
 
     my $s = $ctx->socket(ZMQ_REQ);
 
     $s->set(ZMQ_AFFINITY, 'uint64_t', $max_uint64);
-    is $s->get(ZMQ_AFFINITY, 'uint64_t'), $max_uint64,
+    is $s->get(ZMQ_AFFINITY, 'uint64_t'), $max_uint64->bstr(),
         'set/got max unsigned 64 bit int option value';
-
-    no bigint;
 };
 
 subtest 'int64_t options',
 sub {
-    use bigint;
-
     # max negative 64bit values don't currently make
     # sense with any zmq opts, so we'll stick with positive
-    my $max_int64 = 2**63-1;
+    my $max_int64 = Math::BigInt->new('9223372036854775807');
     my $ctx       = ZMQ::FFI->new();
 
     my ($major) = $ctx->version;
@@ -94,10 +89,8 @@ sub {
     my $s = $ctx->socket(ZMQ_REQ);
 
     $s->set($opt, 'int64_t', $max_int64);
-    is $s->get($opt, 'int64_t'), $max_int64,
+    is $s->get($opt, 'int64_t'), $max_int64->bstr(),
         'set/got max signed 64 bit int option value';
-
-    no bigint;
 };
 
 done_testing;
