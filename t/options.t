@@ -79,9 +79,10 @@ sub {
 
     my ($major) = $ctx->version;
 
+    # no int64 opts exist in both versions
     my $opt;
     if ($major == 2) {
-        $opt = ZMQ_RECOVERY_IVL_MSEC;
+        $opt = ZMQ_SWAP;
     }
     elsif ($major == 3) {
         $opt = ZMQ_MAXMSGSIZE;
@@ -91,9 +92,6 @@ sub {
     }
 
     my $s = $ctx->socket(ZMQ_REQ);
-
-    is $s->get($opt, 'int64_t'), -1,
-        'got default option value';
 
     $s->set($opt, 'int64_t', $max_int64);
     is $s->get($opt, 'int64_t'), $max_int64,
