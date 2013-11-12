@@ -369,4 +369,5 @@ case of an error it will die with the plain english system error message.
 =for :list
 * L<ZMQ::FFI::Constants>
 * L<ZMQ::FFI::Util>
+* L<FFI::Raw>
 
