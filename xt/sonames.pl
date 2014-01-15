@@ -18,7 +18,7 @@ sub {
 
     ok
         join('.', zmq_version('libzmq.so.3'))
-        =~ m/^3(\.\d+){2}$/,
+        =~ m/^[34](\.\d+){2}$/,
         'libzmq.so.3 soname gives 3.x version';
 
     throws_ok { zmq_version('libzmq.so.X') }
@@ -41,7 +41,7 @@ sub
 
     ok
         join('.', $ctx_v3->version)
-        =~ m/^3(\.\d+){2}$/,
+        =~ m/^[34](\.\d+){2}$/,
         'libzmq.so.3 soname gives 3.x version';
 
     throws_ok { ZMQ::FFI->new(soname => 'libzmq.so.X') }
@@ -74,7 +74,7 @@ sub
 
     ok
         $s_v3_rep->recv()
-        =~ m/^3(\.\d+){2}$/,
+        =~ m/^[34](\.\d+){2}$/,
         'got zmq 3.x message';
 };
 
