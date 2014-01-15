@@ -82,6 +82,9 @@ sub {
     elsif ($major == 3) {
         $opt = ZMQ_MAXMSGSIZE;
     }
+    elsif ($major == 4) {
+        $opt = ZMQ_MAXMSGSIZE;
+    }
     else {
         die "Unsupported zmq version $major";
     }
