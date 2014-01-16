@@ -11,23 +11,25 @@ function zmq_major {
 }
 
 function travis_test {
-    sudo rm -f /usr/lib/libzmq.so /usr/lib/x86_64-linux-gnu/libzmq.so
 
+    # install the libzmq version we need
     case $1 in
+
         2)
-            soname='libzmq.so.1'
-            sodir='/usr/lib'
+            wget https://launchpad.net/ubuntu/+archive/primary/+files/libzmq1_2.1.11-1ubuntu1_amd64.deb -qO /tmp/libzmq1.deb
+            sudo dpkg -i /tmp/libzmq1.deb
             ;;
         3)
-            soname='libzmq.so.3'
-            sodir='/usr/lib/x86_64-linux-gnu'
+            sudo add-apt-repository -y ppa:bpaquet/zeromq3-precise
+            sudo apt-get -y update
+            sudo apt-get -y install libzmq1
+            ;;
+        4)
+            sudo add-apt-repository -y ppa:bpaquet/zeromq4-precise
+            sudo apt-get -y update
+            sudo apt-get -y install libzmq1
             ;;
     esac
-
-    echo -e "\n$soname"
-
-    sudo ln -svf $soname $sodir/libzmq.so
-    sudo ldconfig
 
     # sanity test
     ver=$(zmq_major)
@@ -37,11 +39,12 @@ function travis_test {
         exit 1
     fi
 
+    echo -e "\nTesting zeromq ${1}.x"
     run_prove
 }
 
 function local_test {
-    echo -e "\nlibzmq ${1}.x"
+    echo -e "\nTesting zeromq ${1}.x"
     export LD_LIBRARY_PATH="$HOME/git/zeromq$1-x/src/.libs"
     run_prove
 }
@@ -68,6 +71,10 @@ then
     LD_LIBRARY_PATH="$HOME/git/zeromq2-x/src/.libs:"
     LD_LIBRARY_PATH+="$HOME/git/zeromq3-x/src/.libs:"
     export LD_LIBRARY_PATH
+else
+    sudo dpkg -i /tmp/libzmq1.deb
+    sudo apt-get -y install libzmq3
 fi
 
 PERL5LIB=lib:$PERL5LIB perl xt/sonames.pl
+
