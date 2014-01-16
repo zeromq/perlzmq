@@ -18,8 +18,8 @@ sub {
 
     ok
         join('.', zmq_version('libzmq.so.3'))
-        =~ m/^3(\.\d+){2}$/,
-        'libzmq.so.3 soname gives 3.x version';
+        =~ m/^[34](\.\d+){2}$/,
+        'libzmq.so.3 soname gives 3.x/4.x version';
 
     throws_ok { zmq_version('libzmq.so.X') }
         qr/libzmq.so.X: cannot open shared object file/,
@@ -41,8 +41,8 @@ sub
 
     ok
         join('.', $ctx_v3->version)
-        =~ m/^3(\.\d+){2}$/,
-        'libzmq.so.3 soname gives 3.x version';
+        =~ m/^[34](\.\d+){2}$/,
+        'libzmq.so.3 soname gives 3.x/4.x version';
 
     throws_ok { ZMQ::FFI->new(soname => 'libzmq.so.X') }
         qr/libzmq\.so\.X: cannot open shared object file/,
@@ -74,8 +74,8 @@ sub
 
     ok
         $s_v3_rep->recv()
-        =~ m/^3(\.\d+){2}$/,
-        'got zmq 3.x message';
+        =~ m/^[34](\.\d+){2}$/,
+        'got zmq 3.x/4.x message';
 };
 
 done_testing;

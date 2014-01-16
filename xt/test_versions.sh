@@ -53,7 +53,7 @@ function run_prove {
     LANG=fr_FR.utf8 prove -lvr t
 }
 
-for v in 2 3
+for v in 2 3 4
 do
     if [[ -n $TRAVIS ]]
     then
