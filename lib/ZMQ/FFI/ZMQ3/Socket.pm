@@ -4,6 +4,7 @@ use Moo;
 use namespace::autoclean;
 
 use FFI::Raw;
+use Encode qw//;
 
 extends q(ZMQ::FFI::SocketBase);
 
@@ -20,10 +21,16 @@ sub send {
 
     $flags //= 0;
 
+    my $length;
+    { 
+        use bytes; 
+        $length = length($msg);
+    };
+
     $self->check_error(
         'zmq_send',
         $self->zmq3_ffi->{zmq_send}->(
-            $self->_socket, $msg, length($msg), $flags
+            $self->_socket, $msg, $length, $flags
         )
     );
 }
@@ -62,6 +69,12 @@ sub recv {
     $ffi->{zmq_msg_close}->($msg_ptr);
 
     return $rv;
+}
+
+sub recv_string {
+    my $self = shift;
+
+    return Encode::decode_utf8( $self->recv(@_) );
 }
 
 sub _init_zmq3_ffi {
