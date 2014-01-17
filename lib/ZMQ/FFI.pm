@@ -327,10 +327,22 @@ optional flags. ZMQ_SNDMORE semantics are handled for you
 
 receive a message
 
+=head2 recv_string([$flags])
+
+Receive a String message and decode it via L<Encode::decode_utf8>. 
+
+Sending data over a wire means sending bytes.  Bytes do not know anything
+about encoding. If you want to send (unicode)
+strings, use this L<recv_string> method to L<recv> them correctly.
+
 =head2 @parts = recv_multipart([$flags])
 
 receives a multipart message, returning an array of parts. ZMQ_RCVMORE
 semantics are handled for you
+
+=head2 @parts = recv_multipart_string([$flags])
+
+see L<recv_string> for more info. Apply L<Encode::decode_utf8> to all message parts.
 
 =head2 has_pollin, has_pollout
 
