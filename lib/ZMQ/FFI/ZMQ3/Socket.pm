@@ -47,13 +47,21 @@ sub recv {
 
     $self->check_error('zmq_msg_recv', $msg_size);
 
-    my $data_ptr    = $ffi->{zmq_msg_data}->($msg_ptr);
-    my $content_ptr = FFI::Raw::memptr($msg_size);
+    my $rv;
+    if ($msg_size) {
+        my $data_ptr    = $ffi->{zmq_msg_data}->($msg_ptr);
+        my $content_ptr = FFI::Raw::memptr($msg_size);
 
-    $ffi->{memcpy}->($content_ptr, $data_ptr, $msg_size);
+        $ffi->{memcpy}->($content_ptr, $data_ptr, $msg_size);
+        $rv = $content_ptr->tostr($msg_size);
+    }
+    else {
+        $rv = '';
+    }
+
     $ffi->{zmq_msg_close}->($msg_ptr);
 
-    return $content_ptr->tostr($msg_size);
+    return $rv;
 }
 
 sub _init_zmq3_ffi {

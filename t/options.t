@@ -79,7 +79,7 @@ sub {
     if ($major == 2) {
         $opt = ZMQ_SWAP;
     }
-    elsif ($major == 3) {
+    elsif ($major == 3 || $major == 4) {
         $opt = ZMQ_MAXMSGSIZE;
     }
     else {

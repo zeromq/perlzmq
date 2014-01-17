@@ -8,9 +8,7 @@ perl:
     - "5.10"
 
 before_install:
-    - sudo apt-get update
-    - wget https://launchpad.net/ubuntu/+archive/primary/+files/libzmq1_2.1.11-1ubuntu1_amd64.deb -qO /tmp/libzmq1.deb
-    - sudo dpkg -i /tmp/libzmq1.deb
+    - sudo apt-get -y remove libzmq*
 
 install:
     - cpanm --notest Perl::PrereqScanner
