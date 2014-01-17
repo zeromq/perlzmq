@@ -9,6 +9,7 @@ use feature 'switch';
 use Carp;
 use FFI::Raw;
 use ZMQ::FFI::Constants qw(:all);
+use Encode qw//;
 
 use Try::Tiny;
 use Math::Int64 qw(
@@ -98,6 +99,17 @@ sub recv_multipart {
     }
 
     return @parts;
+}
+
+sub recv_multipart_string {
+    my $self = shift;
+
+    my @ret;
+    foreach my $part ( $self->recv_multipart(@_) ) {
+        push(@ret, Encode::decode_utf8($part) );
+    }
+
+    return @ret;
 }
 
 sub get_fd {
