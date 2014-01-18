@@ -24,7 +24,7 @@ sub usesocket {
 }
 
 sub mksocket {
-    my $ctx       = ZMQ::FFI->new();
+    my $ctx = ZMQ::FFI->new();
 
     no warnings q/redefine/;
     my $ctx_class = blessed($ctx);
