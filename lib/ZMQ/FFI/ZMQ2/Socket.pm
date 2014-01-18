@@ -23,7 +23,14 @@ sub send {
 
     $flags //= 0;
 
-    my $bytes_size = length($msg);
+
+    my $length;
+    {
+        use bytes;
+        $length = length($msg);
+    };
+
+    my $bytes_size = $length;
     my $bytes      = pack "a$bytes_size", $msg;
     my $bytes_ptr  = unpack('L!', pack('P', $bytes));
 

@@ -20,10 +20,16 @@ sub send {
 
     $flags //= 0;
 
+    my $length;
+    {
+        use bytes;
+        $length = length($msg);
+    };
+
     $self->check_error(
         'zmq_send',
         $self->zmq3_ffi->{zmq_send}->(
-            $self->_socket, $msg, length($msg), $flags
+            $self->_socket, $msg, $length, $flags
         )
     );
 }
