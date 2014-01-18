@@ -20,7 +20,7 @@ my $fd = $pull->get_fd();
 
 my $recv = 0;
 my $w = AE::io $fd, 0, sub {
-    while ( $pull->has_pollin ) {
+    while ($pull->has_pollin) {
         my $msg = $pull->recv();
         is $msg, $expected[$recv], "got message $recv";
 

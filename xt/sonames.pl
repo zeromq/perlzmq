@@ -64,8 +64,8 @@ sub
     my $s_v3_rep = $ctx_v3->socket(ZMQ_REP);
     $s_v3_rep->bind($v3_endpoint);
 
-    $s_v2_req->send(join('.', $ctx_v2->version), ZMQ_NOBLOCK);
-    $s_v3_req->send(join('.', $ctx_v3->version), ZMQ_DONTWAIT);
+    $s_v2_req->send(join('.', $ctx_v2->version));
+    $s_v3_req->send(join('.', $ctx_v3->version));
 
     ok
         $s_v2_rep->recv()

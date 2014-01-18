@@ -22,12 +22,12 @@ sub {
 
     {
         $s->subscribe('');
-        $p->send('ohhai', ZMQ_DONTWAIT);
+        $p->send('ohhai');
 
         until ($s->has_pollin) {
             # sleep for a 100ms to compensate for slow subscriber problem
             usleep 100_000;
-            $p->send('ohhai', ZMQ_DONTWAIT);
+            $p->send('ohhai');
         }
 
         my $msg = $s->recv();
@@ -38,11 +38,11 @@ sub {
 
     {
         $s->subscribe('mytopic');
-        $p->send('mytopic ohhai', ZMQ_DONTWAIT);
+        $p->send('mytopic ohhai');
 
         until ($s->has_pollin) {
             usleep 100_000;
-            $p->send('mytopic ohhai', ZMQ_DONTWAIT);
+            $p->send('mytopic ohhai');
         }
 
         my $msg = $s->recv();

@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP ZMQ_DONTWAIT);
+use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
 
 my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new( threads => 1 );
@@ -14,7 +14,7 @@ $s1->connect($endpoint);
 my $s2 = $ctx->socket(ZMQ_REP);
 $s2->bind($endpoint);
 
-$s1->send('ohhai', ZMQ_DONTWAIT);
+$s1->send('ohhai');
 
 is
     $s2->recv(),

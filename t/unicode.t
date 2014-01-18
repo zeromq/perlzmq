@@ -6,7 +6,7 @@ use Test::More;
 use List::Util qw(sum);
 
 use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL ZMQ_DONTWAIT);
+use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
 
 my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new();
@@ -22,7 +22,7 @@ my $msg = 'werde ich von Dir hören?';
 
 subtest 'send_unicode_bytes' => sub {
     ok utf8::is_utf8($msg), "created unicode message";
-    $s1->send($msg, ZMQ_DONTWAIT);
+    $s1->send($msg);
 
     my $recvd = $s2->recv();
 
@@ -50,7 +50,7 @@ subtest 'send_multipart_unicode_bytes' => sub {
 
     ok $is_unicode, "created unicode message parts";
 
-    $s1->send_multipart( $multipart, ZMQ_DONTWAIT );
+    $s1->send_multipart($multipart);
 
     my @recvd = $s2->recv_multipart();
 

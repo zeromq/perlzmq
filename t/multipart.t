@@ -17,7 +17,7 @@ my $r = $ctx->socket(ZMQ_ROUTER);
 $d->connect($endpoint);
 $r->bind($endpoint);
 
-$d->send_multipart([qw(ABC DEF GHI)], ZMQ_DONTWAIT);
+$d->send_multipart([qw(ABC DEF GHI)]);
 
 my @recvd = $r->recv_multipart;
 is_deeply

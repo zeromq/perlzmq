@@ -39,7 +39,7 @@ __END__
 
     use v5.10;
     use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP ZMQ_DONTWAIT);
+    use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
 
     my $endpoint = "ipc://zmq-ffi-$$";
     my $ctx      = ZMQ::FFI->new( threads => 1 );
@@ -50,7 +50,7 @@ __END__
     my $s2 = $ctx->socket(ZMQ_REP);
     $s2->bind($endpoint);
 
-    $s1->send('ohhai', ZMQ_DONTWAIT);
+    $s1->send('ohhai');
 
     say $s2->recv();
     # ohhai
@@ -60,7 +60,7 @@ __END__
 
     use v5.10;
     use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_PUB ZMQ_SUB ZMQ_DONTWAIT);
+    use ZMQ::FFI::Constants qw(ZMQ_PUB ZMQ_SUB);
     use Time::HiRes q(usleep);
 
     my $endpoint = "ipc://zmq-ffi-$$";
@@ -75,12 +75,12 @@ __END__
     # all topics
     {
         $s->subscribe('');
-        $p->send('ohhai', ZMQ_DONTWAIT);
+        $p->send('ohhai');
 
         until ($s->has_pollin) {
             # compensate for slow subscriber
             usleep 100_000;
-            $p->send('ohhai', ZMQ_DONTWAIT);
+            $p->send('ohhai');
         }
 
         say $s->recv();
@@ -94,13 +94,13 @@ __END__
         $s->subscribe('topic1');
         $s->subscribe('topic2');
 
-        $p->send('topic1 ohhai', ZMQ_DONTWAIT);
-        $p->send('topic2 ohhai', ZMQ_DONTWAIT);
+        $p->send('topic1 ohhai');
+        $p->send('topic2 ohhai');
 
         until ($s->has_pollin) {
             usleep 100_000;
-            $p->send('topic1 ohhai', ZMQ_DONTWAIT);
-            $p->send('topic2 ohhai', ZMQ_DONTWAIT);
+            $p->send('topic1 ohhai');
+            $p->send('topic2 ohhai');
         }
 
         while ($s->has_pollin) {
@@ -115,7 +115,7 @@ __END__
 
     use v5.10;
     use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_DEALER ZMQ_ROUTER ZMQ_DONTWAIT);
+    use ZMQ::FFI::Constants qw(ZMQ_DEALER ZMQ_ROUTER);
 
     my $endpoint = "ipc://zmq-ffi-$$";
     my $ctx      = ZMQ::FFI->new();
@@ -128,7 +128,7 @@ __END__
     $d->connect($endpoint);
     $r->bind($endpoint);
 
-    $d->send_multipart([qw(ABC DEF GHI)], ZMQ_DONTWAIT);
+    $d->send_multipart([qw(ABC DEF GHI)]);
 
     say join ' ', $r->recv_multipart;
     # dealer ABC DEF GHI
@@ -312,7 +312,7 @@ remove C<$topic> from the subscription list
 
 =head2 send($msg, [$flags])
 
-    $socket->send('ohhai', ZMQ_DONTWAIT)
+    $socket->send('ohhai')
 
 sends a message using the optional flags
 
