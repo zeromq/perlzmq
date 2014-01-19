@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.08      2014-01-19 01:19:49 America/Chicago
+
     - ZMQ_DONTWAIT is not necessary in examples & tests
     - Fix unicode bytes handling (GH#5)
       * Thanks @klaus for test and code
