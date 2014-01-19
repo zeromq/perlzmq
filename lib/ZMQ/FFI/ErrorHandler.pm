@@ -53,7 +53,7 @@ sub check_null {
 sub fatal {
     my ($self, $func) = @_;
 
-    croak "$func: ".$zmq_strerror->($zmq_errno->());
+    confess "$func: ".$zmq_strerror->($zmq_errno->());
 }
 
 __PACKAGE__->meta->make_immutable;

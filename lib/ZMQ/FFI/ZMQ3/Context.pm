@@ -32,7 +32,7 @@ sub BUILD {
     }
     catch {
         $self->_ctx(-1);
-        croak $_;
+        die $_;
     };
 
     if ( $self->has_threads ) {

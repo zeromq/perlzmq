@@ -33,7 +33,7 @@ sub BUILD {
     }
     catch {
         $self->_socket(-1);
-        croak $_;
+        die $_;
     };
 
     # ensure clean edge state
@@ -265,7 +265,7 @@ sub _pack_type {
         when (/^int$/)      { return 'i!' }
         when (/^binary$/)   { return 'L!' }
 
-        default { croak "unsupported type '$self->ffi->{zmqtype}'" }
+        default { confess "unsupported type '$self->ffi->{zmqtype}'" }
     }
 }
 
