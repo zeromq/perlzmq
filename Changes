@@ -1,0 +1,44 @@
+
+{{$NEXT}}
+
+    - ZMQ_DONTWAIT is not necessary in examples & tests
+    - Fix unicode bytes handling (GH#5)
+      * Thanks @klaus for test and code
+    - Generate constants through 4.0.3
+    - ZMQ4 support added (GH#4)
+      * Thanks @klaus for test, code, and suggestions
+
+0.07      2013-11-10 15:38:14 America/Chicago
+
+    - Support 32bit Perls (GH#1)
+    - Make tests locale aware (GH#2)
+
+0.06      2013-10-08 07:53:53 America/Chicago
+
+    - Fix socket/context DEMOLISH order bug
+
+0.05      2013-10-07 01:47:00 America/Chicago
+
+    - Minimum required Moo version is 1.003001
+
+0.04      2013-10-06 22:29:35 America/Chicago
+
+    - Use Moo instead of Moose
+    - Support specifying soname at object creation
+    - Add zmq_soname and zmq_version Util functions
+    - If soname unspecified try all libzmq sonames before failing
+    - Major code and doc refactor
+    - add .travis.yml for Travis CI builds
+
+0.03      2013-10-03 14:32:50 America/Chicago
+
+    - Doc additions
+
+0.02      2013-10-03 12:32:16 America/Chicago
+
+    - Doc tweaks
+    - Don't try to close/destroy sockets/contexts if creation failed
+
+0.01      2013-10-03 10:10:05 America/Chicago
+
+    - Initial release
