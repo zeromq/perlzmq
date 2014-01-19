@@ -5,10 +5,10 @@
 
     - ZMQ_DONTWAIT is not necessary in examples & tests
     - Fix unicode bytes handling (GH#5)
-      * Thanks @klaus for test and code
+      Thanks @klaus for test and code
     - Generate constants through 4.0.3
     - ZMQ4 support added (GH#4)
-      * Thanks @klaus for test, code, and suggestions
+      Thanks @klaus for test, code, and suggestions
 
 0.07      2013-11-10 15:38:14 America/Chicago
 
