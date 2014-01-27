@@ -64,13 +64,13 @@ sub zmq_version {
         FFI::Raw::ptr   # patch
     );
 
-    my ($major, $minor, $patch) = map { pack 'L!', $_ } (0, 0, 0);
+    my ($major, $minor, $patch) = map { pack 'i!', $_ } (0, 0, 0);
 
     my @ptrs = map { unpack('L!', pack('P', $_)) } ($major, $minor, $patch);
 
     $zmq_version->(@ptrs);
 
-    return map { unpack 'L!', $_ } ($major, $minor, $patch);
+    return map { unpack 'i!', $_ } ($major, $minor, $patch);
 }
 
 1;
