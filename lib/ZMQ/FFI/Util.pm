@@ -30,7 +30,10 @@ sub zmq_soname {
     #
     # If Linux extensions fail also try platform specific
     # extensions (e.g. OS X) before giving up.
-    my @sonames = qw(libzmq.so libzmq.so.3 libzmq.so.1 libzmq.dylib);
+    my @sonames = qw(
+        libzmq.so    libzmq.so.3    libzmq.so.1
+        libzmq.dylib libzmq.3.dylib libzmq.1.dylib
+    );
 
     my $soname;
     FIND_SONAME:
