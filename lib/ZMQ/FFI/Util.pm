@@ -17,13 +17,20 @@ use Sub::Exporter -setup => {
 };
 
 sub zmq_soname {
-    # try to find a soname available on this system
+    my %args = @_;
 
-    # .so symlink conventions are linker_name => soname => real_name
+    my $die = $args{die};
+
+    # Try to find a soname available on this system
+    #
+    # Linux .so symlink conventions are linker_name => soname => real_name
     # e.g. libzmq.so => libzmq.so.X => libzmq.so.X.Y.Z
-    # Unfortunately not all distros follow this convention (Ubuntu).
-    # So first we'll try the linker_name, then the sonames, and then give up
-    my @sonames = qw(libzmq.so libzmq.so.3 libzmq.so.1);
+    # Unfortunately not all distros follow this convention (Ubuntu). So first
+    # we'll try the linker_name, then the sonames.
+    #
+    # If Linux extensions fail also try platform specific
+    # extensions (e.g. OS X) before giving up.
+    my @sonames = qw(libzmq.so libzmq.so.3 libzmq.so.1 libzmq.dylib);
 
     my $soname;
     FIND_SONAME:
@@ -44,6 +51,13 @@ sub zmq_soname {
         };
 
         last FIND_SONAME if $soname;
+    }
+
+    if ( !$soname && $die ) {
+        croak
+            qq(Could not load libzmq, tried:\n),
+            join(', ', @sonames),"\n",
+            q(Is libzmq on your ld path?);
     }
 
     return $soname;

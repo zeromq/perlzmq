@@ -5,7 +5,7 @@ use Test::More;
 use Test::Exception;
 
 use ZMQ::FFI;
-use ZMQ::FFI::Util qw(zmq_soname zmq_version);
+use ZMQ::FFI::Util qw(zmq_version);
 use ZMQ::FFI::Constants qw(:all);
 
 subtest 'util zmq_version different sonames',

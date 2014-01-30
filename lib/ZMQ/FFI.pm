@@ -8,14 +8,7 @@ sub new {
     my $self = shift;
     my %args = @_;
 
-    $args{soname} //= zmq_soname();
-
-    unless ($args{soname}) {
-        croak
-            q(Could not load libzmq, tried: ).
-            qq(libzmq.so, libzmq.so.3, libzmq.so.1\n).
-            q(Is libzmq on your ld path?);
-    }
+    $args{soname} //= zmq_soname( die => 1 );
 
     my ($major) = zmq_version($args{soname});
 
