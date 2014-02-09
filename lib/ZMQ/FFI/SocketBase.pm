@@ -372,7 +372,7 @@ sub _init_ffi {
     );
 
     $ffi->{memcpy} = FFI::Raw->new(
-        'libc.so.6' => 'memcpy',
+        undef, 'memcpy',
         FFI::Raw::ptr,  # dest filled
         FFI::Raw::ptr,  # dest buf
         FFI::Raw::ptr,  # src
