@@ -3,6 +3,10 @@
 
 0.09      2014-01-29 08:07:12 America/Chicago
 
+    - use correct pack type for zmq_version
+    - use appropriate error function depending on the context
+    - don't ship zmq constants generation script, which confuses CPAN
+
 0.08      2014-01-19 01:19:49 America/Chicago
 
     - ZMQ_DONTWAIT is not necessary in examples & tests
