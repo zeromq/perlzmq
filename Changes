@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.10      2014-02-14 20:27:36 America/Chicago
+
     - Implicitly use system libc by passing undef as soname to FFI::Raw
       Requires FFI::Raw >= 0.26
 
