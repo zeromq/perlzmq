@@ -4,7 +4,6 @@
     - Implicitly use system libc by passing undef as soname to FFI::Raw
       Requires FFI::Raw >= 0.26
 
-
 0.09      2014-01-29 08:07:12 America/Chicago
 
     - use correct pack type for zmq_version
