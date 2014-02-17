@@ -7,8 +7,6 @@ use FFI::Raw;
 
 extends q(ZMQ::FFI::SocketBase);
 
-with q(ZMQ::FFI::SocketRole);
-
 has zmq3_ffi => (
     is      => 'ro',
     lazy    => 1,
@@ -39,7 +37,7 @@ sub recv {
 
     $flags //= 0;
 
-    my $ffi = $self->ffi;
+    my $ffi = $self->_ffi;
 
     my $msg_ptr = FFI::Raw::memptr(40); # large enough to hold zmq_msg_t
 

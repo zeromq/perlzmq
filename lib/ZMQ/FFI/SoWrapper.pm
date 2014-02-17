@@ -1,6 +1,16 @@
 package ZMQ::FFI::SoWrapper;
 
+# common helpers for working with zeromq ffi bindings
+
 use Moo::Role;
+
+use ZMQ::FFI::ErrorHandler;
+use ZMQ::FFI::Versioner;
+
+has soname => (
+    is       => 'ro',
+    required => 1,
+);
 
 has _err_handler => (
     is      => 'ro',
@@ -25,11 +35,6 @@ has _versioner => (
         );
     },
     handles => [qw(version)],
-);
-
-has soname => (
-    is       => 'ro',
-    required => 1,
 );
 
 1;

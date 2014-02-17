@@ -5,19 +5,14 @@ use namespace::autoclean;
 
 use FFI::Raw;
 use Carp;
+use Try::Tiny;
 
 use ZMQ::FFI::ZMQ3::Socket;
 use ZMQ::FFI::Constants qw(ZMQ_IO_THREADS ZMQ_MAX_SOCKETS);
 
-use Try::Tiny;
+extends q(ZMQ::FFI::ContextBase);
 
-with q(ZMQ::FFI::ContextRole);
-
-has '+threads' => (
-    default => 1,
-);
-
-has ffi => (
+has _ffi => (
     is      => 'ro',
     lazy    => 1,
     builder => '_init_ffi',
@@ -27,7 +22,7 @@ sub BUILD {
     my $self = shift;
 
     try {
-        $self->_ctx( $self->ffi->{zmq_ctx_new}->() );
+        $self->_ctx( $self->_ffi->{zmq_ctx_new}->() );
         $self->check_null('zmq_ctx_new', $self->_ctx);
     }
     catch {
@@ -36,18 +31,18 @@ sub BUILD {
     };
 
     if ( $self->has_threads ) {
-        $self->set(ZMQ_IO_THREADS, $self->_threads);
+        $self->set(ZMQ_IO_THREADS, $self->threads);
     }
 
     if ( $self->has_max_sockets ) {
-        $self->set(ZMQ_MAX_SOCKETS, $self->_max_sockets);
+        $self->set(ZMQ_MAX_SOCKETS, $self->max_sockets);
     }
 }
 
 sub get {
     my ($self, $option) = @_;
 
-    my $option_val = $self->ffi->{zmq_ctx_get}->($self->_ctx, $option);
+    my $option_val = $self->_ffi->{zmq_ctx_get}->($self->_ctx, $option);
     $self->check_error('zmq_ctx_get', $option_val);
 
     return $option_val;
@@ -58,7 +53,7 @@ sub set {
 
     $self->check_error(
         'zmq_ctx_set',
-        $self->ffi->{zmq_ctx_set}->($self->_ctx, $option, $option_val)
+        $self->_ffi->{zmq_ctx_set}->($self->_ctx, $option, $option_val)
     );
 }
 
@@ -77,7 +72,7 @@ sub destroy {
 
     $self->check_error(
         'zmq_ctx_destroy',
-        $self->ffi->{zmq_ctx_destroy}->($self->_ctx)
+        $self->_ffi->{zmq_ctx_destroy}->($self->_ctx)
     );
 
     $self->_ctx(-1);

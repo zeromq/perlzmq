@@ -9,13 +9,13 @@ use Try::Tiny;
 
 use ZMQ::FFI::ZMQ2::Socket;
 
-with qw(ZMQ::FFI::ContextRole);
+extends qw(ZMQ::FFI::ContextBase);
 
 has '+threads' => (
     default => 1,
 );
 
-has ffi => (
+has _ffi => (
     is      => 'ro',
     lazy    => 1,
     builder => '_init_ffi',
@@ -30,7 +30,7 @@ sub BUILD {
     }
 
     try {
-        $self->_ctx( $self->ffi->{zmq_init}->($self->_threads) );
+        $self->_ctx( $self->_ffi->{zmq_init}->($self->threads) );
         $self->check_null('zmq_init', $self->_ctx);
     }
     catch {
@@ -70,7 +70,7 @@ sub destroy {
 
     $self->check_error(
         'zmq_term',
-        $self->ffi->{zmq_term}->($self->_ctx)
+        $self->_ffi->{zmq_term}->($self->_ctx)
     );
 
     $self->_ctx(-1);
