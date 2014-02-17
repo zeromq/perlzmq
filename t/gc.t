@@ -30,10 +30,10 @@ sub mksocket {
     no warnings q/redefine/;
 
     my $ctx = ZMQ::FFI->new();
-    *ZMQ::FFI::ContextBase::DEMOLISH = sub { push \@gc_stack, 'ctx' };
+    *ZMQ::FFI::ContextBase::DEMOLISH = sub { push @gc_stack, 'ctx' };
 
     my $s = $ctx->socket(ZMQ_REQ);
-    *ZMQ::FFI::SocketBase::DEMOLISH = sub { push \@gc_stack, 'socket' };
+    *ZMQ::FFI::SocketBase::DEMOLISH = sub { push @gc_stack, 'socket' };
 
     # ctx should not get reaped
     return $s;
