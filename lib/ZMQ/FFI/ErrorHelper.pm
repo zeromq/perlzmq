@@ -17,6 +17,11 @@ has _err_ffi => (
     builder => '_init_err_ffi',
 );
 
+sub BUILD {
+    my $self = shift;
+    $self->_err_ffi;
+}
+
 sub check_error {
     my ($self, $func, $rc) = @_;
 
