@@ -1,13 +1,10 @@
 package ZMQ::FFI::Versioner;
 
-use Moo;
+use Moo::Role;
 
 use ZMQ::FFI::Util qw(zmq_version);
 
-has soname => (
-    is       => 'ro',
-    required => 1,
-);
+requires q(soname);
 
 has _version_parts => (
     is      => 'ro',
@@ -19,4 +16,4 @@ sub version {
     return @{shift->_version_parts};
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

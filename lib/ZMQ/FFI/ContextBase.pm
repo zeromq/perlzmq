@@ -7,7 +7,8 @@ use Carp;
 
 with qw(
     ZMQ::FFI::ContextRole
-    ZMQ::FFI::SoWrapper
+    ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::Versioner
 );
 
 # real underlying zmq ctx pointer

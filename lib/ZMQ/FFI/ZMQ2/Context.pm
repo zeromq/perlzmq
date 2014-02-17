@@ -24,8 +24,6 @@ has _ffi => (
 sub BUILD {
     my $self = shift;
 
-    $self->_err_handler;
-
     if ($self->has_max_sockets) {
         die "max_sockets option not available for ZMQ2\n".
             $self->_verstr;
@@ -61,9 +59,10 @@ sub socket {
     my ($self, $type) = @_;
 
     return ZMQ::FFI::ZMQ2::Socket->new(
-        ctx     => $self,
-        soname  => $self->soname,
-        type    => $type
+        ctx          => $self,
+        type         => $type,
+        soname       => $self->soname,
+        error_helper => $self->error_helper,
     );
 }
 

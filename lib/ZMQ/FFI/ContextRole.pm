@@ -2,6 +2,11 @@ package ZMQ::FFI::ContextRole;
 
 use Moo::Role;
 
+has soname => (
+    is       => 'ro',
+    required => 1,
+);
+
 has threads => (
     is        => 'ro',
     predicate => 'has_threads',

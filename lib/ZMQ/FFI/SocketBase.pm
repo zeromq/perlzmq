@@ -19,7 +19,8 @@ use ZMQ::FFI::Constants qw(:all);
 
 with qw(
     ZMQ::FFI::SocketRole
-    ZMQ::FFI::SoWrapper
+    ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::Versioner
 );
 
 has _ffi => (
@@ -44,8 +45,6 @@ has _socket => (
 
 sub BUILD {
     my $self = shift;
-
-    $self->_err_handler;
 
     $self->_socket( $self->_ffi->{zmq_socket}->($self->_ctx, $self->type) );
 

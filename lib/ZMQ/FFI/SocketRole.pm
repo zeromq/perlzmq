@@ -2,6 +2,11 @@ package ZMQ::FFI::SocketRole;
 
 use Moo::Role;
 
+has soname => (
+    is       => 'ro',
+    required => 1,
+);
+
 # context to associate socket instance with.
 # reference necessary to guard against premature object destruction
 has ctx => (

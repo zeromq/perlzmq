@@ -7,7 +7,7 @@ use FFI::Raw;
 
 extends q(ZMQ::FFI::SocketBase);
 
-has zmq2_ffi => (
+has _zmq2_ffi => (
     is      => 'ro',
     lazy    => 1,
     builder => '_init_zmq2_ffi',
@@ -17,7 +17,7 @@ sub send {
     my ($self, $msg, $flags) = @_;
 
     my $ffi      = $self->_ffi;
-    my $zmq2_ffi = $self->zmq2_ffi;
+    my $zmq2_ffi = $self->_zmq2_ffi;
 
     $flags //= 0;
 
@@ -54,7 +54,7 @@ sub recv {
     my ($self, $flags) = @_;
 
     my $ffi      = $self->_ffi;
-    my $zmq2_ffi = $self->zmq2_ffi;
+    my $zmq2_ffi = $self->_zmq2_ffi;
 
     $flags //= 0;
 

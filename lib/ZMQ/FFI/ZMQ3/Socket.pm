@@ -7,7 +7,7 @@ use FFI::Raw;
 
 extends q(ZMQ::FFI::SocketBase);
 
-has zmq3_ffi => (
+has _zmq3_ffi => (
     is      => 'ro',
     lazy    => 1,
     builder => '_init_zmq3_ffi',
@@ -26,7 +26,7 @@ sub send {
 
     $self->check_error(
         'zmq_send',
-        $self->zmq3_ffi->{zmq_send}->(
+        $self->_zmq3_ffi->{zmq_send}->(
             $self->_socket, $msg, $length, $flags
         )
     );
@@ -47,7 +47,7 @@ sub recv {
     );
 
     my $msg_size =
-        $self->zmq3_ffi->{zmq_msg_recv}->($msg_ptr, $self->_socket, $flags);
+        $self->_zmq3_ffi->{zmq_msg_recv}->($msg_ptr, $self->_socket, $flags);
 
     $self->check_error('zmq_msg_recv', $msg_size);
 

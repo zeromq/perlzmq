@@ -21,8 +21,6 @@ has _ffi => (
 sub BUILD {
     my $self = shift;
 
-    $self->_err_handler;
-
     try {
         $self->_ctx( $self->_ffi->{zmq_ctx_new}->() );
         $self->check_null('zmq_ctx_new', $self->_ctx);
@@ -63,9 +61,10 @@ sub socket {
     my ($self, $type) = @_;
 
     return ZMQ::FFI::ZMQ3::Socket->new(
-        ctx     => $self,
-        soname  => $self->soname,
-        type    => $type
+        ctx          => $self,
+        type         => $type,
+        soname       => $self->soname,
+        error_helper => $self->error_helper,
     );
 }
 
