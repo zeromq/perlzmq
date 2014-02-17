@@ -24,6 +24,8 @@ has _ffi => (
 sub BUILD {
     my $self = shift;
 
+    $self->_err_handler;
+
     if ($self->has_max_sockets) {
         die "max_sockets option not available for ZMQ2\n".
             $self->_verstr;

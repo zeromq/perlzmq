@@ -21,6 +21,8 @@ has _ffi => (
 sub BUILD {
     my $self = shift;
 
+    $self->_err_handler;
+
     try {
         $self->_ctx( $self->_ffi->{zmq_ctx_new}->() );
         $self->check_null('zmq_ctx_new', $self->_ctx);
