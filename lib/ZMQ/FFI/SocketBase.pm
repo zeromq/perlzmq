@@ -26,6 +26,8 @@ has ffi => (
 sub BUILD {
     my $self = shift;
 
+    $self->_err_handler;
+
     $self->_socket( $self->ffi->{zmq_socket}->($self->_ctx, $self->type) );
 
     try {
