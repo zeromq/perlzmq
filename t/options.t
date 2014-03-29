@@ -37,7 +37,7 @@ sub {
     is $ctx->get(ZMQ_MAX_SOCKETS), 1024, 'max sockets set to 1024';
 };
 
-subtest 'convenience socket options',
+subtest 'convenience options',
 sub {
     my $ctx = ZMQ::FFI->new();
     my $s   = $ctx->socket(ZMQ_DEALER);
@@ -55,6 +55,10 @@ sub {
 
 subtest 'string options',
 sub {
+    plan skip_all =>
+        "no string options exist for libzmq 2.x"
+        if (zmq_version())[0] == 2;
+
     my $ctx = ZMQ::FFI->new();
     my $s   = $ctx->socket(ZMQ_DEALER);
 
@@ -62,7 +66,12 @@ sub {
     $s->bind($endpoint);
 
     is $s->get(ZMQ_LAST_ENDPOINT, 'string'), $endpoint, 'got last endpoint';
+};
 
+subtest 'binary options',
+sub {
+    my $ctx = ZMQ::FFI->new();
+    my $s   = $ctx->socket(ZMQ_DEALER);
 
     # 255 characters long
     my $long_ident = 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
