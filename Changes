@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.12      2014-03-29 17:48:45 America/Chicago
+
     - fix binary/string option handling (e.g. ZMQ_LAST_ENDPOINT)
 
 0.11      2014-02-17 19:50:14 America/Chicago
