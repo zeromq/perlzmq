@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - fix binary/string option handling (e.g. ZMQ_LAST_ENDPOINT)
+
 0.11      2014-02-17 19:50:14 America/Chicago
 
     - works on OS X now (GH#6 - thanks @wjackson!)
