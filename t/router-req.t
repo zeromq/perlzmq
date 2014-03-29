@@ -40,7 +40,6 @@ subtest 'router-req', sub {
             usleep 100_000;
         }
 
-        diag("Receiving message on REQ");
         my @result = $req->recv();
         is reverse($result[0]), $message, "Message received by client";
     }
