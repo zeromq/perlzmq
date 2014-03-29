@@ -37,10 +37,10 @@ sub {
     is $ctx->get(ZMQ_MAX_SOCKETS), 1024, 'max sockets set to 1024';
 };
 
-subtest 'socket options',
+subtest 'convenience socket options',
 sub {
     my $ctx = ZMQ::FFI->new();
-    my $s   = $ctx->socket(ZMQ_REQ);
+    my $s   = $ctx->socket(ZMQ_DEALER);
 
     is $s->get_linger(), -1, 'got default linger';
 
