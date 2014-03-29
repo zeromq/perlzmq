@@ -53,6 +53,24 @@ sub {
     is $s->get_identity(), 'foo', 'set identity';
 };
 
+subtest 'string options',
+sub {
+    my $ctx = ZMQ::FFI->new();
+    my $s   = $ctx->socket(ZMQ_DEALER);
+
+    my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+    $s->bind($endpoint);
+
+    is $s->get(ZMQ_LAST_ENDPOINT, 'string'), $endpoint, 'got last endpoint';
+
+
+    # 255 characters long
+    my $long_ident = 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+
+    $s->set(ZMQ_IDENTITY, 'binary', $long_ident);
+    is $s->get(ZMQ_IDENTITY, 'binary'), $long_ident, 'set long identity';
+};
+
 subtest 'uint64_t options',
 sub {
     my $max_uint64 = Math::BigInt->new('18446744073709551615');
