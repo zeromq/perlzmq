@@ -183,16 +183,33 @@ sub has_pollout {
 sub get {
     my ($self, $opt, $opt_type) = @_;
 
-    my $optval = $self->_pack($opt_type, 0);
+    my $optval;
+    my $optval_ptr;
+    my $optval_len;
 
-    my $optval_len = pack 'L!', length($optval);
-    my $sizeof_ptr = length(pack('L!'));
+    for ($opt_type) {
+        when (/^(binary|string)$/) {
+            # ZMQ_IDENTITY uses binary type and
+            # can be at most 255 bytes long
 
-    my $optval_ptr =
-        $opt_type eq 'binary' ?
-            FFI::Raw::memptr($sizeof_ptr)
-            : unpack('L!', pack('P', $optval))
-            ;
+            # ZMQ_LAST_ENDPOINT uses string type and
+            # expects a buffer large enough to hold an endpoint string
+
+            # so for both cases 256 should be sufficient (including \0)
+            my $buflen   = 256;
+
+            $optval_ptr  = FFI::Raw::memptr($buflen);
+            $optval_len  = pack 'L!', $buflen;
+        }
+
+        default {
+            # zeroed memory region
+            $optval     = $self->_pack($opt_type, 0);
+
+            $optval_ptr = unpack('L!', pack('P', $optval));
+            $optval_len = pack 'L!', length($optval);
+        }
+    }
 
     my $optval_len_ptr = unpack('L!', pack('P', $optval_len));
 
@@ -215,7 +232,7 @@ sub set {
 
     my $ffi = $self->_ffi;
 
-    if ($opt_type eq 'binary') {
+    if ($opt_type =~ m/^(binary|string$)/) {
         $self->check_error(
             'zmq_setsockopt',
             $ffi->{str_zmq_setsockopt}->(
@@ -274,6 +291,10 @@ sub _unpack {
             $optval = $optval_ptr->tostr($optval_len);
         }
 
+        when (/^string$/) {
+            $optval = $optval_ptr->tostr();
+        }
+
         when (/^int64_t$/)  { $optval = native_to_int64($optval)   }
         when (/^uint64_t$/) { $optval = native_to_uint64($optval)  }
 
@@ -288,13 +309,12 @@ sub _unpack {
 sub _pack_type {
     my ($self, $zmqtype) = @_;
 
-    # these are the only opts we use native perl packing for
-    for ($zmqtype) {
-        when (/^int$/)      { return 'i!' }
-        when (/^binary$/)   { return 'L!' }
-
-        default { confess "unsupported type '$self->_ffi->{zmqtype}'" }
+    # opts we use native perl packing for (currently just int)
+    if ( $zmqtype eq 'int' ) {
+        return 'i!';
     }
+
+    confess "unsupported type '$zmqtype'";
 }
 
 sub close {
