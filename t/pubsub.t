@@ -2,7 +2,6 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_PUB ZMQ_SUB ZMQ_DONTWAIT);
@@ -49,9 +48,6 @@ sub {
         my $msg = $s->recv();
         is $msg, 'mytopic ohhai', 'got msg sent to mytopic';
     }
-
-    ok !$p->unbind($endpoint);
-    dies_ok { $p->unbind($endpoint); };
 };
 
 done_testing;
