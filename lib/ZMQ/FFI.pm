@@ -290,6 +290,10 @@ does socket connect on the specified endpoint
 
 does socket bind on the specified endpoint
 
+=head2 unbind($endpoint)
+
+does socket unbind on the specified endpoint. Only available for ZeroMQ 3+.
+
 =head2 get_linger(), set_linger($millis)
 
 get or set the current socket linger period
