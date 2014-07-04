@@ -78,7 +78,7 @@ sub unbind {
 
     $self->check_error(
         'zmq_unbind',
-        $self->zmq3_ffi->{zmq_unbind}->($self->_socket, $endpoint)
+        $self->_zmq3_ffi->{zmq_unbind}->($self->_socket, $endpoint)
     );
 }
 
