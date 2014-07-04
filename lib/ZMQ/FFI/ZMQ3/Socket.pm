@@ -3,6 +3,7 @@ package ZMQ::FFI::ZMQ3::Socket;
 use Moo;
 use namespace::autoclean;
 
+use Carp;
 use FFI::Raw;
 
 extends q(ZMQ::FFI::SocketBase);
@@ -56,6 +57,19 @@ sub recv {
     return $content_ptr->tostr($msg_size);
 }
 
+sub unbind {
+    my ($self, $endpoint) = @_;
+
+    unless ($endpoint) {
+        croak 'usage: $socket->unbind($endpoint)';
+    }
+
+    $self->check_error(
+        'zmq_unbind',
+        $self->zmq3_ffi->{zmq_unbind}->($self->_socket, $endpoint)
+    );
+}
+
 sub _init_zmq3_ffi {
     my $self = shift;
 
@@ -77,6 +91,13 @@ sub _init_zmq3_ffi {
         FFI::Raw::ptr, # msg ptr
         FFI::Raw::ptr, # socket
         FFI::Raw::int  # flags
+    );
+
+    $ffi->{zmq_unbind} = FFI::Raw->new(
+        $soname => 'zmq_unbind',
+        FFI::Raw::int,
+        FFI::Raw::ptr,
+        FFI::Raw::str
     );
 
     return $ffi;
