@@ -10,18 +10,29 @@ my $e = "ipc:///tmp/test-zmq-ffi-$$";
 
 my $c = ZMQ::FFI->new();
 
-my $s1 = $c->socket(ZMQ_REP);
-$s1->bind($e);
+my $s1 = $c->socket(ZMQ_REQ);
+$s1->connect($e);
+
+my $s2 = $c->socket(ZMQ_REP);
+$s2->bind($e);
 
 my ($major) = $c->version();
 
 if ( $major == 2 ) {
-    throws_ok { $s1->unbind($e) } qr'not available in zmq 2.x',
+    throws_ok { $s1->disconnect($e) }
+                qr'not available in zmq 2.x',
+                'threw unimplemented error for 2.x';
+
+    throws_ok { $s2->unbind($e) }
+                qr'not available in zmq 2.x',
                 'threw unimplemented error for 2.x';
 }
 else {
-    lives_ok { $s1->unbind($e) } 'first unbind lives';
-    dies_ok  { $s1->unbind($e) } 'second unbind dies';
+    lives_ok { $s1->disconnect($e) } 'first disconnect lives';
+    lives_ok { $s2->unbind($e)     } 'first unbind lives';
+
+    dies_ok  { $s1->disconnect($e) } 'second disconnect dies';
+    dies_ok  { $s2->unbind($e)     } 'second unbind dies';
 }
 
 done_testing;

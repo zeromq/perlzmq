@@ -95,12 +95,17 @@ sub recv {
     return $rv;
 }
 
+sub disconnect {
+    my ($self, $endpoint) = @_;
+
+    croak 'not available in zmq 2.x';
+}
+
 sub unbind {
     my ($self, $endpoint) = @_;
 
-    croak 'unbind not available in zmq 2.x';
+    croak 'not available in zmq 2.x';
 }
-
 
 sub _init_zmq2_ffi {
     my $self = shift;

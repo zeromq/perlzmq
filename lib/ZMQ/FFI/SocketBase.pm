@@ -75,6 +75,10 @@ sub connect {
     );
 }
 
+sub disconnect {
+    croak 'unimplemented in base class';
+}
+
 sub bind {
     my ($self, $endpoint) = @_;
 

@@ -22,6 +22,7 @@ has type => (
 
 requires qw(
     connect
+    disconnect
     bind
     unbind
     send

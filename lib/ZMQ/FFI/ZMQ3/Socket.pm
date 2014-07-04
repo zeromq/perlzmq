@@ -69,6 +69,19 @@ sub recv {
     return $rv;
 }
 
+sub disconnect {
+    my ($self, $endpoint) = @_;
+
+    unless ($endpoint) {
+        croak 'usage: $socket->disconnect($endpoint)';
+    }
+
+    $self->check_error(
+        'zmq_disconnect',
+        $self->_zmq3_ffi->{zmq_disconnect}->($self->_socket, $endpoint)
+    );
+}
+
 sub unbind {
     my ($self, $endpoint) = @_;
 
@@ -107,6 +120,13 @@ sub _init_zmq3_ffi {
 
     $ffi->{zmq_unbind} = FFI::Raw->new(
         $soname => 'zmq_unbind',
+        FFI::Raw::int,
+        FFI::Raw::ptr,
+        FFI::Raw::str
+    );
+
+    $ffi->{zmq_disconnect} = FFI::Raw->new(
+        $soname => 'zmq_disconnect',
         FFI::Raw::int,
         FFI::Raw::ptr,
         FFI::Raw::str
