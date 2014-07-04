@@ -3,6 +3,7 @@ package ZMQ::FFI::ZMQ2::Socket;
 use Moo;
 use namespace::autoclean;
 
+use Carp;
 use FFI::Raw;
 
 extends q(ZMQ::FFI::SocketBase);
@@ -93,6 +94,13 @@ sub recv {
 
     return $rv;
 }
+
+sub unbind {
+    my ($self, $endpoint) = @_;
+
+    croak 'unbind not available in zmq 2.x';
+}
+
 
 sub _init_zmq2_ffi {
     my $self = shift;

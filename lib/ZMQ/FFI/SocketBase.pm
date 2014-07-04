@@ -88,6 +88,10 @@ sub bind {
     );
 }
 
+sub unbind {
+    croak 'unimplemented in base class';
+}
+
 sub send {
     croak 'unimplemented in base class';
 }

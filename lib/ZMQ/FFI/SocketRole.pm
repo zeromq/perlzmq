@@ -23,6 +23,7 @@ has type => (
 requires qw(
     connect
     bind
+    unbind
     send
     send_multipart
     recv
