@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - add zmq_disconnect and zmq_unbind bindings (GH#7)
+
 0.12      2014-03-29 17:48:45 America/Chicago
 
     - fix binary/string option handling (e.g. ZMQ_LAST_ENDPOINT)
