@@ -220,7 +220,7 @@ zeromq thread pool size. Default: 1
 
 =item max_sockets
 
-I<only for zeromq 3.x>
+I<requires zmq E<gt>= 3.x>
 
 max number of sockets allowed for context. Default: 1024
 
@@ -242,7 +242,7 @@ return the libzmq version as the list C<($major, $minor, $patch)>
 
 =head2 get($option)
 
-I<only for zeromq 3.x>
+I<requires zmq E<gt>= 3.x>
 
     $ctx->get(ZMQ_IO_THREADS)
 
@@ -250,7 +250,7 @@ get a context option value
 
 =head2 set($option, $option_value)
 
-I<only for zeromq 3.x>
+I<requires zmq E<gt>= 3.x>
 
     $ctx->set(ZMQ_MAX_SOCKETS, 42)
 
@@ -292,7 +292,9 @@ does socket bind on the specified endpoint
 
 =head2 unbind($endpoint)
 
-does socket unbind on the specified endpoint. Only available for ZeroMQ 3+.
+I<requires zmq E<gt>= 3.x>
+
+does socket unbind on the specified endpoint
 
 =head2 get_linger(), set_linger($millis)
 
