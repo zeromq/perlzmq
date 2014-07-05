@@ -286,6 +286,12 @@ same as Context version() above
 
 does socket connect on the specified endpoint
 
+=head2 disconnect($endpoint)
+
+I<requires zmq E<gt>= 3.x>
+
+does socket disconnect on the specified endpoint
+
 =head2 bind($endpoint)
 
 does socket bind on the specified endpoint
