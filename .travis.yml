@@ -15,7 +15,8 @@ install:
 
 before_script:
     - >-
-        scan_prereqs --combine lib t
+        cp $(which scan_prereqs) ./ &&
+        ./scan_prereqs --combine lib t
         | grep -v ZMQ::FFI
         | awk '{ print $1 }'
         | cpanm --notest || /bin/true
