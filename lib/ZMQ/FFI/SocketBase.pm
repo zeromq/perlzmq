@@ -111,7 +111,7 @@ sub send_multipart {
     }
 
     for my $i (0..$#parts-1) {
-        $self->send($parts[$i], ZMQ_SNDMORE);
+        $self->send($parts[$i], $flags | ZMQ_SNDMORE);
     }
 
     $self->send($parts[$#parts], $flags);
