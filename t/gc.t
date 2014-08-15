@@ -2,8 +2,6 @@ use Test::More;
 use strict;
 use warnings;
 
-use Scalar::Util qw(blessed);
-
 use ZMQ::FFI;
 use ZMQ::FFI::ContextBase;
 use ZMQ::FFI::SocketBase;
