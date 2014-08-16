@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.15      2014-08-15 20:39:39 America/Chicago
+
     - Apply flags correctly in multipart sends (GH#8 - thanks @shripchenko)
 
 0.14      2014-07-06 00:39:20 America/Chicago
