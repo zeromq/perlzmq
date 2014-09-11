@@ -2,8 +2,8 @@ package ZMQ::FFI::Constants;
 
 # ABSTRACT: Generated module of zmq constants. All constants, all versions.
 
-# Module generated on Thu Jan 16 06:27:50 2014
-# Generated using ZMQ versions v2.1.0-v4.0.3
+# Module generated on Thu Sep 11 01:14:41 2014
+# Generated using ZMQ versions v2.1.0-v4.0.4
 
 use Exporter 'import';
 
@@ -111,6 +111,7 @@ ZMQ_XREP
 ZMQ_XREQ
 ZMQ_XSUB
 ZMQ_ZAP_DOMAIN
+zmq_msg_t_size
 );
 
 %EXPORT_TAGS = (all => [@EXPORT_OK]);
@@ -218,6 +219,7 @@ sub ZMQ_XREP { 6 }
 sub ZMQ_XREQ { 5 }
 sub ZMQ_XSUB { 10 }
 sub ZMQ_ZAP_DOMAIN { 55 }
+sub zmq_msg_t_size { 96 }
 
 1;
 
@@ -234,7 +236,7 @@ __END__
 =head1 DESCRIPTION
 
 This module includes every zmq constant from every stable version of zeromq.
-Currently that is v2.1.0-v4.0.3.  It was generated using the zeromq2-x,
+Currently that is v2.1.0-v4.0.4.  It was generated using the zeromq2-x,
 zeromq3-x, and zeromq4-x git repos at L<https://github.com/zeromq>.
 
 =head1 SEE ALSO

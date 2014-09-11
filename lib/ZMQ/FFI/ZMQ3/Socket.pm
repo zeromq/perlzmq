@@ -6,6 +6,8 @@ use namespace::autoclean;
 use Carp;
 use FFI::Raw;
 
+use ZMQ::FFI::Constants q(zmq_msg_t_size);
+
 extends q(ZMQ::FFI::SocketBase);
 
 has _zmq3_ffi => (
@@ -40,7 +42,7 @@ sub recv {
 
     my $ffi = $self->_ffi;
 
-    my $msg_ptr = FFI::Raw::memptr(40); # large enough to hold zmq_msg_t
+    my $msg_ptr = FFI::Raw::memptr(zmq_msg_t_size);
 
     $self->check_error(
         'zmq_msg_init',
