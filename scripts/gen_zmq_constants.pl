@@ -4,6 +4,10 @@ use strict;
 use warnings;
 use feature 'say';
 
+use C::TinyCompiler;
+use List::Util q(max);
+
+
 my @versions;
 my %zmq_constants;
 for my $major (2,3,4) {
@@ -46,6 +50,43 @@ while ( my ($constant,$data) = each %zmq_constants ) {
     push @exports, $constant;
     push @subs, "sub $constant { $value }";
 }
+
+
+# Also add dynamically generated zmq_msg_t size.  we use 2x the largest
+# size of zmq_msg_t among all zeromq versions, including dev. This
+# should hopefully be large enough to accomodate fluctuations in size
+# between releases.
+my @zmq_h_versions;
+my @zmq_msg_sizes;
+
+for my $major (2,3,4) {
+    push @zmq_h_versions,
+            "$ENV{HOME}/git/zeromq$major-x/include/zmq.h";
+}
+
+push @zmq_h_versions, "$ENV{HOME}/git/libzmq/include/zmq.h";
+
+for my $zmq_h (@zmq_h_versions) {
+    my $c = C::TinyCompiler->new('C::TinyCompiler::Callable');
+    $c->code('Body') =<<"    END";
+        #include "$zmq_h"
+
+        C::TinyCompiler::Callable
+        long sizeof_zmq_msg_t(void)
+        {
+            return sizeof(zmq_msg_t);
+        }
+    END
+
+    $c->compile();
+    push @zmq_msg_sizes,
+        $c->get_callable_subref('sizeof_zmq_msg_t')->();
+}
+
+my $zmq_msg_size = 2 * max(@zmq_msg_sizes);
+push @exports, 'zmq_msg_t_size';
+push @subs, "sub zmq_msg_t_size { $zmq_msg_size }";
+
 
 my $exports = join "\n", sort @exports;
 my $subs    = join "\n", sort @subs;
