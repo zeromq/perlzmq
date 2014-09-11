@@ -2,18 +2,19 @@
 
 set -e
 
-function zmq_major {
+function zmq_version {
     echo $(\
         PERL5LIB=lib:$PERL5LIB \
         perl -M'ZMQ::FFI::Util q(zmq_version)' \
-        -E 'say((zmq_version)[0])'\
+        -E 'print join " ",zmq_version'\
     )
 }
 
 function travis_test {
+    major_version=$1
 
     # install the libzmq version we need
-    case $1 in
+    case $major_version in
 
         2)
             wget https://launchpad.net/ubuntu/+archive/primary/+files/libzmq1_2.1.11-1ubuntu1_amd64.deb -qO /tmp/libzmq1.deb
@@ -29,23 +30,47 @@ function travis_test {
             sudo apt-get -y update
             sudo apt-get -y install libzmq1
             ;;
+
+        devel)
+            tmpdir=`mktemp -d`
+            git clone https://github.com/zeromq/libzmq.git $tmpdir
+            ( cd $tmpdir
+              ./autogen.sh
+              ./configure
+              make -j2 )
+            export LD_LIBRARY_PATH=$tmpdir/src/.libs
+            ;;
     esac
 
     # sanity test
-    ver=$(zmq_major)
-    if [[ $ver != $1 ]];
+    ver=($(zmq_version))
+    if [[ "${ver[0]}" != "$major_version" && "$major_version" != "devel" ]];
     then
-        echo "unexpected version $ver != $1"
+        echo "unexpected version ${ver[0]} != $major_version"
         exit 1
     fi
 
-    echo -e "\nTesting zeromq ${1}.x"
+    echo -e "\nTesting zeromq" \
+        "$(echo ${ver[@]} | tr ' ' '.')"
+
     run_prove
 }
 
 function local_test {
-    echo -e "\nTesting zeromq ${1}.x"
-    export LD_LIBRARY_PATH="$HOME/git/zeromq$1-x/src/.libs"
+    major_version=$1
+
+    case $major_version in
+        [2-4])
+            export LD_LIBRARY_PATH="$HOME/git/zeromq$1-x/src/.libs"
+            ;;
+        devel)
+            export LD_LIBRARY_PATH="$HOME/git/libzmq/src/.libs"
+            ;;
+    esac
+
+    echo -e "\nTesting zeromq" \
+        "$(zmq_version | tr ' ' '.')"
+
     run_prove
 }
 
@@ -56,7 +81,7 @@ function run_prove {
     LANG=fr_FR.utf8 prove -lvr t
 }
 
-for v in 2 3 4
+for v in 2 3 4 devel
 do
     if [[ -n $TRAVIS ]]
     then
@@ -66,6 +91,7 @@ do
     fi
 done
 
+# extra test to verify sonames arg is honored
 if [[ -z $TRAVIS ]]
 then
     LD_LIBRARY_PATH="$HOME/git/zeromq2-x/src/.libs:"
