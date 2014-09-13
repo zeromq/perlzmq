@@ -1,6 +1,10 @@
 
 {{$NEXT}}
 
+    - generate zmq_msg_t size, don't hardcode it
+      (GH#9 - thanks @parth-j-gandhi!)
+    - test against libzmq dev repo in addition to stable
+
 0.15      2014-08-15 20:39:39 America/Chicago
 
     - Apply flags correctly in multipart sends (GH#8 - thanks @shripchenko)
