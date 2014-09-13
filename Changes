@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.16      2014-09-13 17:20:05-05:00 America/Chicago
+
     - generate zmq_msg_t size, don't hardcode it
       (GH#9 - thanks @parth-j-gandhi!)
     - test against libzmq dev repo in addition to stable
