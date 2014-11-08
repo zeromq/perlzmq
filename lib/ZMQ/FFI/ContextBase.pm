@@ -30,7 +30,12 @@ sub socket {
 }
 
 sub device {
-    croak 'unimplemented in base class';
+    my ($self, $type, $front, $back) = @_;
+
+    $self->check_error(
+        'zmq_device',
+        $self->_ffi->{zmq_device}->($type, $front->_socket, $back->_socket)
+    );
 }
 
 sub destroy {

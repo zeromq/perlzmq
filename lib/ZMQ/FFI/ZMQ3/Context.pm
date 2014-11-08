@@ -68,15 +68,6 @@ sub socket {
     );
 }
 
-sub device {
-    my ($self, $type, $front, $back) = @_;
-
-    $self->check_error(
-        'zmq_device',
-        $self->_ffi->{zmq_device}->($type, $front->_socket, $back->_socket)
-    );
-}
-
 sub destroy {
     my $self = shift;
 
