@@ -31,8 +31,8 @@ sub zmq_soname {
     # If Linux extensions fail also try platform specific
     # extensions (e.g. OS X) before giving up.
     my @sonames = qw(
-        libzmq.so    libzmq.so.3    libzmq.so.1
-        libzmq.dylib libzmq.3.dylib libzmq.1.dylib
+        libzmq.so    libzmq.so.4    libzmq.so.3    libzmq.so.1
+        libzmq.dylib libzmq.4.dylib libzmq.3.dylib libzmq.1.dylib
     );
 
     my $soname;
@@ -103,10 +103,21 @@ __END__
 
 =head1 FUNCTIONS
 
-=head2 zmq_soname
+=head2 zmq_soname([die => 0|1])
 
-Tries to load libzmq.so, libzmq.so.1, libzmq.so.3 in that order, returning the
-first one that was successful, or undef
+Tries to load the following sonames (in order):
+
+    libzmq.so
+    libzmq.so.4
+    libzmq.so.3
+    libzmq.so.1
+    libzmq.dylib
+    libzmq.4.dylib
+    libzmq.3.dylib
+    libzmq.1.dylib
+
+Returns the name of the first one that was successful or undef. If you would
+prefer exceptional behavior pass C<die =E<gt> 1>
 
 =head2 ($major, $minor, $patch) = zmq_version([$soname])
 

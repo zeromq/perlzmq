@@ -226,10 +226,10 @@ max number of sockets allowed for context. Default: 1024
 
 =item soname
 
-specify the libzmq library name to load.  By default ZMQ::FFI will try the
-linker name, C<libzmq.so>, and then the sonames C<libzmq.so.3> and
-C<libzmq.so.1>, in that order. C<soname> can also be the path to a particular
-libzmq so file
+specify the libzmq library name to load.  By default ZMQ::FFI will first try
+the generic soname for the system, then the soname for each version of zeromq
+(e.g. libzmq.so.3). C<soname> can also be the path to a particular libzmq so
+file
 
 It is technically possible to have multiple contexts of different versions in
 the same process, though the utility of doing such a thing is dubious
