@@ -21,6 +21,7 @@ requires qw(
     get
     set
     socket
+    device
     destroy
 );
 

@@ -68,6 +68,15 @@ sub socket {
     );
 }
 
+sub device {
+    my ($self, $type, $front, $back) = @_;
+
+    $self->check_error(
+        'zmq_device',
+        $self->_ffi->{zmq_device}->($type, $front->_socket, $back->_socket)
+    );
+}
+
 sub destroy {
     my $self = shift;
 
@@ -104,6 +113,14 @@ sub _init_ffi {
         FFI::Raw::int, # opt value,
         FFI::Raw::ptr, # ctx
         FFI::Raw::int  # opt constant
+    );
+
+    $ffi->{zmq_device} = FFI::Raw->new(
+        $soname => 'zmq_device',
+        FFI::Raw::int, # error code
+        FFI::Raw::int, # type
+        FFI::Raw::ptr, # frontend
+        FFI::Raw::ptr, # backend
     );
 
     $ffi->{zmq_ctx_destroy} = FFI::Raw->new(

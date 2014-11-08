@@ -29,6 +29,10 @@ sub socket {
     croak 'unimplemented in base class';
 }
 
+sub device {
+    croak 'unimplemented in base class';
+}
+
 sub destroy {
     croak 'unimplemented in base class';
 }
