@@ -68,6 +68,19 @@ sub socket {
     );
 }
 
+sub proxy {
+    my ($self, $front, $back, $capture) = @_;
+
+    $self->check_error(
+        'zmq_proxy',
+        $self->_ffi->{zmq_proxy}->(
+            $front->_socket,
+            $back->_socket,
+            defined $capture ? $capture->_socket : undef,
+        )
+    );
+}
+
 sub destroy {
     my $self = shift;
 
@@ -104,6 +117,14 @@ sub _init_ffi {
         FFI::Raw::int, # opt value,
         FFI::Raw::ptr, # ctx
         FFI::Raw::int  # opt constant
+    );
+
+    $ffi->{zmq_proxy} = FFI::Raw->new(
+        $soname => 'zmq_proxy',
+        FFI::Raw::int, # error code
+        FFI::Raw::ptr, # frontend
+        FFI::Raw::ptr, # backend
+        FFI::Raw::ptr, # captuer
     );
 
     $ffi->{zmq_device} = FFI::Raw->new(

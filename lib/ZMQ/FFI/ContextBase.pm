@@ -29,6 +29,10 @@ sub socket {
     croak 'unimplemented in base class';
 }
 
+sub proxy {
+    croak 'unimplemented in base class';
+}
+
 sub device {
     my ($self, $type, $front, $back) = @_;
 

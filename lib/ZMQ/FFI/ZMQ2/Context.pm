@@ -8,6 +8,7 @@ use Carp;
 use Try::Tiny;
 
 use ZMQ::FFI::ZMQ2::Socket;
+use ZMQ::FFI::Constants qw(ZMQ_STREAMER);
 
 extends qw(ZMQ::FFI::ContextBase);
 
@@ -63,6 +64,18 @@ sub socket {
         type         => $type,
         soname       => $self->soname,
         error_helper => $self->error_helper,
+    );
+}
+
+# zeromq v2 does not provide zmq_proxy; implemented here in terms of zmq_device
+sub proxy {
+    my ($self, $front, $back, $capture) = @_;
+
+    croak "zeromq v2 does not support a capture socket" if defined $capture;
+
+    $self->check_error(
+        'zmq_device',
+        $self->_ffi->{zmq_device}->(ZMQ_STREAMER, $front->_socket, $back->_socket)
     );
 }
 
