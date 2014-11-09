@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.17      2014-11-08 22:31:25-06:00 America/Chicago
+
     - add zmq_device and zmq_proxy functionality
       (GH#10, GH#11 - thanks @semifor)
     - add libzmq.so.4 to list of sonames checked
