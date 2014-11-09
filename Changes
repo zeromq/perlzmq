@@ -1,6 +1,11 @@
 
 {{$NEXT}}
 
+    - add zmq_device and zmq_proxy functionality
+      (GH#10, GH#11 - thanks @semifor)
+    - add libzmq.so.4 to list of sonames checked
+    - linger default is 2000 circa libzmq 4.2
+
 0.16      2014-09-13 17:20:05-05:00 America/Chicago
 
     - generate zmq_msg_t size, don't hardcode it
