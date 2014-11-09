@@ -262,6 +262,14 @@ set a context option value
 
 returns a socket of the specified type. See L<SOCKET API> below
 
+=head2 proxy($frontend, $backend, $capture)
+
+sets up and runs a zmq_proxy, C<$capture> is optional
+
+=head2 device($type, $frontend, $backend)
+
+sets up and runs a zmq_device with specified frontend and backend sockets
+
 =head2 destroy()
 
 destroys the underlying zmq context. This is called automatically when the
