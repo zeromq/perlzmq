@@ -174,7 +174,7 @@ my ($major, $minor, $patch) = $ctx->version;
     cpanm ZMQ::FFI
 
     # if wanting to hack on the source and build the dist
-    git clone git@github.com:calid/zmq-ffi.git
+    git clone https://github.com/calid/zmq-ffi.git
     cd zmq-ffi
     cpanm Dist::Zilla # if not already installed
     dzil authordeps | cpanm
