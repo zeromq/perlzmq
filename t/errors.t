@@ -12,9 +12,15 @@ use ZMQ::FFI::Constants qw(ZMQ_REQ);
 use ZMQ::FFI::Util qw(zmq_soname);
 
 subtest 'socket errors' => sub {
-    # get the EINVAL error string in a locale aware way
     $! = EINVAL;
-    my $einval_str = "$!";
+    my $einval_str;
+
+    {
+        # get the EINVAL error string in a locale aware way
+        use locale;
+        use bytes;
+        $einval_str = "$!";
+    }
 
     my $ctx = ZMQ::FFI->new();
 
