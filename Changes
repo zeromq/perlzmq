@@ -1,6 +1,11 @@
 
 {{$NEXT}}
 
+    - linger default has changed back to -1 for libzmq all versions
+    - add travis tests for Perl 5.20
+    - $! will not be localized by default when stringified in Perl 5.22 and
+      beyond, and needs to be explicitly localized in the tests (GH#12)
+
 0.17      2014-11-08 22:31:25-06:00 America/Chicago
 
     - add zmq_device and zmq_proxy functionality
