@@ -36,7 +36,7 @@ function travis_test {
             git clone https://github.com/zeromq/libzmq.git $tmpdir
             ( cd $tmpdir
               ./autogen.sh
-              ./configure
+              ./configure --without-libsodium
               make -j2 )
             export LD_LIBRARY_PATH=$tmpdir/src/.libs
             ;;
