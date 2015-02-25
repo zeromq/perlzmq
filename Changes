@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.18      2015-02-25 07:30:20-06:00 America/Chicago
+
     - linger default has changed back to -1 for libzmq all versions
     - add travis tests for Perl 5.20
     - $! will not be localized by default when stringified in Perl 5.22 and
