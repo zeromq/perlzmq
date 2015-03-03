@@ -16,4 +16,10 @@ sub version {
     return @{shift->_version_parts};
 }
 
+sub verstr {
+    my ($self) = @_;
+
+    return join('.', $self->version);
+}
+
 1;

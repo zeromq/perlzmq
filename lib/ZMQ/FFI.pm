@@ -1,5 +1,5 @@
 package ZMQ::FFI;
-# ABSTRACT: zeromq bindings using libffi and FFI::Raw
+# ABSTRACT: zeromq bindings using FFI::Platypus and libffi
 
 use ZMQ::FFI::Util qw(zmq_soname zmq_version);
 use ZMQ::FFI::ErrorHelper;
@@ -389,5 +389,6 @@ case of an error it will die with the plain english system error message.
 =for :list
 * L<ZMQ::FFI::Constants>
 * L<ZMQ::FFI::Util>
+* L<FFI::Platypus>
 * L<FFI::Raw>
 
