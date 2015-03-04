@@ -4,7 +4,8 @@ use strict;
 use warnings;
 use feature 'say';
 
-use C::TinyCompiler;
+use FFI::TinyCC;
+use FFI::Platypus;
 use List::Util q(max);
 
 
@@ -66,21 +67,24 @@ for my $major (2,3,4) {
 
 push @zmq_h_versions, "$ENV{HOME}/git/libzmq/include/zmq.h";
 
+my $ffi = FFI::Platypus->new();
 for my $zmq_h (@zmq_h_versions) {
-    my $c = C::TinyCompiler->new('C::TinyCompiler::Callable');
-    $c->code('Body') =<<"    END";
+    my $tcc = FFI::TinyCC->new();
+
+    $tcc->compile_string(qq{
         #include "$zmq_h"
 
-        C::TinyCompiler::Callable
-        long sizeof_zmq_msg_t(void)
+        size_t sizeof_zmq_msg_t(void)
         {
             return sizeof(zmq_msg_t);
         }
-    END
+    });
 
-    $c->compile();
-    push @zmq_msg_sizes,
-        $c->get_callable_subref('sizeof_zmq_msg_t')->();
+    my $f = $ffi->function(
+        $tcc->get_symbol('sizeof_zmq_msg_t') => [] => 'size_t'
+    );
+
+    push @zmq_msg_sizes, $f->call();
 }
 
 my $zmq_msg_size = 2 * max(@zmq_msg_sizes);
