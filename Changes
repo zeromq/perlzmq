@@ -1,6 +1,10 @@
 
 {{$NEXT}}
 
+    - use dzil FFI::CheckLib plugin to properly report NA on CPAN tester boxes
+      without libzmq
+    - test against dev perl in addition to stable on travis
+
 0.18      2015-02-25 07:30:20-06:00 America/Chicago
 
     - linger default has changed back to -1 for libzmq all versions
