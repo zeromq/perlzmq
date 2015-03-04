@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+0.19      2015-03-04 01:42:16-06:00 America/Chicago
+
     - use dzil FFI::CheckLib plugin to properly report NA on CPAN tester boxes
       without libzmq
     - test against dev perl in addition to stable on travis
