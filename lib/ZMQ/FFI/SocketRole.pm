@@ -26,10 +26,8 @@ has type => (
 
 # real underlying zmq socket pointer
 has _socket => (
-    is       => 'rw',
-    lazy     => 1,
-    required => 1,
-    builder  => '_build_socket',
+    is      => 'rw',
+    default => -1,
 );
 
 requires qw(

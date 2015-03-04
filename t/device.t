@@ -2,20 +2,20 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Exception;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_STREAMER ZMQ_PUSH ZMQ_PULL);
+use ZMQ::FFI::Util qw(zmq_version);
 
 use Time::HiRes q(usleep);
 
 my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
 my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
 
-# Set up the streamer device in its own process
-my $device = fork;
-die "fork failed: $!" unless defined $device;
+my $device;
 
-if ( $device == 0 ) {
+sub mkdevice {
     my $ctx = ZMQ::FFI->new();
 
     my $front = $ctx->socket(ZMQ_PULL);
@@ -26,12 +26,31 @@ if ( $device == 0 ) {
 
     $ctx->device(ZMQ_STREAMER, $front, $back);
     warn "device exited: $!";
-
     exit 0;
+}
+
+my ($major) = zmq_version();
+if ($major > 2) {
+    throws_ok { mkdevice() }
+        qr/zmq_device not available in zmq >= 3\.x/,
+        'zmq_device version error for zmq >= 3.x';
+}
+else {
+    # Set up the streamer device in its own process
+    $device = fork;
+    die "fork failed: $!" unless defined $device;
+
+    if ( $device == 0 ) {
+        mkdevice();
+    }
 }
 
 subtest 'device', sub {
     my $ctx = ZMQ::FFI->new();
+
+    if ($major > 2) {
+        plan skip_all => 'zmq_device not available in zmq >= 3.x';
+    }
 
     my $server = $ctx->socket(ZMQ_PUSH);
     $server->connect($server_address);
@@ -52,9 +71,11 @@ subtest 'device', sub {
     is $payload, $message, "Message received";
 };
 
-# tear down the device
-kill TERM => $device;
-waitpid $device, 0;
+if ($device) {
+    # tear down the device
+    kill TERM => $device;
+    waitpid $device, 0;
+}
 
 done_testing;
 

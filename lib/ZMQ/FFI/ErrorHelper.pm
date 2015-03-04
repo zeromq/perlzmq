@@ -1,10 +1,11 @@
 package ZMQ::FFI::ErrorHelper;
 
-use Moo;
-use namespace::autoclean;
-
 use Carp;
-use FFI::Raw;
+use FFI::Platypus;
+use ZMQ::FFI::Util qw(zmq_version);
+
+use Moo;
+use namespace::clean;
 
 has soname => (
     is       => 'ro',
@@ -16,11 +17,6 @@ has _err_ffi => (
     lazy    => 1,
     builder => '_init_err_ffi',
 );
-
-sub BUILD {
-    my $self = shift;
-    $self->_err_ffi;
-}
 
 sub check_error {
     my ($self, $func, $rc) = @_;
@@ -38,6 +34,22 @@ sub check_null {
     }
 }
 
+sub bad_version {
+    my ($self, $msg, $use_carp) = @_;
+
+    my $verstr = join ".", zmq_version($self->soname);
+
+    if ($use_carp) {
+        croak   "$msg\n"
+              . "your version: $verstr";
+    }
+    else {
+        die   "$msg\n"
+            . "your version: $verstr";
+
+    }
+}
+
 sub fatal {
     my ($self, $func) = @_;
 
@@ -52,22 +64,21 @@ sub fatal {
 sub _init_err_ffi {
     my $self = shift;
 
-    my $ffi    = {};
-    my $soname = $self->soname;
+    my $soname   = $self->soname;
+    my $ffi_href = {};
+    my $ffi      = FFI::Platypus->new( lib => $soname );
 
-    $ffi->{zmq_errno} = FFI::Raw->new(
-        $soname => 'zmq_errno',
-        FFI::Raw::int # returns errno
-        # void
+    $ffi_href->{zmq_errno} = $ffi->function(
+        'zmq_errno',
+        [] => 'int'
     );
 
-    $ffi->{zmq_strerror} = FFI::Raw->new(
-        $soname => 'zmq_strerror',
-        FFI::Raw::str,  # returns error str
-        FFI::Raw::int   # errno
+    $ffi_href->{zmq_strerror} = $ffi->function(
+        'zmq_strerror',
+        ['int'] => 'string'
     );
 
-    return $ffi;
+    return $ffi_href;
 }
 
 1;

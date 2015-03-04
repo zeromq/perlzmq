@@ -3,8 +3,10 @@ use strict;
 use warnings;
 
 use ZMQ::FFI;
-use ZMQ::FFI::ContextBase;
-use ZMQ::FFI::SocketBase;
+use ZMQ::FFI::ZMQ2::Context;
+use ZMQ::FFI::ZMQ2::Socket;
+use ZMQ::FFI::ZMQ3::Context;
+use ZMQ::FFI::ZMQ3::Socket;
 
 use ZMQ::FFI::Constants qw(ZMQ_REQ);
 
@@ -28,10 +30,17 @@ sub mksocket {
     no warnings q/redefine/;
 
     my $ctx = ZMQ::FFI->new();
-    *ZMQ::FFI::ContextBase::DEMOLISH = sub { push @gc_stack, 'ctx' };
-
     my $s = $ctx->socket(ZMQ_REQ);
-    *ZMQ::FFI::SocketBase::DEMOLISH = sub { push @gc_stack, 'socket' };
+
+    my ($major) = $ctx->version;
+    if ($major == 2) {
+        *ZMQ::FFI::ZMQ2::Context::DEMOLISH = sub { push @gc_stack, 'ctx' };
+        *ZMQ::FFI::ZMQ2::Socket::DEMOLISH  = sub { push @gc_stack, 'socket' };
+    }
+    else {
+        *ZMQ::FFI::ZMQ3::Context::DEMOLISH = sub { push @gc_stack, 'ctx' };
+        *ZMQ::FFI::ZMQ3::Socket::DEMOLISH  = sub { push @gc_stack, 'socket' };
+    }
 
     # ctx should not get reaped
     return $s;

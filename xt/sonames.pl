@@ -22,7 +22,7 @@ sub {
         'libzmq.so.3 soname gives 3.x/4.x version';
 
     throws_ok { zmq_version('libzmq.so.X') }
-        qr/libzmq.so.X: cannot open shared object file/,
+        qr/Could not find zmq_version in 'libzmq\.so\.X'/,
         'bad soname throws error';
 
 };
@@ -45,7 +45,7 @@ sub
         'libzmq.so.3 soname gives 3.x/4.x version';
 
     throws_ok { ZMQ::FFI->new(soname => 'libzmq.so.X') }
-        qr/libzmq\.so\.X: cannot open shared object file/,
+        qr/Could not find zmq_version in 'libzmq\.so\.X'/,
         'bad soname throws error';
 
 

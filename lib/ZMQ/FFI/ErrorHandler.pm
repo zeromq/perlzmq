@@ -11,6 +11,7 @@ has error_helper => (
     handles => [qw(
         check_error
         check_null
+        bad_version
     )],
 );
 

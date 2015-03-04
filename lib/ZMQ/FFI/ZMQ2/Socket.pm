@@ -5,6 +5,7 @@ use FFI::Platypus::Buffer;
 use FFI::Platypus::Memory qw(malloc free memcpy);
 use ZMQ::FFI::Constants qw(:all);
 use Carp;
+use Try::Tiny;
 
 use Moo;
 use namespace::clean;
@@ -29,15 +30,116 @@ sub BUILD {
         $FFI_LOADED = 1;
     }
 
+    try {
+        my $s = zmq_socket($self->ctx->_ctx, $self->type);
+        $self->_socket($s);
+        $self->check_null('zmq_socket', $self->_socket);
+    }
+    catch {
+        $self->_socket(-1);
+        die $_;
+    };
+
+    # ensure clean edge state
+    while ( $self->has_pollin ) {
+        $self->recv();
+    }
 }
 
-sub _build_socket {
+### ZMQ2 API ###
+
+sub _load_zmq2_ffi {
+    my ($soname) = @_;
+
+    my $ffi = FFI::Platypus->new( lib => $soname );
+
+    $ffi->attach(
+        'zmq_send' => ['pointer', 'pointer', 'int'] => 'int'
+    );
+
+    $ffi->attach(
+        'zmq_recv' => ['pointer', 'pointer', 'int'] => 'int'
+    );
+}
+
+sub send {
+    my ($self, $data, $flags) = @_;
+
+    $flags //= 0;
+
+    my $data_ptr;
+    my $data_size;
+    {
+        use bytes;
+        ($data_ptr, $data_size) = scalar_to_buffer($data);
+    };
+
+    my $msg_ptr = malloc(zmq_msg_t_size);
+
+    $self->check_error(
+        'zmq_msg_init_size',
+        zmq_msg_init_size($msg_ptr, $data_size)
+    );
+
+    my $msg_data_ptr = zmq_msg_data($msg_ptr);
+    memcpy($msg_data_ptr, $data_ptr, $data_size);
+
+    $self->check_error(
+        'zmq_send',
+        zmq_send($self->_socket, $msg_ptr, $flags)
+    );
+
+    zmq_msg_close($msg_ptr);
+}
+
+sub recv {
+    my ($self, $flags) = @_;
+
+    $flags //= 0;
+
+    my $msg_ptr = malloc(zmq_msg_t_size);
+
+    $self->check_error(
+        'zmq_msg_init',
+        zmq_msg_init($msg_ptr)
+    );
+
+    $self->check_error(
+        'zmq_recv',
+        zmq_recv($self->_socket, $msg_ptr, $flags)
+    );
+
+    my $data_ptr  = zmq_msg_data($msg_ptr);
+    my $data_size = zmq_msg_size($msg_ptr);
+
+    $self->check_error('zmq_msg_size', $data_size);
+
+    my $rv;
+    if ($data_size) {
+        $rv = buffer_to_scalar($data_ptr, $data_size);
+    }
+    else {
+        $rv = '';
+    }
+
+    zmq_msg_close($msg_ptr);
+
+    return $rv;
+}
+
+sub disconnect {
     my ($self) = @_;
 
-    my $socket = zmq_socket($self->ctx->_ctx, $self->type);
-    $self->check_null('zmq_socket', $socket);
-    return $socket;
+    $self->bad_version("disconnect not available in zmq 2.x");
 }
+
+sub unbind {
+    my ($self) = @_;
+
+    $self->bad_version("unbind not available in zmq 2.x");
+}
+
+### ZMQ COMMON API ###
 
 sub connect {
     my ($self, $endpoint) = @_;
@@ -292,99 +394,6 @@ sub close {
     );
 
     $self->_socket(-1);
-}
-
-sub send {
-    my ($self, $data, $flags) = @_;
-
-    $flags //= 0;
-
-    my $data_ptr;
-    my $data_size;
-    {
-        use bytes;
-        ($data_ptr, $data_size) = scalar_to_buffer($data);
-    };
-
-    my $msg_ptr = malloc(zmq_msg_t_size);
-
-    $self->check_error(
-        'zmq_msg_init_size',
-        zmq_msg_init_size($msg_ptr, $data_size)
-    );
-
-    my $msg_data_ptr = zmq_msg_data($msg_ptr);
-    memcpy($msg_data_ptr, $data_ptr, $data_size);
-
-    $self->check_error(
-        'zmq_send',
-        zmq_send($self->_socket, $msg_ptr, $flags)
-    );
-
-    zmq_msg_close($msg_ptr);
-}
-
-sub recv {
-    my ($self, $flags) = @_;
-
-    $flags //= 0;
-
-    my $msg_ptr = malloc(zmq_msg_t_size);
-
-    $self->check_error(
-        'zmq_msg_init',
-        zmq_msg_init($msg_ptr)
-    );
-
-    $self->check_error(
-        'zmq_recv',
-        zmq_recv($self->_socket, $msg_ptr, $flags)
-    );
-
-    my $data_ptr  = zmq_msg_data($msg_ptr);
-    my $data_size = zmq_msg_size($msg_ptr);
-
-    $self->check_error('zmq_msg_size', $data_size);
-
-    my $rv;
-    if ($data_size) {
-        $rv = buffer_to_scalar($data_ptr, $data_size);
-    }
-    else {
-        $rv = '';
-    }
-
-    zmq_msg_close($msg_ptr);
-
-    return $rv;
-}
-
-
-sub disconnect {
-    my ($self) = @_;
-
-    $self->bad_version("disconnect not available in zmq 2.x");
-}
-
-sub unbind {
-    my ($self) = @_;
-
-    $self->bad_version("unbind not available in zmq 2.x");
-}
-
-
-sub _load_zmq2_ffi {
-    my ($soname) = @_;
-
-    my $ffi = FFI::Platypus->new( lib => $soname );
-
-    $ffi->attach(
-        'zmq_send' => ['pointer', 'pointer', 'int'] => 'int'
-    );
-
-    $ffi->attach(
-        'zmq_recv' => ['pointer', 'pointer', 'int'] => 'int'
-    );
 }
 
 sub DEMOLISH {

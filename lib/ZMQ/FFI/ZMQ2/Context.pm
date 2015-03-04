@@ -12,6 +12,7 @@ use namespace::clean;
 with qw(
     ZMQ::FFI::ContextRole
     ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::Versioner
 );
 
 has '+threads' => (
@@ -40,6 +41,24 @@ sub BUILD {
         $self->_ctx(-1);
         die $_;
     };
+}
+
+sub _load_zmq2_ffi {
+    my ($soname) = @_;
+
+    my $ffi = FFI::Platypus->new( lib => $soname );
+
+    $ffi->attach(
+        'zmq_init' => ['int'] => 'pointer'
+    );
+
+    $ffi->attach(
+        'zmq_device' => ['int', 'pointer', 'pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        'zmq_term' => ['pointer'] => 'int'
+    );
 }
 
 sub get {
@@ -109,22 +128,12 @@ sub destroy {
     $self->_ctx(-1);
 }
 
-sub _load_zmq2_ffi {
-    my ($soname) = @_;
+sub DEMOLISH {
+    my ($self) = @_;
 
-    my $ffi = FFI::Platypus->new( lib => $soname );
-
-    $ffi->attach(
-        'zmq_init' => ['int'] => 'pointer'
-    );
-
-    $ffi->attach(
-        'zmq_device' => ['int', 'pointer', 'pointer'] => 'int'
-    );
-
-    $ffi->attach(
-        'zmq_term' => ['pointer'] => 'int'
-    );
+    unless ($self->_ctx == -1) {
+        $self->destroy();
+    }
 }
 
 1;
