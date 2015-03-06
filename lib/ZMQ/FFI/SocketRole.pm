@@ -30,6 +30,22 @@ has _socket => (
     default => -1,
 );
 
+has sockopt_sizes => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_sockopt_sizes'
+);
+
+sub _build_sockopt_sizes {
+    my $ffi = FFI::Platypus->new();
+
+    return {
+        int    => $ffi->sizeof('int'),
+        sint64 => $ffi->sizeof('sint64'),
+        uint64 => $ffi->sizeof('uint64'),
+    };
+}
+
 requires qw(
     connect
     disconnect

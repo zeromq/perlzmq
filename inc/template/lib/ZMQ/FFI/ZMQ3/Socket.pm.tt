@@ -35,6 +35,10 @@ sub BUILD {
     }
 
     try {
+        # XXX
+        # not clear why this is necessary, but the setter doesn't actually
+        # take affect if you directly nest the zmq_socket call in the _socket
+        # call... some Class::XSAccessor weirdness/bug? Need to investigate.
         my $s = zmq_socket($self->ctx->_ctx, $self->type);
         $self->_socket($s);
         $self->check_null('zmq_socket', $self->_socket);
@@ -55,10 +59,10 @@ sub BUILD {
 sub _load_zmq3_ffi {
     my ($soname) = @_;
 
-    my $ffi    = FFI::Platypus->new( lib => $soname );
+    my $ffi = FFI::Platypus->new( lib => $soname );
 
     $ffi->attach(
-        'zmq_send' => ['pointer', 'pointer', 'size_t', 'int'] => 'int'
+        'zmq_send' => ['pointer', 'string', 'size_t', 'int'] => 'int'
     );
 
     $ffi->attach(
@@ -74,20 +78,28 @@ sub _load_zmq3_ffi {
     );
 }
 
+#
+# hot spots (anything that will reasonably be called in a tight loop) need to
+# be optimized, which means we're trading readability for performance
+#
+
 sub send {
-    # my ($self, $msg, $flags) = @_;
+    # 0: self
+    # 1: data
+    # 2: flags
 
     use bytes;
-    my ($data, $data_size) = scalar_to_buffer($_[1]);
+    my $length = length($_[1]);
     no bytes;
 
-    if ( -1 == zmq_send($_[0]->_socket, $data, $data_size, ($_[2] // 0)) ) {
+    if ( -1 == zmq_send($_[0]->_socket, $_[1], $length, ($_[2] // 0)) ) {
         $_[0]->fatal('zmq_send');
     }
 }
 
 sub recv {
-    # my ($self, $flags) = @_;
+    # 0: self
+    # 1: flags
 
     my $msg_ptr = malloc zmq_msg_t_size;
 

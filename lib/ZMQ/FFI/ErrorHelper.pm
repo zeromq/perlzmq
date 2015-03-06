@@ -62,7 +62,7 @@ sub fatal {
 }
 
 sub _init_err_ffi {
-    my $self = shift;
+    my ($self) = @_;
 
     my $soname   = $self->soname;
     my $ffi_href = {};

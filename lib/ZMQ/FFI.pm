@@ -6,8 +6,7 @@ use ZMQ::FFI::ErrorHelper;
 use Carp;
 
 sub new {
-    my $self = shift;
-    my %args = @_;
+    my ($self, %args) = @_;
 
     $args{soname} //= zmq_soname( die => 1 );
 

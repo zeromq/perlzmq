@@ -35,6 +35,10 @@ sub BUILD {
     }
 
     try {
+        # XXX
+        # not clear why this is necessary, but the setter doesn't actually
+        # take affect if you directly nest the zmq_socket call in the _socket
+        # call... some Class::XSAccessor weirdness/bug? Need to investigate.
         my $s = zmq_socket($self->ctx->_ctx, $self->type);
         $self->_socket($s);
         $self->check_null('zmq_socket', $self->_socket);
@@ -66,64 +70,62 @@ sub _load_zmq2_ffi {
     );
 }
 
-sub send {
-    my ($self, $data, $flags) = @_;
+#
+# send & recv are hot spots, so we're trading readability for performance
+#
 
-    $flags //= 0;
+sub send {
+    # 0: self
+    # 1: data
+    # 2: flags
 
     my $data_ptr;
     my $data_size;
     {
         use bytes;
-        ($data_ptr, $data_size) = scalar_to_buffer($data);
+        ($data_ptr, $data_size) = scalar_to_buffer($_[1]);
     };
 
     my $msg_ptr = malloc(zmq_msg_t_size);
 
-    $self->check_error(
-        'zmq_msg_init_size',
-        zmq_msg_init_size($msg_ptr, $data_size)
-    );
+    if ( -1 == zmq_msg_init_size($msg_ptr, $data_size) ) {
+        $_[0]->fatal('zmq_msg_init_size');
+    }
 
     my $msg_data_ptr = zmq_msg_data($msg_ptr);
     memcpy($msg_data_ptr, $data_ptr, $data_size);
 
-    $self->check_error(
-        'zmq_send',
-        zmq_send($self->_socket, $msg_ptr, $flags)
-    );
+    if ( -1 == zmq_send($_[0]->_socket, $msg_ptr, $_[2] // 0) ) {
+        $_[0]->fatal('zmq_send');
+    }
 
     zmq_msg_close($msg_ptr);
 }
 
 sub recv {
-    my ($self, $flags) = @_;
-
-    $flags //= 0;
+    # 0: self
+    # 1: flags
 
     my $msg_ptr = malloc(zmq_msg_t_size);
 
-    $self->check_error(
-        'zmq_msg_init',
-        zmq_msg_init($msg_ptr)
-    );
+    if ( -1 == zmq_msg_init($msg_ptr) ) {
+        $_[0]->fatal('zmq_msg_init');
+    }
 
-    $self->check_error(
-        'zmq_recv',
-        zmq_recv($self->_socket, $msg_ptr, $flags)
-    );
+    if ( -1 == zmq_recv($_[0]->_socket, $msg_ptr, $_[1] // 0) ) {
+        $_[0]->fatal('zmq_recv');
+    }
 
     my $data_ptr  = zmq_msg_data($msg_ptr);
     my $data_size = zmq_msg_size($msg_ptr);
 
-    $self->check_error('zmq_msg_size', $data_size);
+    if ( -1 == $data_size ) {
+        $_[0]->fatal('zmq_msg_size');
+    }
 
-    my $rv;
+    my $rv = '';
     if ($data_size) {
         $rv = buffer_to_scalar($data_ptr, $data_size);
-    }
-    else {
-        $rv = '';
     }
 
     zmq_msg_close($msg_ptr);

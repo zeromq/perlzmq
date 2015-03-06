@@ -26,6 +26,10 @@ sub BUILD {
     }
 
     try {
+        # XXX
+        # not clear why this is necessary, but the setter doesn't actually
+        # take affect if you directly nest the zmq_ctx_new call in the _ctx
+        # call... some Class::XSAccessor weirdness/bug? Need to investigate.
         my $c = zmq_ctx_new();
         $self->_ctx($c);
         $self->check_null('zmq_ctx_new', $self->_ctx);
