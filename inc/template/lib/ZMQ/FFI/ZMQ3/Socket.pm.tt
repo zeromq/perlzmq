@@ -79,8 +79,7 @@ sub _load_zmq3_ffi {
 }
 
 #
-# hot spots (anything that will reasonably be called in a tight loop) need to
-# be optimized, which means we're trading readability for performance
+# send/recv are hot spots, so sacrificing some readability for performance
 #
 
 sub send {

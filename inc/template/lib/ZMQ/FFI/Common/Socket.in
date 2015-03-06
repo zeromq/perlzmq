@@ -27,6 +27,10 @@ sub bind {
     );
 }
 
+#
+# send/recv are hot spots, so sacrificing some readability for performance
+#
+
 sub send_multipart {
     # 0: self
     # 1: partsref
@@ -109,7 +113,16 @@ sub get {
     my $optval_len;
 
     for ($opt_type) {
-        when (/^binary$/) {
+        when (/^(binary|string)$/) {
+            # ZMQ_IDENTITY uses binary type and can be at most 255 bytes long
+            #
+            # ZMQ_LAST_ENDPOINT uses string type and expects a buffer large
+            # enough to hold an endpoint string
+            #
+            # So for these cases 256 should be sufficient (including \0).
+            # Other binary/string opts are being added all the time, and
+            # hopefully this value scales, but we can always increase it if
+            # necessary
             my $optval_ptr = malloc(256);
             $optval_len    = 256;
 
@@ -123,29 +136,17 @@ sub get {
                 )
             );
 
-            $optval = buffer_to_scalar($optval_ptr, $optval_len);
-            free($optval_ptr);
-        }
-
-        when (/^string$/) {
-            my $optval_ptr = malloc(256);
-            $optval_len    = 256;
-
-            $self->check_error(
-                'zmq_getsockopt',
-                zmq_getsockopt_binary(
-                    $self->_socket,
-                    $opt,
-                    $optval_ptr,
-                    \$optval_len
-                )
-            );
-
-            # FFI::Platypus already appends a null terminating byte
-            # So strip then one included by zeromq (otherwise test
-            # comparisons fail due to the extra NUL
-            $optval = buffer_to_scalar($optval_ptr, $optval_len-1);
-            free($optval_ptr);
+            if ($opt_type eq 'binary') {
+                $optval = buffer_to_scalar($optval_ptr, $optval_len);
+                free($optval_ptr);
+            }
+            else { # string
+                # FFI::Platypus already appends a null terminating byte for
+                # strings, so strip the one included by zeromq (otherwise test
+                # comparisons fail due to the extra NUL)
+                $optval = buffer_to_scalar($optval_ptr, $optval_len-1);
+                free($optval_ptr);
+            }
         }
 
         when (/^int$/) {
@@ -275,3 +276,96 @@ sub DEMOLISH {
         $self->close();
     }
 };
+
+sub _load_common_ffi {
+    my ($soname) = @_;
+
+    my $ffi   = FFI::Platypus->new( lib => $soname );
+    my $class = caller;
+
+    $ffi->attach(
+        ['zmq_socket' => "${class}::zmq_socket"],
+            => ['pointer', 'int'] => 'pointer'
+    );
+
+    $ffi->attach(
+        ['zmq_getsockopt' => "${class}::zmq_getsockopt_binary"],
+            => ['pointer', 'int', 'pointer', 'size_t*'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_getsockopt' => "${class}::zmq_getsockopt_int"],
+            => ['pointer', 'int', 'int*', 'size_t*'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_getsockopt' => "${class}::zmq_getsockopt_int64"],
+            => ['pointer', 'int', 'sint64*', 'size_t*'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_getsockopt' => "${class}::zmq_getsockopt_uint64"],
+            => ['pointer', 'int', 'uint64*', 'size_t*'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_setsockopt' => "${class}::zmq_setsockopt_binary"],
+            => ['pointer', 'int', 'pointer', 'size_t'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_setsockopt' => "${class}::zmq_setsockopt_int"],
+            => ['pointer', 'int', 'int*', 'size_t'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_setsockopt' => "${class}::zmq_setsockopt_int64"],
+            => ['pointer', 'int', 'sint64*', 'size_t'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_setsockopt' => "${class}::zmq_setsockopt_uint64"],
+            => ['pointer', 'int', 'uint64*', 'size_t'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_connect' => "${class}::zmq_connect"],
+            => ['pointer', 'string'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_bind' => "${class}::zmq_bind"],
+            => ['pointer', 'string'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_msg_init' => "${class}::zmq_msg_init"],
+            => ['pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_msg_init_size' => "${class}::zmq_msg_init_size"],
+            => ['pointer', 'int'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_msg_size' => "${class}::zmq_msg_size"],
+            => ['pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_msg_data' => "${class}::zmq_msg_data"],
+            => ['pointer'] => 'pointer'
+    );
+
+    $ffi->attach(
+        ['zmq_msg_close' => "${class}::zmq_msg_close"],
+            => ['pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        ['zmq_close' => "${class}::zmq_close"],
+            => ['pointer'] => 'int'
+    );
+}
+

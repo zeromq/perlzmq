@@ -30,7 +30,11 @@ sub BUILD {
     }
 
     if ($self->has_max_sockets) {
-        $self->bad_version("max_sockets option not available in zmq 2.x")
+        $self->bad_version(
+            $self->verstr,
+            'max_sockets option not available in zmq 2.x',
+            'use_die',
+        )
     }
 
     try {
@@ -65,8 +69,8 @@ sub get {
     my ($self) = @_;
 
     $self->bad_version(
-        "getting ctx options not available in zmq 2.x",
-        "use_carp"
+        $self->verstr,
+        "getting ctx options not available in zmq 2.x"
     );
 }
 
@@ -74,8 +78,8 @@ sub set {
     my ($self) = @_;
 
     $self->bad_version(
-        "setting ctx options not available in zmq 2.x",
-        "use_carp"
+        $self->verstr,
+        "setting ctx options not available in zmq 2.x"
     );
 }
 
@@ -97,8 +101,8 @@ sub proxy {
 
     if ($capture){
         $self->bad_version(
-            "capture socket not supported in zmq 2.x",
-            "use_carp"
+            $self->verstr,
+            "capture socket not supported in zmq 2.x"
         );
     }
 

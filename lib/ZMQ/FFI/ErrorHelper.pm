@@ -18,6 +18,16 @@ has _err_ffi => (
     builder => '_init_err_ffi',
 );
 
+sub BUILD {
+    # force init err ffi
+    # need to be sure ffi is loaded before zmq error functions are called,
+    # as on OS X errno can get clobbered if ffi is loaded just in time
+
+    # initializing in BUILD instead of lazy => 0, as we still need to be sure
+    # to initialize ffi after soname is set
+    $_[0]->_err_ffi;
+}
+
 sub check_error {
     my ($self, $func, $rc) = @_;
 
@@ -35,18 +45,15 @@ sub check_null {
 }
 
 sub bad_version {
-    my ($self, $msg, $use_carp) = @_;
+    my ($self, $verstr, $msg, $use_die) = @_;
 
-    my $verstr = join ".", zmq_version($self->soname);
-
-    if ($use_carp) {
-        croak   "$msg\n"
-              . "your version: $verstr";
-    }
-    else {
+    if ($use_die) {
         die   "$msg\n"
             . "your version: $verstr";
-
+    }
+    else {
+        croak   "$msg\n"
+              . "your version: $verstr";
     }
 }
 

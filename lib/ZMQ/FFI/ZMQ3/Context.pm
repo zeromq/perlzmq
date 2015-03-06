@@ -120,8 +120,8 @@ sub device {
     my ($self, $type, $frontend, $backend) = @_;
 
     $self->bad_version(
+        $self->verstr,
         "zmq_device not available in zmq >= 3.x",
-        "use_carp"
     );
 }
 

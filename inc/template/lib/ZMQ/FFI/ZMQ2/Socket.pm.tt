@@ -71,7 +71,7 @@ sub _load_zmq2_ffi {
 }
 
 #
-# send & recv are hot spots, so we're trading readability for performance
+# send/recv are hot spots, so sacrificing some readability for performance
 #
 
 sub send {
@@ -81,10 +81,10 @@ sub send {
 
     my $data_ptr;
     my $data_size;
-    {
-        use bytes;
-        ($data_ptr, $data_size) = scalar_to_buffer($_[1]);
-    };
+
+    use bytes;
+    ($data_ptr, $data_size) = scalar_to_buffer($_[1]);
+    no bytes;
 
     my $msg_ptr = malloc(zmq_msg_t_size);
 
@@ -136,13 +136,19 @@ sub recv {
 sub disconnect {
     my ($self) = @_;
 
-    $self->bad_version("disconnect not available in zmq 2.x");
+    $self->bad_version(
+        $self->verstr,
+        "disconnect not available in zmq 2.x"
+    );
 }
 
 sub unbind {
     my ($self) = @_;
 
-    $self->bad_version("unbind not available in zmq 2.x");
+    $self->bad_version(
+        $self->verstr,
+        "unbind not available in zmq 2.x"
+    );
 }
 
 [% zmq_common_api %]
