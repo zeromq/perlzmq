@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/calid/zmq-ffi.png?branch=master)](https://travis-ci.org/calid/zmq-ffi)
 
-##  Perl zeromq bindings using libffi and [FFI::Raw](https://github.com/ghedo/p5-FFI-Raw) ##
+##  Perl zeromq bindings using libffi and [FFI::Platypus](https://github.com/plicease/FFI-Platypus) ##
 
 ZMQ::FFI exposes a high level, transparent, OO interface to zeromq independent of the underlying libzmq version.  Where semantics differ, it will dispatch to the appropriate backend for you.  As it uses ffi, there is no dependency on XS or compilation.
 
@@ -170,15 +170,16 @@ my ($major, $minor, $patch) = $ctx->version;
 ```
 
 ### INSTALL ###
-    # if simply wanting to use ZMQ::FFI
-    cpanm ZMQ::FFI
+    cpanm -v ZMQ::FFI
 
-    # if wanting to hack on the source and build the dist
+
+### HACKING ###
     git clone https://github.com/calid/zmq-ffi.git
     cd zmq-ffi
-    cpanm Dist::Zilla # if not already installed
-    dzil authordeps | cpanm
-    dzil build
+    cpanm -v Dist::Zilla # if not already installed
+    dzil authordeps --missing | cpanm -v
+    dzil listdeps   --missing | cpanm -v
+    dzil test
 
 
 ### DOCUMENTATION ###

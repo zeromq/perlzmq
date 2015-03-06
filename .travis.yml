@@ -17,7 +17,7 @@ before_install:
     - sudo apt-get -y remove libzmq*
 
 install:
-    - cpanm --notest Perl::PrereqScanner
+    - cpanm --notest Perl::PrereqScanner Template::Tiny Path::Class
 
 before_script:
     - >-
@@ -26,5 +26,7 @@ before_script:
         | grep -v ZMQ::FFI
         | awk '{ print $1 }'
         | cpanm --notest || /bin/true
+
+    - perl scripts/gen_modules.pl
 
 script: xt/test_versions.sh
