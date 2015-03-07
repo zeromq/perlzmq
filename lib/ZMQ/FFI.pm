@@ -1,6 +1,6 @@
 package ZMQ::FFI;
 
-# ABSTRACT: zeromq bindings using FFI::Platypus and libffi
+# ABSTRACT: Fast, version agnostic bindings for zeromq
 
 use strict;
 use warnings;
@@ -212,6 +212,8 @@ ZMQ::FFI exposes a high level, transparent, OO interface to zeromq independent
 of the underlying libzmq version.  Where semantics differ, it will dispatch to
 the appropriate backend for you.  As it uses ffi, there is no dependency on XS
 or compilation.
+
+L<FFI::Platypus> is used for the ffi backend
 
 =head1 CONTEXT API
 
