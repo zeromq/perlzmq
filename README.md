@@ -2,11 +2,11 @@
 
 [![Build Status](https://travis-ci.org/calid/zmq-ffi.png?branch=master)](https://travis-ci.org/calid/zmq-ffi)
 
-## Fast, version agnostic Perl bindings for zeromq ##
+## Fast, version agnostic Perl bindings for ØMQ ##
 
 ZMQ::FFI exposes a high level, transparent, OO interface to zeromq independent of the underlying libzmq version.  Where semantics differ, it will dispatch to the appropriate backend for you.  As it uses ffi, there is no dependency on XS or compilation.
 
-[FFI::Platypus](https://github.com/plicease/FFI-Platypus) is used for the ffi backend
+ZMQ::FFI is implemented using [FFI::Platypus](https://github.com/plicease/FFI-Platypus).
 
 ### EXAMPLES ###
 
@@ -172,8 +172,15 @@ my ($major, $minor, $patch) = $ctx->version;
 ```
 
 ### INSTALL ###
+
     cpanm -v ZMQ::FFI
 
-
 ### DOCUMENTATION ###
-Full documentation can be found on [cpan](https://metacpan.org/module/ZMQ::FFI)
+
+https://metacpan.org/module/ZMQ::FFI
+
+### PERFORMANCE ###
+
+What does "fast" mean? Fast meaning XS-like performance, but not necessarily faster than other language bindings, and definitely not faster than pure C.
+
+For an explanation of how XS-like performance is possible even though ZMQ::FFI isn't implemented using XS see https://metacpan.org/pod/ZMQ::FFI#PERFORMANCE-VS-XS

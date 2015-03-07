@@ -1,6 +1,6 @@
 package ZMQ::FFI;
 
-# ABSTRACT: Fast, version agnostic bindings for zeromq
+# ABSTRACT: Fast, version agnostic Perl bindings for zeromq
 
 use strict;
 use warnings;
@@ -213,7 +213,7 @@ of the underlying libzmq version.  Where semantics differ, it will dispatch to
 the appropriate backend for you.  As it uses ffi, there is no dependency on XS
 or compilation.
 
-L<FFI::Platypus> is used for the ffi backend
+ZMQ::FFI is implemented using L<FFI::Platypus>.
 
 =head1 CONTEXT API
 
@@ -415,7 +415,7 @@ the case of an error it will die with the plain english system error message.
 
 TL;DR ZMQ::FFI performs on par with the XS bindings.
 
-ZMQ::FFI uses FFI::Platypus on the backend. In addition to a friendly, usable
+ZMQ::FFI uses L<FFI::Platypus> on the backend. In addition to a friendly, usable
 interface, FFI::Platypus's killer feature is C<attach>. C<attach> makes it
 possible to bind ffi functions in memory as first class Perl xsubs. This
 results in dramatic performance gains and gives you the flexibility of ffi
