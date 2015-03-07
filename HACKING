@@ -7,4 +7,4 @@ $ dzil test
 # repeat
 
 Note that the Socket modules are generated so edit them under inc/, not under
-lib/, and regenerate them using scripts/gen_modules.pl
+lib/, and regenerate them using scripts/gen_modules.pl (or just rerun dzil)
