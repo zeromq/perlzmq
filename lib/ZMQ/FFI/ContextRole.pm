@@ -2,6 +2,12 @@ package ZMQ::FFI::ContextRole;
 
 use Moo::Role;
 
+# real underlying zmq ctx pointer
+has _ctx => (
+    is      => 'rw',
+    default => -1,
+);
+
 has soname => (
     is       => 'ro',
     required => 1,

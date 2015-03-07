@@ -5,14 +5,14 @@ package ZMQ::FFI::Util;
 use strict;
 use warnings;
 
-use FFI::Raw;
+use FFI::Platypus;
 use Carp;
-use Try::Tiny;
 
 use Sub::Exporter -setup => {
     exports => [qw(
         zmq_soname
         zmq_version
+        valid_soname
     )],
 };
 
@@ -38,20 +38,11 @@ sub zmq_soname {
     my $soname;
     FIND_SONAME:
     for (@sonames) {
-        try {
-            $soname = $_;
+        $soname = $_;
 
-            my $zmq_version = FFI::Raw->new(
-                $soname => 'zmq_version',
-                FFI::Raw::void,
-                FFI::Raw::ptr,  # major
-                FFI::Raw::ptr,  # minor
-                FFI::Raw::ptr   # patch
-            );
-        }
-        catch {
+        unless ( valid_soname($soname) ) {
             undef $soname;
-        };
+        }
 
         last FIND_SONAME if $soname;
     }
@@ -60,34 +51,48 @@ sub zmq_soname {
         croak
             qq(Could not load libzmq, tried:\n),
             join(', ', @sonames),"\n",
-            q(Is libzmq on your ld path?);
+            q(Is libzmq on your loader path?);
     }
 
     return $soname;
 }
 
 sub zmq_version {
-    my $soname = shift;
+    my ($soname) = @_;
 
     $soname //= zmq_soname();
 
     return unless $soname;
 
-    my $zmq_version = FFI::Raw->new(
-        $soname => 'zmq_version',
-        FFI::Raw::void,
-        FFI::Raw::ptr,  # major
-        FFI::Raw::ptr,  # minor
-        FFI::Raw::ptr   # patch
+    my $ffi = FFI::Platypus->new( lib => $soname, ignore_not_found => 1 );
+    my $zmq_version = $ffi->function(
+        'zmq_version',
+        ['int*', 'int*', 'int*'],
+        'void'
     );
 
-    my ($major, $minor, $patch) = map { pack 'i!', $_ } (0, 0, 0);
+    unless (defined $zmq_version) {
+        croak   "Could not find zmq_version in '$soname'\n"
+              . "Is '$soname' on your loader path?";
+    }
 
-    my @ptrs = map { unpack('L!', pack('P', $_)) } ($major, $minor, $patch);
+    my ($major, $minor, $patch);
+    $zmq_version->call(\$major, \$minor, \$patch);
 
-    $zmq_version->(@ptrs);
+    return $major, $minor, $patch;
+}
 
-    return map { unpack 'i!', $_ } ($major, $minor, $patch);
+sub valid_soname {
+    my ($soname) = @_;
+
+    my $ffi = FFI::Platypus->new( lib => $soname, ignore_not_found => 1 );
+    my $zmq_version = $ffi->function(
+        'zmq_version',
+        ['int*', 'int*', 'int*'],
+        'void'
+    );
+
+    return defined $zmq_version;
 }
 
 1;

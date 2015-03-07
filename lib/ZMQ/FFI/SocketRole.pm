@@ -1,6 +1,10 @@
 package ZMQ::FFI::SocketRole;
 
+use FFI::Platypus;
+
 use Moo::Role;
+
+with qw(ZMQ::FFI::ErrorHandler);
 
 has soname => (
     is       => 'ro',
@@ -19,6 +23,28 @@ has type => (
     is       => 'ro',
     required => 1,
 );
+
+# real underlying zmq socket pointer
+has _socket => (
+    is      => 'rw',
+    default => -1,
+);
+
+has sockopt_sizes => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_sockopt_sizes'
+);
+
+sub _build_sockopt_sizes {
+    my $ffi = FFI::Platypus->new();
+
+    return {
+        int    => $ffi->sizeof('int'),
+        sint64 => $ffi->sizeof('sint64'),
+        uint64 => $ffi->sizeof('uint64'),
+    };
+}
 
 requires qw(
     connect

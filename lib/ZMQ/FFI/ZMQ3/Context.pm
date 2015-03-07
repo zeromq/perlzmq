@@ -1,28 +1,37 @@
 package ZMQ::FFI::ZMQ3::Context;
 
-use Moo;
-use namespace::autoclean;
-
-use FFI::Raw;
-use Carp;
+use FFI::Platypus;
+use ZMQ::FFI::Util qw(zmq_soname);
+use ZMQ::FFI::Constants qw(ZMQ_IO_THREADS ZMQ_MAX_SOCKETS);
+use ZMQ::FFI::ZMQ3::Socket;
 use Try::Tiny;
 
-use ZMQ::FFI::ZMQ3::Socket;
-use ZMQ::FFI::Constants qw(ZMQ_IO_THREADS ZMQ_MAX_SOCKETS);
+use Moo;
+use namespace::clean;
 
-extends q(ZMQ::FFI::ContextBase);
-
-has _ffi => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_init_ffi',
+with qw(
+    ZMQ::FFI::ContextRole
+    ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::Versioner
 );
 
+my $FFI_LOADED;
+
 sub BUILD {
-    my $self = shift;
+    my ($self) = @_;
+
+    unless ($FFI_LOADED) {
+        _load_zmq3_ffi($self->soname);
+        $FFI_LOADED = 1;
+    }
 
     try {
-        $self->_ctx( $self->_ffi->{zmq_ctx_new}->() );
+        # XXX
+        # not clear why this is necessary, but the setter doesn't actually
+        # take affect if you directly nest the zmq_ctx_new call in the _ctx
+        # call... some Class::XSAccessor weirdness/bug? Need to investigate.
+        my $c = zmq_ctx_new();
+        $self->_ctx($c);
         $self->check_null('zmq_ctx_new', $self->_ctx);
     }
     catch {
@@ -39,10 +48,41 @@ sub BUILD {
     }
 }
 
+sub _load_zmq3_ffi {
+    my ($soname) = @_;
+
+    my $ffi = FFI::Platypus->new( lib => $soname );
+
+    $ffi->attach(
+        # void *zmq_ctx_new()
+        'zmq_ctx_new' => [] => 'pointer'
+    );
+
+    $ffi->attach(
+        # int zmq_ctx_get(void *context, int option_name)
+        'zmq_ctx_get' => ['pointer', 'int'] => 'int'
+    );
+
+    $ffi->attach(
+        # int zmq_ctx_set(void *context, int option_name, int option_value)
+        'zmq_ctx_set' => ['pointer', 'int', 'int'] => 'int'
+    );
+
+    $ffi->attach(
+        # int zmq_proxy(const void *front, const void *back, const void *cap)
+        'zmq_proxy' => ['pointer', 'pointer', 'pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        # int zmq_ctx_destroy (void *context)
+        'zmq_ctx_destroy' => ['pointer'] => 'int'
+    );
+}
+
 sub get {
     my ($self, $option) = @_;
 
-    my $option_val = $self->_ffi->{zmq_ctx_get}->($self->_ctx, $option);
+    my $option_val = zmq_ctx_get($self->_ctx, $option);
     $self->check_error('zmq_ctx_get', $option_val);
 
     return $option_val;
@@ -53,7 +93,7 @@ sub set {
 
     $self->check_error(
         'zmq_ctx_set',
-        $self->_ffi->{zmq_ctx_set}->($self->_ctx, $option, $option_val)
+        zmq_ctx_set($self->_ctx, $option, $option_val)
     );
 }
 
@@ -69,80 +109,44 @@ sub socket {
 }
 
 sub proxy {
-    my ($self, $front, $back, $capture) = @_;
+    my ($self, $frontend, $backend, $capture) = @_;
 
     $self->check_error(
         'zmq_proxy',
-        $self->_ffi->{zmq_proxy}->(
-            $front->_socket,
-            $back->_socket,
+        zmq_proxy(
+            $frontend->_socket,
+            $backend->_socket,
             defined $capture ? $capture->_socket : undef,
         )
     );
 }
 
+sub device {
+    my ($self, $type, $frontend, $backend) = @_;
+
+    $self->bad_version(
+        $self->verstr,
+        "zmq_device not available in zmq >= 3.x",
+    );
+}
+
 sub destroy {
-    my $self = shift;
+    my ($self) = @_;
 
     $self->check_error(
         'zmq_ctx_destroy',
-        $self->_ffi->{zmq_ctx_destroy}->($self->_ctx)
+        zmq_ctx_destroy($self->_ctx)
     );
 
     $self->_ctx(-1);
 };
 
-sub _init_ffi {
-    my $self = shift;
+sub DEMOLISH {
+    my ($self) = @_;
 
-    my $ffi    = {};
-    my $soname = $self->soname;
-
-    $ffi->{zmq_ctx_new} = FFI::Raw->new(
-        $soname => 'zmq_ctx_new',
-        FFI::Raw::ptr, # returns ctx ptr
-        # void
-    );
-
-    $ffi->{zmq_ctx_set} = FFI::Raw->new(
-        $soname => 'zmq_ctx_set',
-        FFI::Raw::int, # error code,
-        FFI::Raw::ptr, # ctx
-        FFI::Raw::int, # opt constant
-        FFI::Raw::int  # opt value
-    );
-
-    $ffi->{zmq_ctx_get} = FFI::Raw->new(
-        $soname => 'zmq_ctx_get',
-        FFI::Raw::int, # opt value,
-        FFI::Raw::ptr, # ctx
-        FFI::Raw::int  # opt constant
-    );
-
-    $ffi->{zmq_proxy} = FFI::Raw->new(
-        $soname => 'zmq_proxy',
-        FFI::Raw::int, # error code
-        FFI::Raw::ptr, # frontend
-        FFI::Raw::ptr, # backend
-        FFI::Raw::ptr, # captuer
-    );
-
-    $ffi->{zmq_device} = FFI::Raw->new(
-        $soname => 'zmq_device',
-        FFI::Raw::int, # error code
-        FFI::Raw::int, # type
-        FFI::Raw::ptr, # frontend
-        FFI::Raw::ptr, # backend
-    );
-
-    $ffi->{zmq_ctx_destroy} = FFI::Raw->new(
-        $soname => 'zmq_ctx_destroy',
-        FFI::Raw::int, # retval
-        FFI::Raw::ptr  # ctx to destroy
-    );
-
-    return $ffi;
+    unless ($self->_ctx == -1) {
+        $self->destroy();
+    }
 }
 
-__PACKAGE__->meta->make_immutable();
-
+1;

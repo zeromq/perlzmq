@@ -1,37 +1,44 @@
 package ZMQ::FFI::ZMQ2::Context;
 
-use Moo;
-use namespace::autoclean;
-
-use FFI::Raw;
-use Carp;
+use FFI::Platypus;
+use ZMQ::FFI::Util qw(zmq_soname);
+use ZMQ::FFI::Constants qw(ZMQ_STREAMER);
+use ZMQ::FFI::ZMQ2::Socket;
 use Try::Tiny;
 
-use ZMQ::FFI::ZMQ2::Socket;
-use ZMQ::FFI::Constants qw(ZMQ_STREAMER);
+use Moo;
+use namespace::clean;
 
-extends qw(ZMQ::FFI::ContextBase);
+with qw(
+    ZMQ::FFI::ContextRole
+    ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::Versioner
+);
 
 has '+threads' => (
     default => 1,
 );
 
-has _ffi => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_init_ffi',
-);
+my $FFI_LOADED;
 
 sub BUILD {
-    my $self = shift;
+    my ($self) = @_;
+
+    unless ($FFI_LOADED) {
+        _load_zmq2_ffi($self->soname);
+        $FFI_LOADED = 1;
+    }
 
     if ($self->has_max_sockets) {
-        die "max_sockets option not available for ZMQ2\n".
-            $self->_verstr;
+        $self->bad_version(
+            $self->verstr,
+            'max_sockets option not available in zmq 2.x',
+            'use_die',
+        )
     }
 
     try {
-        $self->_ctx( $self->_ffi->{zmq_init}->($self->threads) );
+        $self->_ctx( zmq_init($self->threads) );
         $self->check_null('zmq_init', $self->_ctx);
     }
     catch {
@@ -40,20 +47,43 @@ sub BUILD {
     };
 }
 
-sub get {
-    my $self = shift;
+sub _load_zmq2_ffi {
+    my ($soname) = @_;
 
-    croak
-        "getting ctx options not implemented for ZMQ2\n".
-        $self->_verstr;
+    my $ffi = FFI::Platypus->new( lib => $soname );
+
+    $ffi->attach(
+        # void *zmq_init(int io_threads)
+        'zmq_init' => ['int'] => 'pointer'
+    );
+
+    $ffi->attach(
+        # int zmq_device(int device, const void *front, const void *back)
+        'zmq_device' => ['int', 'pointer', 'pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        # int zmq_term(void *context)
+        'zmq_term' => ['pointer'] => 'int'
+    );
+}
+
+sub get {
+    my ($self) = @_;
+
+    $self->bad_version(
+        $self->verstr,
+        "getting ctx options not available in zmq 2.x"
+    );
 }
 
 sub set {
-    my $self = shift;
+    my ($self) = @_;
 
-    croak
-        "setting ctx options not implemented for ZMQ2\n".
-        $self->_verstr;
+    $self->bad_version(
+        $self->verstr,
+        "setting ctx options not available in zmq 2.x"
+    );
 }
 
 sub socket {
@@ -67,62 +97,50 @@ sub socket {
     );
 }
 
-# zeromq v2 does not provide zmq_proxy; implemented here in terms of zmq_device
+# zeromq v2 does not provide zmq_proxy
+# implemented here in terms of zmq_device
 sub proxy {
-    my ($self, $front, $back, $capture) = @_;
+    my ($self, $frontend, $backend, $capture) = @_;
 
-    croak "zeromq v2 does not support a capture socket" if defined $capture;
+    if ($capture){
+        $self->bad_version(
+            $self->verstr,
+            "capture socket not supported in zmq 2.x"
+        );
+    }
 
     $self->check_error(
         'zmq_device',
-        $self->_ffi->{zmq_device}->(ZMQ_STREAMER, $front->_socket, $back->_socket)
+        zmq_device(ZMQ_STREAMER, $frontend->_socket, $backend->_socket)
+    );
+}
+
+sub device {
+    my ($self, $type, $frontend, $backend) = @_;
+
+    $self->check_error(
+        'zmq_device',
+        zmq_device($type, $frontend->_socket, $backend->_socket)
     );
 }
 
 sub destroy {
-    my $self = shift;
+    my ($self) = @_;
 
     $self->check_error(
         'zmq_term',
-        $self->_ffi->{zmq_term}->($self->_ctx)
+        zmq_term($self->_ctx)
     );
 
     $self->_ctx(-1);
 }
 
-sub _init_ffi {
-    my $self = shift;
+sub DEMOLISH {
+    my ($self) = @_;
 
-    my $ffi    = {};
-    my $soname = $self->soname;
-
-    $ffi->{zmq_init} = FFI::Raw->new(
-        $soname => 'zmq_init',
-        FFI::Raw::ptr, # returns ctx ptr
-        FFI::Raw::int  # num threads
-    );
-
-    $ffi->{zmq_device} = FFI::Raw->new(
-        $soname => 'zmq_device',
-        FFI::Raw::int, # error code
-        FFI::Raw::int, # type
-        FFI::Raw::ptr, # frontend
-        FFI::Raw::ptr, # backend
-    );
-
-    $ffi->{zmq_term} = FFI::Raw->new(
-        $soname => 'zmq_term',
-        FFI::Raw::int, # retval
-        FFI::Raw::ptr  # ctx pt
-    );
-
-    return $ffi;
+    unless ($self->_ctx == -1) {
+        $self->destroy();
+    }
 }
 
-sub _verstr {
-    my $self = shift;
-    return "your version: ".join('.', $self->version);
-}
-
-__PACKAGE__->meta->make_immutable();
-
+1;

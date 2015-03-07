@@ -1,10 +1,11 @@
 package ZMQ::FFI::ErrorHelper;
 
-use Moo;
-use namespace::autoclean;
-
 use Carp;
-use FFI::Raw;
+use FFI::Platypus;
+use ZMQ::FFI::Util qw(zmq_version);
+
+use Moo;
+use namespace::clean;
 
 has soname => (
     is       => 'ro',
@@ -18,8 +19,13 @@ has _err_ffi => (
 );
 
 sub BUILD {
-    my $self = shift;
-    $self->_err_ffi;
+    # force init err ffi
+    # need to be sure ffi is loaded before zmq error functions are called,
+    # as on OS X errno can get clobbered if ffi is loaded just in time
+
+    # initializing in BUILD instead of lazy => 0, as we still need to be sure
+    # to initialize ffi after soname is set
+    $_[0]->_err_ffi;
 }
 
 sub check_error {
@@ -38,6 +44,19 @@ sub check_null {
     }
 }
 
+sub bad_version {
+    my ($self, $verstr, $msg, $use_die) = @_;
+
+    if ($use_die) {
+        die   "$msg\n"
+            . "your version: $verstr";
+    }
+    else {
+        croak   "$msg\n"
+              . "your version: $verstr";
+    }
+}
+
 sub fatal {
     my ($self, $func) = @_;
 
@@ -50,24 +69,23 @@ sub fatal {
 }
 
 sub _init_err_ffi {
-    my $self = shift;
+    my ($self) = @_;
 
-    my $ffi    = {};
-    my $soname = $self->soname;
+    my $soname   = $self->soname;
+    my $ffi_href = {};
+    my $ffi      = FFI::Platypus->new( lib => $soname );
 
-    $ffi->{zmq_errno} = FFI::Raw->new(
-        $soname => 'zmq_errno',
-        FFI::Raw::int # returns errno
-        # void
+    $ffi_href->{zmq_errno} = $ffi->function(
+        'zmq_errno',
+        [] => 'int'
     );
 
-    $ffi->{zmq_strerror} = FFI::Raw->new(
-        $soname => 'zmq_strerror',
-        FFI::Raw::str,  # returns error str
-        FFI::Raw::int   # errno
+    $ffi_href->{zmq_strerror} = $ffi->function(
+        'zmq_strerror',
+        ['int'] => 'string'
     );
 
-    return $ffi;
+    return $ffi_href;
 }
 
 1;
