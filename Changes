@@ -1,6 +1,14 @@
 
 {{$NEXT}}
 
+    - switch to FFI::Platypus on the backend. FFI::Platypus provides the
+      ability to bind ffi functions as first class Perl xsubs, resulting in
+      dramatic performance gains.
+    - optimize the Perl code in general, especially the send/recv hot spots
+    - require Class::XSAccessor, which substantially improves Moo accessor
+      performance
+    - don't test against dev Perl on travis for now, seems to be busted
+
 0.19      2015-03-04 01:42:16-06:00 America/Chicago
 
     - use dzil FFI::CheckLib plugin to properly report NA on CPAN tester boxes
