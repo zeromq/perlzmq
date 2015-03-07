@@ -4,8 +4,6 @@ use FFI::Platypus;
 
 use Moo::Role;
 
-with qw(ZMQ::FFI::ErrorHandler);
-
 has soname => (
     is       => 'ro',
     required => 1,
