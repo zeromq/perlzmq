@@ -173,14 +173,5 @@ my ($major, $minor, $patch) = $ctx->version;
     cpanm -v ZMQ::FFI
 
 
-### HACKING ###
-    git clone https://github.com/calid/zmq-ffi.git
-    cd zmq-ffi
-    cpanm -v Dist::Zilla # if not already installed
-    dzil authordeps --missing | cpanm -v
-    dzil listdeps   --missing | cpanm -v
-    dzil test
-
-
 ### DOCUMENTATION ###
 Full documentation can be found on [cpan](https://metacpan.org/module/ZMQ::FFI)
