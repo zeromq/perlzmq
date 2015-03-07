@@ -55,9 +55,10 @@ sub {
 
 subtest 'string options',
 sub {
+    my ($major) = zmq_version;
     plan skip_all =>
         "no string options exist for libzmq 2.x"
-        if (zmq_version())[0] == 2;
+        if $major == 2;
 
     my $ctx = ZMQ::FFI->new();
     my $s   = $ctx->socket(ZMQ_DEALER);
@@ -66,6 +67,12 @@ sub {
     $s->bind($endpoint);
 
     is $s->get(ZMQ_LAST_ENDPOINT, 'string'), $endpoint, 'got last endpoint';
+
+    if ($major >= 4) {
+        $s->set(ZMQ_PLAIN_USERNAME, 'string', 'foo');
+        is $s->get(ZMQ_PLAIN_USERNAME, 'string'), 'foo',
+            'setting/getting zmq4 string opt works'
+    }
 };
 
 subtest 'binary options',
