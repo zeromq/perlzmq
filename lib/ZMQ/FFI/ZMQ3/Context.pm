@@ -54,22 +54,27 @@ sub _load_zmq3_ffi {
     my $ffi = FFI::Platypus->new( lib => $soname );
 
     $ffi->attach(
+        # void *zmq_ctx_new()
         'zmq_ctx_new' => [] => 'pointer'
     );
 
     $ffi->attach(
+        # int zmq_ctx_get(void *context, int option_name)
         'zmq_ctx_get' => ['pointer', 'int'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_ctx_set(void *context, int option_name, int option_value)
         'zmq_ctx_set' => ['pointer', 'int', 'int'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_proxy(const void *front, const void *back, const void *cap)
         'zmq_proxy' => ['pointer', 'pointer', 'pointer'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_ctx_destroy (void *context)
         'zmq_ctx_destroy' => ['pointer'] => 'int'
     );
 }

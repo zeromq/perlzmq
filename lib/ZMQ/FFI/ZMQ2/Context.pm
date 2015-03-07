@@ -53,14 +53,17 @@ sub _load_zmq2_ffi {
     my $ffi = FFI::Platypus->new( lib => $soname );
 
     $ffi->attach(
+        # void *zmq_init(int io_threads)
         'zmq_init' => ['int'] => 'pointer'
     );
 
     $ffi->attach(
+        # int zmq_device(int device, const void *front, const void *back)
         'zmq_device' => ['int', 'pointer', 'pointer'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_term(void *context)
         'zmq_term' => ['pointer'] => 'int'
     );
 }

@@ -284,9 +284,14 @@ sub _load_common_ffi {
     my $class = caller;
 
     $ffi->attach(
+        # void *zmq_socket(void *context, int type)
         ['zmq_socket' => "${class}::zmq_socket"],
             => ['pointer', 'int'] => 'pointer'
     );
+
+    # for get/set sockopt create ffi functions for each possible opt type
+
+    # int zmq_getsockopt(void *sock, int opt, void *val, size_t *len)
 
     $ffi->attach(
         ['zmq_getsockopt' => "${class}::zmq_getsockopt_binary"],
@@ -308,6 +313,9 @@ sub _load_common_ffi {
             => ['pointer', 'int', 'uint64*', 'size_t*'] => 'int'
     );
 
+
+    # int zmq_setsockopt(void *sock, int opt, const void *val, size_t len)
+
     $ffi->attach(
         ['zmq_setsockopt' => "${class}::zmq_setsockopt_binary"],
             => ['pointer', 'int', 'pointer', 'size_t'] => 'int'
@@ -328,42 +336,51 @@ sub _load_common_ffi {
             => ['pointer', 'int', 'uint64*', 'size_t'] => 'int'
     );
 
+
     $ffi->attach(
+        # int zmq_connect(void *socket, const char *endpoint)
         ['zmq_connect' => "${class}::zmq_connect"],
             => ['pointer', 'string'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_bind(void *socket, const char *endpoint)
         ['zmq_bind' => "${class}::zmq_bind"],
             => ['pointer', 'string'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_msg_init(zmq_msg_t *msg)
         ['zmq_msg_init' => "${class}::zmq_msg_init"],
             => ['pointer'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_msg_init_size(zmq_msg_t *msg, size_t size)
         ['zmq_msg_init_size' => "${class}::zmq_msg_init_size"],
             => ['pointer', 'int'] => 'int'
     );
 
     $ffi->attach(
+        # size_t zmq_msg_size(zmq_msg_t *msg)
         ['zmq_msg_size' => "${class}::zmq_msg_size"],
             => ['pointer'] => 'int'
     );
 
     $ffi->attach(
+        # void *zmq_msg_data(zmq_msg_t *msg)
         ['zmq_msg_data' => "${class}::zmq_msg_data"],
             => ['pointer'] => 'pointer'
     );
 
     $ffi->attach(
+        # int zmq_msg_close(zmq_msg_t *msg)
         ['zmq_msg_close' => "${class}::zmq_msg_close"],
             => ['pointer'] => 'int'
     );
 
     $ffi->attach(
+        # int zmq_close(void *socket)
         ['zmq_close' => "${class}::zmq_close"],
             => ['pointer'] => 'int'
     );
