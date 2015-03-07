@@ -302,8 +302,8 @@ For core attributes and functions, common across all versions of zeromq,
 convenience methods are provided. Otherwise, generic get/set methods are
 provided that will work independent of version.
 
-As attributes are constantly being added/removed from zeromq, it is unlikely the
-'static' accessors will grow much beyond the current set.
+As attributes are constantly being added/removed from zeromq, it is unlikely
+the 'static' accessors will grow much beyond the current set.
 
 =head2 ($major, $minor, $patch) = version()
 
@@ -403,8 +403,8 @@ gets reaped
 
 =head1 ERROR HANDLING
 
-ZMQ::FFI checks the return codes of underlying zmq functions for you, and in the
-case of an error it will die with the plain english system error message.
+ZMQ::FFI checks the return codes of underlying zmq functions for you, and in
+the case of an error it will die with the plain english system error message.
 
     $ctx->socket(-1);
     # dies with 'zmq_socket: Invalid argument'
