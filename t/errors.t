@@ -47,4 +47,17 @@ subtest 'util errors' => sub {
     } q(zmq_soname lives and returns undef when die => 0 and FFI::Platypus->function fails);
 };
 
+subtest 'fatal socket error' => sub {
+    no warnings qw/redefine once/;
+
+    local *ZMQ::FFI::ZMQ2::Socket::zmq_send = sub { return -1; };
+    local *ZMQ::FFI::ZMQ3::Socket::zmq_send = sub { return -1; };
+
+    my $ctx = ZMQ::FFI->new();
+    my $socket = $ctx->socket(ZMQ_REQ);
+
+    throws_ok { $socket->send('ohhai'); } qr/^zmq_send:/,
+        q(socket error on send dies with zmq_send error message);
+};
+
 done_testing;
