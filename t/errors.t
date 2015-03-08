@@ -37,14 +37,15 @@ subtest 'socket errors' => sub {
 subtest 'util errors' => sub {
     no warnings q/redefine/;
 
-    local *FFI::Platypus::function = sub  { return; };
+    local *FFI::Platypus::function = sub { return; };
 
     throws_ok { zmq_soname(die => 1) } qr/Could not load libzmq/,
         q(zmq_soname dies when die => 1 and FFI::Platypus->function fails);
 
     lives_ok {
         ok !zmq_soname();
-    } q(zmq_soname lives and returns undef when die => 0 and FFI::Platypus->function fails);
+    } q(zmq_soname lives and returns undef when die => 0)
+    . q( and FFI::Platypus->function fails);
 };
 
 subtest 'fatal socket error' => sub {
