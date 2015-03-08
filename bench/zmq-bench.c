@@ -13,10 +13,8 @@ int main(void)
     void *socket = zmq_socket(ctx, ZMQ_PUB);
     assert(socket);
 
-    pid_t p = getpid();
-
     char *endpoint = malloc(256);
-    sprintf(endpoint, "ipc:///tmp/c-zmq-bench-%d", p);
+    sprintf(endpoint, "ipc:///tmp/zmq-bench-c");
 
     assert( -1 != zmq_bind(socket, endpoint) );
 
@@ -26,6 +24,6 @@ int main(void)
     printf("C ZMQ Version: %d.%d.%d\n", major, minor, patch);
 
     for ( int i = 0; i < (10 * 1000 * 1000); i++ ) {
-        assert( -1 != zmq_send(socket, "ohhai", 5, 0) );
+        assert( -1 != zmq_send(socket, "c", 1, 0) );
     }
 }
