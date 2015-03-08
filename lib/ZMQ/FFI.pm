@@ -407,6 +407,33 @@ the case of an error it will die with the plain english system error message.
     $ctx->socket(-1);
     # dies with 'zmq_socket: Invalid argument'
 
+=head1 FFI VS XS PERFORMANCE
+
+ZMQ::FFI uses L<FFI::Platypus> on the backend. In addition to a friendly,
+usable interface, FFI::Platypus's killer feature is C<attach>. C<attach> makes
+it possible to bind ffi functions in memory as first class Perl xsubs. This
+results in dramatic performance gains and gives you the flexibility of ffi
+with performance approaching that of XS.
+
+Testing indicates FFI::Platypus xsubs are around 30% slower than "real" XS
+xsubs. That may sound like a lot, but to put it in perspective that means, for
+zeromq, the XS bindings can send 10 million messages 1-2 seconds faster than
+the ffi ones.
+
+If you really care about 1-2 seconds over 10 million messages you should be
+writing your solution in C anyways. An equivalent C implementation will be
+several I<hundred> percent faster or more.
+
+Keep in mind also that the small speed bump you get using XS can easily be
+wiped out by crappy and poorly optimized Perl code.
+
+Now that Perl finally has a great ffi interface, it is hard to make the case
+to continue using XS. The slight speed bump just isn't worth giving up the
+convenience, flexibility, and portability of ffi.
+
+You can find the detailed performance results that informed this section at:
+L<https://gist.github.com/calid/17df5bcfb81c83786d6f>
+
 =head1 SEE ALSO
 
 =for :list
