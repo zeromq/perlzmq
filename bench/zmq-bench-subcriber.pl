@@ -4,6 +4,21 @@ use warnings;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_SUB);
+use Try::Tiny;
+
+my $count = 0;
+
+$SIG{USR1} = sub {
+    say "received $count messages";
+};
+
+$SIG{USR2} = sub {
+    say "resetting message count";
+    $count = 0;
+};
+
+say "'kill -USR1 $$' to print current message count";
+say "'kill -USR2 $$' to reset message count";
 
 my $ctx = ZMQ::FFI->new();
 my $s = $ctx->socket(ZMQ_SUB);
@@ -12,14 +27,13 @@ $s->connect('ipc:///tmp/zmq-bench-xs');
 $s->connect('ipc:///tmp/zmq-bench-ffi');
 $s->subscribe('');
 
-my $rh = {c => 0, ffi => 0, xs => 0};
 my $r;
 while (1) {
-    $r = $s->recv();
-
-    $rh->{$r}++;
-
-    if ( ($rh->{$r} % 1_000) == 0 ) {
-        say $r."=".$rh->{$r};
+    try {
+        $r = $s->recv();
+        $count++;
     }
+    catch {
+        croak $_ unless $_ =~ m/Interrupted system call/;
+    };
 }
