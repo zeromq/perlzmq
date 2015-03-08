@@ -22,7 +22,6 @@ sub {
 
     {
         $s->subscribe('');
-        $p->send('ohhai');
 
         until ($s->has_pollin) {
             # sleep for a 100ms to compensate for slow subscriber problem
@@ -38,7 +37,6 @@ sub {
 
     {
         $s->subscribe('mytopic');
-        $p->send('mytopic ohhai');
 
         until ($s->has_pollin) {
             usleep 100_000;

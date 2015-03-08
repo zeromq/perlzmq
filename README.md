@@ -50,7 +50,6 @@ $p->bind($endpoint);
 # all topics
 {
     $s->subscribe('');
-    $p->send('ohhai');
 
     until ($s->has_pollin) {
         # compensate for slow subscriber
@@ -68,9 +67,6 @@ $p->bind($endpoint);
 {
     $s->subscribe('topic1');
     $s->subscribe('topic2');
-
-    $p->send('topic1 ohhai');
-    $p->send('topic2 ohhai');
 
     until ($s->has_pollin) {
         usleep 100_000;
