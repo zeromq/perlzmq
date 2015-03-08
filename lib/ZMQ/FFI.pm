@@ -209,7 +209,9 @@ of the underlying libzmq version.  Where semantics differ, it will dispatch to
 the appropriate backend for you.  As it uses ffi, there is no dependency on XS
 or compilation.
 
-ZMQ::FFI is implemented using L<FFI::Platypus>.
+As of 1.00 ZMQ::FFI is implemented using L<FFI::Platypus>. This version has
+substantial performance improvements and you are encouraged to use 1.00 or
+newer.
 
 =head1 CONTEXT API
 
