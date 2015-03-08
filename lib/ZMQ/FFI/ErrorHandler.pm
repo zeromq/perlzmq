@@ -12,6 +12,7 @@ has error_helper => (
         check_error
         check_null
         bad_version
+        fatal
     )],
 );
 
