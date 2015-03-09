@@ -2,12 +2,15 @@ package ZMQ::FFI::Constants;
 
 # ABSTRACT: Generated module of zmq constants. All constants, all versions.
 
-# Module generated on Wed Mar  4 01:04:08 2015
+# Module generated on Sun Mar  8 19:31:42 2015
 # Generated using ZMQ versions v2.1.0-v4.0.5
+
+use strict;
+use warnings;
 
 use Exporter 'import';
 
-@EXPORT_OK = qw(
+our @EXPORT_OK = qw(
 ZMQ_AFFINITY
 ZMQ_BACKLOG
 ZMQ_CONFLATE
@@ -114,7 +117,7 @@ ZMQ_ZAP_DOMAIN
 zmq_msg_t_size
 );
 
-%EXPORT_TAGS = (all => [@EXPORT_OK]);
+our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub ZMQ_AFFINITY { 4 }
 sub ZMQ_BACKLOG { 19 }

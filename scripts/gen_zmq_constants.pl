@@ -107,13 +107,16 @@ package ZMQ::FFI::Constants;
 # Module generated on $date
 # Generated using ZMQ versions $first-$latest
 
+use strict;
+use warnings;
+
 use Exporter 'import';
 
-\@EXPORT_OK = qw(
+our \@EXPORT_OK = qw(
 $exports
 );
 
-%EXPORT_TAGS = (all => [\@EXPORT_OK]);
+our %EXPORT_TAGS = (all => [\@EXPORT_OK]);
 
 $subs
 
