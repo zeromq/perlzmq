@@ -341,6 +341,20 @@ get or set the socket identity for request/reply patterns
 
 get the file descriptor associated with the socket
 
+=head2 get($option, $option_type)
+
+    $socket->get(ZMQ_LINGER, 'int')
+
+return the value for the specified socket option. C<$option_type> is the type
+associated with the option value in the zeromq API (C<zmq_getsockopt> man page)
+
+=head2 set($option, $option_type, $option_value)
+
+    $socket->set(ZMQ_IDENTITY, 'binary', 'foo')
+
+set the socket option to the specified value. C<$option_type> is the type
+associated with the option value in the zeromq API (C<zmq_setsockopt> man page)
+
 =head2 subscribe($topic)
 
 add C<$topic> to the subscription list
@@ -381,20 +395,6 @@ semantics are handled for you
 
 checks ZMQ_EVENTS for ZMQ_POLLIN and ZMQ_POLLOUT respectively, and returns
 true/false depending on the state
-
-=head2 $value = get($option, $option_type)
-
-    $socket->get(ZMQ_LINGER, 'int')
-
-return the value for the specified socket option. C<$option_type> is the type
-associated with the option value in the zeromq API (C<zmq_getsockopt> man page)
-
-=head2 set($option, $option_type, $option_value)
-
-    $socket->set(ZMQ_IDENTITY, 'binary', 'foo')
-
-set the socket option to the specified value. C<$option_type> is the type
-associated with the option value in the zeromq API (C<zmq_setsockopt> man page)
 
 =head2 close()
 
