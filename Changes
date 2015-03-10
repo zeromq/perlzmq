@@ -1,6 +1,10 @@
 
 {{$NEXT}}
 
+    - Require Math::BigInt 1.997 or newer to resolve integer overflow bug
+      (GH#14 - thanks @plicease!)
+    - Perl v5.10 is now the official minimum version supported
+
 1.00      2015-03-09 00:54:41-05:00 America/Chicago
 
     - switch to FFI::Platypus on the backend. FFI::Platypus provides the
