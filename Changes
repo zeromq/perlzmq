@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+1.01      2015-03-11 00:50:39-05:00 America/Chicago
+
     - Require Math::BigInt 1.997 or newer to resolve integer overflow bug
       (GH#14 - thanks @plicease!)
     - Perl v5.10 is now the official minimum version supported
