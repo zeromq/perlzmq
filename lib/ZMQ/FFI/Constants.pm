@@ -2,7 +2,6 @@ package ZMQ::FFI::Constants;
 
 # ABSTRACT: Generated module of zmq constants. All constants, all versions.
 
-# Module generated on Sun Mar  8 19:31:42 2015
 # Generated using ZMQ versions v2.1.0-v4.0.5
 
 use strict;

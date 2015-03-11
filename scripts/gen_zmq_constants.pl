@@ -105,7 +105,6 @@ package ZMQ::FFI::Constants;
 
 # ABSTRACT: Generated module of zmq constants. All constants, all versions.
 
-# Module generated on $date
 # Generated using ZMQ versions $first-$latest
 
 use strict;
