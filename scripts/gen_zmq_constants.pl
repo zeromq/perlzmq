@@ -70,6 +70,7 @@ push @zmq_h_versions, "$ENV{HOME}/git/libzmq/include/zmq.h";
 my $ffi = FFI::Platypus->new();
 for my $zmq_h (@zmq_h_versions) {
     my $tcc = FFI::TinyCC->new();
+    $tcc->detect_sysinclude_path();
 
     $tcc->compile_string(qq{
         #include "$zmq_h"
