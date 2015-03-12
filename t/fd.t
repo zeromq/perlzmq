@@ -46,6 +46,6 @@ $t = AE::timer 0, .1, sub {
     }
 };
 
-EV::run();
+EV::loop();
 
 done_testing;
