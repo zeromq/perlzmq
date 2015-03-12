@@ -8,7 +8,7 @@ use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ);
 
 subtest 'close with unsent messages', sub {
-    my $timed_out = timeout_call 3, sub {
+    my $timed_out = timeout_call 5, sub {
         my $ctx = ZMQ::FFI->new();
         my $s   = $ctx->socket(ZMQ_REQ);
 
