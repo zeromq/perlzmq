@@ -186,7 +186,7 @@ __END__
         }
     };
 
-    EV::run();
+    EV::loop();
 
 
     #### specifying versions ####
