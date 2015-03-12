@@ -261,6 +261,9 @@ sub set {
 sub close {
     my ($self) = @_;
 
+    # don't try to cleanup socket cloned from another process (fork)
+    return unless $self->_pid == $$;
+
     $self->check_error(
         'zmq_close',
         zmq_close($self->_socket)

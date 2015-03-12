@@ -28,6 +28,12 @@ has _socket => (
     default => -1,
 );
 
+# used to make sure we handle fork situations correctly
+has _pid => (
+    is      => 'ro',
+    default => $$,
+);
+
 has sockopt_sizes => (
     is      => 'ro',
     lazy    => 1,

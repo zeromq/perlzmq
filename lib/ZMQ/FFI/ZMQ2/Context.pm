@@ -127,6 +127,9 @@ sub device {
 sub destroy {
     my ($self) = @_;
 
+    # don't try to cleanup context cloned from another process (fork)
+    return unless $self->_pid == $$;
+
     $self->check_error(
         'zmq_term',
         zmq_term($self->_ctx)

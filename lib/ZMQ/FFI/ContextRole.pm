@@ -8,6 +8,12 @@ has _ctx => (
     default => -1,
 );
 
+# used to make sure we handle fork situations correctly
+has _pid => (
+    is      => 'ro',
+    default => $$,
+);
+
 has soname => (
     is       => 'ro',
     required => 1,
