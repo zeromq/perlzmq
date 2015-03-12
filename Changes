@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+1.02      2015-03-12 04:51:14-05:00 America/Chicago
+
     - fix cleanup handling of inherited contexts/sockets in forked childen
     - don't include datetime in generated Constants module
     - fix pointer pack warning in ZMQ2 backend
