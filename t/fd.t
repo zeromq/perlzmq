@@ -4,10 +4,8 @@ use warnings;
 use Test::More;
 
 use AnyEvent;
-use EV;
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
-
 
 my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
 my @expected = qw(foo bar baz);
@@ -18,6 +16,8 @@ $pull->bind($endpoint);
 
 my $fd = $pull->get_fd();
 
+my $cv = AE::cv;
+
 my $recv = 0;
 my $w = AE::io $fd, 0, sub {
     while ($pull->has_pollin) {
@@ -26,7 +26,7 @@ my $w = AE::io $fd, 0, sub {
 
         $recv++;
         if ($recv == 3) {
-            EV::unloop();
+            $cv->send;
         }
     }
 };
@@ -46,6 +46,6 @@ $t = AE::timer 0, .1, sub {
     }
 };
 
-EV::run();
+$cv->recv;
 
 done_testing;
