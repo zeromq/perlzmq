@@ -299,18 +299,18 @@ sets up and runs a C<zmq_device> with specified frontend and backend sockets
 
 =head2 destroy
 
-    $ctx->destroy();
-
-    undef $ctx; # ditto
+destroy the underlying zmq context. In general you shouldn't have to call this
+directly as it is called automatically for you when the object gets reaped
 
     {
         my $ctx = ZMQ::FFI->new();
         ...
-        # destroy called in destructor at end of scope
+        # destroy implicitly called in destructor at end of scope
     }
 
-destroys the underlying zmq context. This is called automatically when the
-object gets reaped
+    $ctx->destroy(); # explicitly destroy the context
+
+    undef $ctx;      # ditto
 
 =head1 SOCKET API
 
@@ -448,19 +448,19 @@ true/false depending on the state
 
 =head2 close
 
-    $socket->close();
-
-    undef $socket; # ditto
+close the underlying zmq socket. In general you shouldn't have to call this
+directly as it is called automatically for you when the object gets reaped
 
     {
         my $socket = $ctx->socket($type);
         ...
-        # close called in destructor at end of scope
+        # close called implicitly in destructor at end of scope
     }
 
+    $socket->close(); # explicitly close socket
 
-close the underlying zmq socket. This is called automatically when the object
-gets reaped
+    undef $socket;    # ditto
+
 
 =head1 ERROR HANDLING
 
