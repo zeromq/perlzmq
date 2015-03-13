@@ -1,6 +1,7 @@
 
 {{$NEXT}}
 
+    - misc doc reformatting and rewording
     - don't use EV in fd.t
 
 1.02      2015-03-12 04:51:14-05:00 America/Chicago
