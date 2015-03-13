@@ -215,17 +215,14 @@ newer.
 
 =head1 CONTEXT API
 
-=head2 new([threads, max_sockets, soname])
+=head2 new
 
-    ZMQ::FFI->new()
-
-    ZMQ::FFI->new( threads => 42, max_sockets => 42 )
-
-    ZMQ::FFI->new( soname => '/path/to/libzmq.so' )
-    ZMQ::FFI->new( soname => 'libzmq.so.3' )
+    my $ctx = ZMQ::FFI->new(%options);
 
 returns a new context object, appropriate for the version of
 libzmq found on your system. It accepts the following optional attributes:
+
+=head3 options
 
 =over 4
 
@@ -241,6 +238,9 @@ max number of sockets allowed for context. Default: 1024
 
 =item soname
 
+    ZMQ::FFI->new( soname => '/path/to/libzmq.so' );
+    ZMQ::FFI->new( soname => 'libzmq.so.3' );
+
 specify the libzmq library name to load.  By default ZMQ::FFI will first try
 the generic soname for the system, then the soname for each version of zeromq
 (e.g. libzmq.so.3). C<soname> can also be the path to a particular libzmq so
@@ -251,19 +251,21 @@ the same process, though the utility of doing such a thing is dubious
 
 =back
 
-=head2 ($major, $minor, $patch) = version()
+=head2 version
+
+    my ($major, $minor, $patch) = $ctx->version();
 
 return the libzmq version as the list C<($major, $minor, $patch)>
 
-=head2 get($option)
+=head2 get
 
 I<requires zmq E<gt>= 3.x>
 
-    $ctx->get(ZMQ_IO_THREADS)
+    my $threads = $ctx->get(ZMQ_IO_THREADS)
 
 get a context option value
 
-=head2 set($option, $option_value)
+=head2 set
 
 I<requires zmq E<gt>= 3.x>
 
@@ -271,25 +273,41 @@ I<requires zmq E<gt>= 3.x>
 
 set a context option value
 
-=head2 $socket = socket($type)
+=head2 socket
 
-    $ctx->socket(ZMQ_REQ)
+    my $socket = $ctx->socket(ZMQ_REQ)
 
 returns a socket of the specified type. See L<SOCKET API> below
 
-=head2 proxy($frontend, $backend, [$capture])
+=head2 proxy
+
+    $ctx->proxy($frontend, $backend);
+
+    $ctx->proxy($frontend, $backend, $capture);
 
 sets up and runs a C<zmq_proxy>. For zmq 2.x this will use a C<ZMQ_STREAMER>
 device to simulate the proxy. The optional C<$capture> is only supported for
 zmq E<gt>= 3.x however
 
-=head2 device($type, $frontend, $backend)
+=head2 device
 
 I<zmq 2.x only>
 
+    $ctx->device($type, $frontend, $backend);
+
 sets up and runs a C<zmq_device> with specified frontend and backend sockets
 
-=head2 destroy()
+=head2 destroy
+
+    $ctx->destroy();
+
+    undef $ctx; # ditto
+
+    {
+        my $ctx = ZMQ::FFI->new();
+        ...
+        # destroy called in destructor at end of scope
+    }
 
 destroys the underlying zmq context. This is called automatically when the
 object gets reaped
@@ -305,98 +323,141 @@ provided that will work independent of version.
 As attributes are constantly being added/removed from zeromq, it is unlikely
 the 'static' accessors will grow much beyond the current set.
 
-=head2 ($major, $minor, $patch) = version()
+=head2 version
 
-same as Context version() above
+    my ($major, $minor, $patch) = $socket->version();
 
-=head2 connect($endpoint)
+same as Context C<version> above
+
+=head2 connect
+
+    $socket->connect($endpoint);
 
 does socket connect on the specified endpoint
 
-=head2 disconnect($endpoint)
+=head2 disconnect
 
 I<requires zmq E<gt>= 3.x>
+
+    $socket->disconnect($endpoint);
 
 does socket disconnect on the specified endpoint
 
-=head2 bind($endpoint)
+=head2 bind
+
+    $socket->bind($endpoint);
 
 does socket bind on the specified endpoint
 
-=head2 unbind($endpoint)
+=head2 unbind
 
 I<requires zmq E<gt>= 3.x>
 
+    $socket->unbind($endpoint);
+
 does socket unbind on the specified endpoint
 
-=head2 get_linger(), set_linger($millis)
+=head2 get_linger, set_linger
+
+    my $linger = $socket->get_linger();
+
+    $socket->set_linger($millis);
 
 get or set the current socket linger period
 
-=head2 get_identity(), set_identity($ident)
+=head2 get_identity, set_identity
+
+    my $ident = $socket->get_identity();
+
+    $socket->set_identity($ident);
 
 get or set the socket identity for request/reply patterns
 
-=head2 get_fd()
+=head2 get_fd
+
+    my $fd = $socket->get_fd();
 
 get the file descriptor associated with the socket
 
-=head2 get($option, $option_type)
+=head2 get
 
-    $socket->get(ZMQ_LINGER, 'int')
+    my $linger = $socket->get(ZMQ_LINGER, 'int');
 
 return the value for the specified socket option. C<$option_type> is the type
 associated with the option value in the zeromq API (C<zmq_getsockopt> man page)
 
-=head2 set($option, $option_type, $option_value)
+=head2 set
 
-    $socket->set(ZMQ_IDENTITY, 'binary', 'foo')
+    $socket->set(ZMQ_IDENTITY, 'binary', 'foo');
 
 set the socket option to the specified value. C<$option_type> is the type
 associated with the option value in the zeromq API (C<zmq_setsockopt> man page)
 
-=head2 subscribe($topic)
+=head2 subscribe
+
+    $socket->subscribe($topic);
 
 add C<$topic> to the subscription list
 
-=head2 unsubscribe($topic)
+=head2 unsubscribe
+
+    $socket->unsubscribe($topic);
 
 remove C<$topic> from the subscription list
 
-=head2 send($msg, [$flags])
+=head2 send
 
-    $socket->send('ohhai')
+    $socket->send($msg);
 
-    $socket->send('ohhai', ZMQ_DONTWAIT)
+    $socket->send($msg, $flags);
 
 sends a message using the optional flags
 
-=head2 send_multipart($parts_aref, [$flags])
+=head2 send_multipart
 
-    $socket->send([qw(foo bar baz)])
+    $socket->send($parts_aref);
+
+    $socket->send($parts_aref, $flags);
 
 given an array ref of message parts, sends the multipart message using the
 optional flags. ZMQ_SNDMORE semantics are handled for you
 
-=head2 $msg = recv([$flags])
+=head2 recv
 
-    $socket->recv()
+    my $msg = $socket->recv();
 
-    $socket->recv(ZMQ_DONTWAIT)
+    my $msg = $socket->recv($flags);
 
 receives a message using the optional flags
 
-=head2 @parts = recv_multipart([$flags])
+=head2 recv_multipart
+
+    my @parts = $socket->recv_multipart();
+
+    my @parts = $socket->recv_multipart($flags);
 
 receives a multipart message, returning an array of parts. ZMQ_RCVMORE
 semantics are handled for you
 
 =head2 has_pollin, has_pollout
 
+    while ( $socket->has_pollin ) { ... }
+
 checks ZMQ_EVENTS for ZMQ_POLLIN and ZMQ_POLLOUT respectively, and returns
 true/false depending on the state
 
-=head2 close()
+=head2 close
+
+    $socket->close();
+
+    undef $socket; # ditto
+
+    {
+        my $socket = $ctx->socket($type);
+        ...
+        # close called in destructor at end of scope
+    }
+
 
 close the underlying zmq socket. This is called automatically when the object
 gets reaped
