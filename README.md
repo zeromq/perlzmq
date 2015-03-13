@@ -131,7 +131,7 @@ my $w = AE::io $fd, 0, sub {
 
         $recv++;
         if ($recv == 3) {
-            EV::unloop();
+            EV::break();
         }
     }
 };
@@ -151,7 +151,7 @@ $t = AE::timer 0, .1, sub {
     }
 };
 
-EV::loop();
+EV::run();
 ```
 
 #### specifying versions ####

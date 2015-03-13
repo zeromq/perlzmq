@@ -166,7 +166,7 @@ __END__
 
             $recv++;
             if ($recv == 3) {
-                EV::unloop();
+                EV::break();
             }
         }
     };
@@ -186,7 +186,7 @@ __END__
         }
     };
 
-    EV::loop();
+    EV::run();
 
 
     #### specifying versions ####
