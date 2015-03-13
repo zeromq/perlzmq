@@ -17,7 +17,7 @@ use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
 
 my $endpoint = "ipc://zmq-ffi-$$";
-my $ctx      = ZMQ::FFI->new( threads => 1 );
+my $ctx      = ZMQ::FFI->new();
 
 my $s1 = $ctx->socket(ZMQ_REQ);
 $s1->connect($endpoint);
