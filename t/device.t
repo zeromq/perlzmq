@@ -16,6 +16,9 @@ my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
 my $device;
 
 sub mkdevice {
+    # make sure child shuts down cleanly
+    $SIG{TERM} = sub { exit 0 };
+
     my $ctx = ZMQ::FFI->new();
 
     my $front = $ctx->socket(ZMQ_PULL);

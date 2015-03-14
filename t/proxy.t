@@ -16,6 +16,9 @@ my $proxy = fork;
 die "fork failed: $!" unless defined $proxy;
 
 if ( $proxy == 0 ) {
+    # make sure child shuts down cleanly
+    $SIG{TERM} = sub { exit 0 };
+
     my $ctx = ZMQ::FFI->new();
 
     my $front = $ctx->socket(ZMQ_PULL);
