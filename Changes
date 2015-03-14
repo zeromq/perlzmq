@@ -1,6 +1,7 @@
 
 {{$NEXT}}
 
+    - fix socket files being left around after device.t and proxy.t
     - misc doc reformatting and rewording
     - don't use EV in fd.t
 
