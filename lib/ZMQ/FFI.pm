@@ -454,14 +454,71 @@ directly as it is called automatically for you when the object gets reaped
 
     undef $socket;    # ditto
 
+=head2 die_on_error
+
+    $socket->die_on_error(0);
+
+    $socket->die_on_error(1);
+
+controls whether error handling should be exceptional or not. This is set to
+true by default. See L<ERROR HANDLING> below
+
+=head2 has_error
+
+returns true or false depending on whether the last socket operation had an
+error. This is really just an alias for C<last_errno>
+
+=head2 last_errno
+
+returns the system C<errno> set by the last socket operation, or 0 if there
+was no error
+
+=head2 last_strerror
+
+returns the system error string associated with the current socket C<errno>
 
 =head1 ERROR HANDLING
 
-ZMQ::FFI checks the return codes of underlying zmq functions for you, and in
-the case of an error it will die with the plain english system error message.
+By default, ZMQ::FFI checks the return codes of underlying zmq functions for
+you, and in the case of an error it will die with the plain english system
+error message.
 
     $ctx->socket(-1);
     # dies with 'zmq_socket: Invalid argument'
+
+Usually this is what you want, but not always. Some zmq operations can return
+errors that are not fatal and should be handled. For example using
+C<ZMQ_DONTWAIT> with send/recv can return C<EAGAIN> and simply means try
+again, not die.
+
+For situations such as this you can turn off exceptional error handling by
+setting C<die_on_error> to 0. It is then for you to check and manage any zmq
+errors by checking C<last_errno>:
+
+    use Errno qw(EAGAIN);
+
+    my $ctx = ZMQ::FFI->new();
+    my $s   = $ctx->socket(ZMQ_DEALER);
+    $s->bind('tcp://*:7200');
+
+    $s->die_on_error(0); # turn off exceptional error handling
+
+    while (1) {
+        my $msg = $s->recv(ZMQ_DONTWAIT);
+
+        if ($s->last_errno && $s->last_errno == EAGAIN) {
+            sleep 1;
+        }
+        elsif ($s->last_errno) {
+            die $s->last_strerror;
+        }
+        else {
+            warn "recvd: $msg";
+            last;
+        }
+    }
+
+    $s->die_on_error(1); # turn back on exceptional error handling
 
 =head1 FFI VS XS PERFORMANCE
 
