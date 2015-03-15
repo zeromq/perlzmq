@@ -5,10 +5,10 @@ use Test::More;
 use Test::Exception;
 
 use FFI::Platypus;
-use Errno qw(EINVAL);
+use Errno qw(EINVAL EAGAIN);
 
 use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ);
+use ZMQ::FFI::Constants qw(:all);
 use ZMQ::FFI::Util qw(zmq_soname);
 
 subtest 'socket errors' => sub {
@@ -60,5 +60,76 @@ subtest 'fatal socket error' => sub {
     throws_ok { $socket->send('ohhai'); } qr/^zmq_send:/,
         q(socket error on send dies with zmq_send error message);
 };
+
+subtest 'socket recv error && die_on_error => false' => sub {
+    my $ctx    = ZMQ::FFI->new();
+    my $socket = $ctx->socket(ZMQ_REP);
+    $socket->bind("ipc://test-zmq-ffi-$$");
+
+    check_nonfatal_eagain($socket, 'recv', ZMQ_DONTWAIT);
+};
+
+subtest 'socket send error && die_on_error => false' => sub {
+    my $ctx    = ZMQ::FFI->new();
+    my $socket = $ctx->socket(ZMQ_DEALER);
+    $socket->bind("ipc://test-zmq-ffi-$$");
+
+    check_nonfatal_eagain($socket, 'send', 'ohhai', ZMQ_DONTWAIT);
+};
+
+subtest 'socket recv_multipart error && die_on_error => false' => sub {
+    my $ctx    = ZMQ::FFI->new();
+    my $socket = $ctx->socket(ZMQ_REP);
+    $socket->bind("ipc://test-zmq-ffi-$$");
+
+    check_nonfatal_eagain($socket, 'recv_multipart', ZMQ_DONTWAIT);
+};
+
+subtest 'socket send_multipart error && die_on_error => false' => sub {
+    my $ctx    = ZMQ::FFI->new();
+    my $socket = $ctx->socket(ZMQ_DEALER);
+    $socket->bind("ipc://test-zmq-ffi-$$");
+
+    check_nonfatal_eagain(
+        $socket, 'send_multipart', [qw(foo bar baz)], ZMQ_DONTWAIT
+    );
+};
+
+sub check_nonfatal_eagain {
+    my ($socket, $method, @method_args) = @_;
+
+    $! = EAGAIN;
+    my $eagain_str;
+
+    {
+        # get the EAGAIN error string in a locale aware way
+        use locale;
+        use bytes;
+        $eagain_str = "$!";
+    }
+
+    $socket->die_on_error(0);
+
+    ok !$socket->has_error,
+        qq(has_error false before $method error);
+
+    lives_ok {
+        $socket->$method(@method_args);
+    } qq($method error isn't fatal if die_on_error false);
+
+    ok $socket->has_error,
+        'has_error true after error';
+
+    is $socket->last_errno, EAGAIN,
+        'last_errno set to error code of last error';
+
+    is $socket->last_strerror, $eagain_str,
+        'last_strerror set to error string of last error';
+
+    $socket->die_on_error(1);
+
+    throws_ok { $socket->$method(@method_args) } qr/$eagain_str/i,
+        qq($method error fatal again after die_on_error set back to true);
+}
 
 done_testing;

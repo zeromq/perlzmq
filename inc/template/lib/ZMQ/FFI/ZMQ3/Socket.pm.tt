@@ -19,7 +19,7 @@ use feature 'switch';
 
 with qw(
     ZMQ::FFI::SocketRole
-    ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::ErrorHelper
     ZMQ::FFI::Versioner
 );
 
@@ -91,12 +91,19 @@ sub send {
     # 1: data
     # 2: flags
 
+    $_[0]->{last_errno} = 0;
+
     use bytes;
     my $length = length($_[1]);
     no bytes;
 
     if ( -1 == zmq_send($_[0]->_socket, $_[1], $length, ($_[2] // 0)) ) {
-        $_[0]->fatal('zmq_send');
+        $_[0]->{last_errno} = zmq_errno();
+
+        $_[0]->fatal('zmq_send')
+            if $_[0]->die_on_error;
+
+        return;
     }
 }
 
@@ -104,20 +111,35 @@ sub recv {
     # 0: self
     # 1: flags
 
+    $_[0]->{last_errno} = 0;
+
     my $msg_ptr = malloc zmq_msg_t_size;
     zmq_msg_init($msg_ptr);
 
     my $msg_size = zmq_msg_recv($msg_ptr, $_[0]->_socket, $_[1] // 0);
 
-    my $rv = '';
     if ( $msg_size == -1 ) {
-        $_[0]->fatal('zmq_msg_recv');
-    }
-    elsif ($msg_size) {
-        $rv = buffer_to_scalar(zmq_msg_data($msg_ptr), $msg_size);
+        $_[0]->{last_errno} = zmq_errno();
+
+        $_[0]->fatal('zmq_msg_recv')
+            if $_[0]->die_on_error;
+
+        return;
     }
 
-    zmq_msg_close($msg_ptr);
+    my $rv = $msg_size ?
+                buffer_to_scalar(zmq_msg_data($msg_ptr), $msg_size)
+                : '';
+
+    if ( -1 == zmq_msg_close($msg_ptr) ) {
+        $_[0]->{last_errno} = zmq_errno();
+
+        $_[0]->fatal('zmq_msg_close')
+            if $_[0]->die_on_error;
+
+        return;
+    }
+
     return $rv;
 }
 

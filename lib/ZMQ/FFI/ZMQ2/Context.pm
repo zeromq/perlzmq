@@ -11,7 +11,7 @@ use namespace::clean;
 
 with qw(
     ZMQ::FFI::ContextRole
-    ZMQ::FFI::ErrorHandler
+    ZMQ::FFI::ErrorHelper
     ZMQ::FFI::Versioner
 );
 
@@ -66,6 +66,16 @@ sub _load_zmq2_ffi {
         # int zmq_term(void *context)
         'zmq_term' => ['pointer'] => 'int'
     );
+
+    $ffi->attach(
+        # const char *zmq_strerror(int errnum)
+        'zmq_strerror' => ['int'] => 'string'
+    );
+
+    $ffi->attach(
+        # int zmq_errno(void)
+        'zmq_errno' => [] => 'int'
+    );
 }
 
 sub get {
@@ -93,7 +103,6 @@ sub socket {
         ctx          => $self,
         type         => $type,
         soname       => $self->soname,
-        error_helper => $self->error_helper,
     );
 }
 
