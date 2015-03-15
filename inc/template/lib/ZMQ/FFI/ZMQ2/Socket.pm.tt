@@ -110,10 +110,7 @@ sub recv {
     # 1: flags
 
     my $msg_ptr = malloc(zmq_msg_t_size);
-
-    if ( -1 == zmq_msg_init($msg_ptr) ) {
-        $_[0]->fatal('zmq_msg_init');
-    }
+    zmq_msg_init($msg_ptr);
 
     if ( -1 == zmq_recv($_[0]->_socket, $msg_ptr, $_[1] // 0) ) {
         $_[0]->fatal('zmq_recv');
@@ -121,10 +118,6 @@ sub recv {
 
     my $data_ptr  = zmq_msg_data($msg_ptr);
     my $data_size = zmq_msg_size($msg_ptr);
-
-    if ( -1 == $data_size ) {
-        $_[0]->fatal('zmq_msg_size');
-    }
 
     my $rv = '';
     if ($data_size) {
