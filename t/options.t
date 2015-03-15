@@ -63,7 +63,7 @@ sub {
     my $ctx = ZMQ::FFI->new();
     my $s   = $ctx->socket(ZMQ_DEALER);
 
-    my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+    my $endpoint = "ipc://test-zmq-ffi-$$";
     $s->bind($endpoint);
 
     is $s->get(ZMQ_LAST_ENDPOINT, 'string'), $endpoint, 'got last endpoint';

@@ -8,7 +8,7 @@ use ZMQ::Constants qw(ZMQ_REQ);
 
 my $c = ZMQ::FFI->new();
 my $s = $c->socket(ZMQ_REQ);
-$s->connect("ipc://tmp/zmq-ffi-$$");
+$s->connect("ipc://test-zmq-ffi-$$");
 
 my $child_pid = open(FROM_CHILDTEST, '-|') // die "fork failed $!";
 

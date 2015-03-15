@@ -5,7 +5,7 @@ use Test::More;
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = "ipc://test-zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new( threads => 1 );
 
 my $s1 = $ctx->socket(ZMQ_REQ);
