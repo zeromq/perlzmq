@@ -6,7 +6,6 @@ use strict;
 use warnings;
 
 use ZMQ::FFI::Util qw(zmq_soname zmq_version valid_soname);
-use ZMQ::FFI::ErrorHelper;
 use Carp;
 
 sub new {
@@ -20,12 +19,6 @@ sub new {
     else {
         $args{soname} = zmq_soname( die => 1 );
     }
-
-    # explicitly passing in a loaded error helper instance (i.e. zmq error
-    # bindings) guards against the OS X loader clobbering errno, which can
-    # happen if the bindings are loaded lazily
-    $args{error_helper} =
-        ZMQ::FFI::ErrorHelper->new( soname => $args{soname} );
 
     my ($major) = zmq_version($args{soname});
 

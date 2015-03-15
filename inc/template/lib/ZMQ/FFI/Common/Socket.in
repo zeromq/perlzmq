@@ -43,6 +43,10 @@ sub send_multipart {
 
     for my $i (0..$#parts-1) {
         $_[0]->send($parts[$i], ($_[2] // 0) | ZMQ_SNDMORE);
+
+        # don't need to explicitly check die_on_error
+        # since send would have exploded if it was true
+        return if $_[0]->has_error;
     }
 
     $_[0]->send($parts[$#parts], $_[2] // 0);
@@ -53,10 +57,16 @@ sub recv_multipart {
     # 1: flags
 
     my @parts = ( $_[0]->recv($_[1]) );
-    my $type  = ($_[0]->version)[0] == 2 ? 'int64_t' : 'int';
+    return if $_[0]->has_error;
+
+    my $type = ($_[0]->version)[0] == 2 ? 'int64_t' : 'int';
 
     while ( $_[0]->get(ZMQ_RCVMORE, $type) ){
         push @parts, $_[0]->recv($_[1] // 0);
+
+        # don't need to explicitly check die_on_error
+        # since recv would have exploded if it was true
+        return if $_[0]->has_error;
     }
 
     return @parts;
@@ -135,6 +145,11 @@ sub get {
                     \$optval_len
                 )
             );
+
+            if ($self->has_error) {
+                free($optval_ptr);
+                return;
+            }
 
             if ($opt_type eq 'binary') {
                 $optval = buffer_to_scalar($optval_ptr, $optval_len);
@@ -387,6 +402,18 @@ sub _load_common_ffi {
         # int zmq_close(void *socket)
         ['zmq_close' => "${class}::zmq_close"]
             => ['pointer'] => 'int'
+    );
+
+    $ffi->attach(
+        # const char *zmq_strerror(int errnum)
+        ['zmq_strerror' => "${class}::zmq_strerror"]
+            => ['int'] => 'string'
+    );
+
+    $ffi->attach(
+        # int zmq_errno(void)
+        ['zmq_errno' => "${class}::zmq_errno"]
+            => [] => 'int'
     );
 }
 

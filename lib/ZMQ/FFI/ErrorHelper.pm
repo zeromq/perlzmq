@@ -4,44 +4,81 @@ use Carp;
 use FFI::Platypus;
 use ZMQ::FFI::Util qw(zmq_version);
 
-use Moo;
-use namespace::clean;
+use Moo::Role;
 
-has soname => (
-    is       => 'ro',
-    required => 1,
+has die_on_error => (
+    is      => 'rw',
+    default => 1,
 );
 
-has _err_ffi => (
-    is      => 'ro',
+has last_errno => (
+    is      => 'rw',
     lazy    => 1,
-    builder => '_init_err_ffi',
+    default => 0,
 );
 
-sub BUILD {
-    # force init err ffi
-    # need to be sure ffi is loaded before zmq error functions are called,
-    # as on OS X errno can get clobbered if ffi is loaded just in time
+sub last_strerror {
+    my ($self) = @_;
 
-    # initializing in BUILD instead of lazy => 0, as we still need to be sure
-    # to initialize ffi after soname is set
-    $_[0]->_err_ffi;
+    my $strerr;
+    {
+        no strict q/refs/;
+        my $class = ref $self;
+        $strerr   = &{"$class\::zmq_strerror"}($self->last_errno);
+    }
+
+    return $strerr;
+}
+
+sub has_error {
+    return $_[0]->last_errno;
 }
 
 sub check_error {
     my ($self, $func, $rc) = @_;
 
+    $self->{last_errno} = 0;
+
+    my $errno;
+    {
+        no strict q/refs/;
+        my $class = ref $self;
+        $errno    = &{"$class\::zmq_errno"}();
+    }
+
     if ( $rc == -1 ) {
-        $self->fatal($func);
+        $self->{last_errno} = $errno;
+
+        $self->fatal($func)
+            if $self->die_on_error;
     }
 }
 
 sub check_null {
     my ($self, $func, $obj) = @_;
 
-    unless ($obj) {
-        $self->fatal($func);
+    $self->{last_errno} = 0;
+
+    my $errno;
+    {
+        no strict q/refs/;
+        my $class = ref $self;
+        $errno    = &{"$class\::zmq_errno"}();
     }
+
+    unless ($obj) {
+        $self->{last_errno} = $errno;
+
+        $self->fatal($func)
+            if $self->die_on_error;
+    }
+}
+
+sub fatal {
+    my ($self, $func) = @_;
+
+    my $strerr = $self->last_strerror;
+    confess "$func: $strerr";
 }
 
 sub bad_version {
@@ -55,37 +92,6 @@ sub bad_version {
         croak   "$msg\n"
               . "your version: $verstr";
     }
-}
-
-sub fatal {
-    my ($self, $func) = @_;
-
-    my $ffi = $self->_err_ffi;
-
-    my $errno  = $ffi->{zmq_errno}->();
-    my $strerr = $ffi->{zmq_strerror}->($errno);
-
-    confess "$func: $strerr";
-}
-
-sub _init_err_ffi {
-    my ($self) = @_;
-
-    my $soname   = $self->soname;
-    my $ffi_href = {};
-    my $ffi      = FFI::Platypus->new( lib => $soname );
-
-    $ffi_href->{zmq_errno} = $ffi->function(
-        'zmq_errno',
-        [] => 'int'
-    );
-
-    $ffi_href->{zmq_strerror} = $ffi->function(
-        'zmq_strerror',
-        ['int'] => 'string'
-    );
-
-    return $ffi_href;
 }
 
 1;
