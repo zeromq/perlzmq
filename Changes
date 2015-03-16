@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+1.03      2015-03-16 04:47:24-05:00 America/Chicago
+
     - add alternative (non-exceptional) error handling semantics
     - fix socket files being left around after device.t and proxy.t
     - misc doc reformatting and rewording
