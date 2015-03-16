@@ -506,7 +506,7 @@ errors by checking C<last_errno>:
     while (1) {
         my $msg = $s->recv(ZMQ_DONTWAIT);
 
-        if ($s->last_errno && $s->last_errno == EAGAIN) {
+        if ($s->last_errno == EAGAIN) {
             sleep 1;
         }
         elsif ($s->last_errno) {
