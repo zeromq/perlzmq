@@ -11,7 +11,7 @@ has _ctx => (
 # used to make sure we handle fork situations correctly
 has _pid => (
     is      => 'ro',
-    default => $$,
+    default => sub { $$ },
 );
 
 has soname => (

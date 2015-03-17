@@ -31,7 +31,7 @@ has _socket => (
 # used to make sure we handle fork situations correctly
 has _pid => (
     is      => 'ro',
-    default => $$,
+    default => sub { $$ },
 );
 
 has sockopt_sizes => (
