@@ -4,10 +4,12 @@ use warnings;
 use Test::More;
 
 use AnyEvent;
+use EV;
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
 
 my $endpoint = "ipc://test-zmq-ffi-$$";
+
 my @expected = qw(foo bar baz);
 my $ctx      = ZMQ::FFI->new();
 
@@ -15,8 +17,6 @@ my $pull = $ctx->socket(ZMQ_PULL);
 $pull->bind($endpoint);
 
 my $fd = $pull->get_fd();
-
-my $cv = AE::cv;
 
 my $recv = 0;
 my $w = AE::io $fd, 0, sub {
@@ -26,7 +26,7 @@ my $w = AE::io $fd, 0, sub {
 
         $recv++;
         if ($recv == 3) {
-            $cv->send;
+            EV::break();
         }
     }
 };
@@ -46,6 +46,6 @@ $t = AE::timer 0, .1, sub {
     }
 };
 
-$cv->recv;
+EV::run();
 
 done_testing;
