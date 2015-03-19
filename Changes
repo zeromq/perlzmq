@@ -1,6 +1,9 @@
 
 {{$NEXT}}
 
+    - use a default linger of 0 (default used by czmq/jzmq)
+    - don't clobber user linger value (GH#18)
+    - properly localize redefines in tests
     - fix cleanup of ctx/sockets created in forked children
 
 1.03      2015-03-16 04:47:24-05:00 America/Chicago
