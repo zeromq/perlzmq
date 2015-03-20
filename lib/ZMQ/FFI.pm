@@ -348,7 +348,7 @@ does socket unbind on the specified endpoint
 
     $socket->set_linger($millis);
 
-get or set the socket linger period. Default: 1
+get or set the socket linger period. Default: 0 (no linger)
 
 See L</CLEANUP> below
 
@@ -472,7 +472,7 @@ That is:
 
 =over 4
 
-=item * it uses a low linger value (1) by default
+=item * it uses 0 linger by default (this is the default used by L<czmq|https://github.com/zeromq/czmq> and L<jzmq|https://github.com/zeromq/jzmq>)
 
 =item * during object destruction it will call close/destroy for you
 

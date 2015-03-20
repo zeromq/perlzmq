@@ -54,7 +54,7 @@ sub BUILD {
     }
 
     # set default linger
-    $self->set_linger(1);
+    $self->set_linger(0);
 }
 
 ### ZMQ2 API ###

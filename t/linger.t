@@ -30,7 +30,7 @@ local *ZMQ::FFI::ZMQ3::Socket::close = $fake_close;
 use strict;
 use warnings;
 
-is $s->get_linger, 1, "linger is 1 by default";
+is $s->get_linger, 0, "got default linger";
 
 $s->set_linger(42);
 is $s->get_linger, 42, "linger is 42 after set";
