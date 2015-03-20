@@ -291,7 +291,6 @@ sub DEMOLISH {
     my ($self) = @_;
 
     unless ($self->_socket == -1) {
-        $self->set_linger(1);
         $self->close();
     }
 };
