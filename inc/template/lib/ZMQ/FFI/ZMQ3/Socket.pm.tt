@@ -52,6 +52,9 @@ sub BUILD {
     while ( $self->has_pollin ) {
         $self->recv();
     }
+
+    # set default linger
+    $self->set_linger(0);
 }
 
 ### ZMQ3 API ###

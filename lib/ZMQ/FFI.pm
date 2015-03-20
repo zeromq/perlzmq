@@ -270,7 +270,7 @@ set a context option value
 
     my $socket = $ctx->socket(ZMQ_REQ)
 
-returns a socket of the specified type. See L<SOCKET API> below
+returns a socket of the specified type. See L</SOCKET API> below
 
 =head2 proxy
 
@@ -295,15 +295,7 @@ sets up and runs a C<zmq_device> with specified frontend and backend sockets
 destroy the underlying zmq context. In general you shouldn't have to call this
 directly as it is called automatically for you when the object gets reaped
 
-    {
-        my $ctx = ZMQ::FFI->new();
-        ...
-        # destroy implicitly called in destructor at end of scope
-    }
-
-    $ctx->destroy(); # explicitly destroy the context
-
-    undef $ctx;      # ditto
+See L</CLEANUP> below
 
 =head1 SOCKET API
 
@@ -356,7 +348,9 @@ does socket unbind on the specified endpoint
 
     $socket->set_linger($millis);
 
-get or set the current socket linger period
+get or set the socket linger period. Default: 0 (no linger)
+
+See L</CLEANUP> below
 
 =head2 get_identity, set_identity
 
@@ -444,15 +438,7 @@ true/false depending on the state
 close the underlying zmq socket. In general you shouldn't have to call this
 directly as it is called automatically for you when the object gets reaped
 
-    {
-        my $socket = $ctx->socket($type);
-        ...
-        # close called implicitly in destructor at end of scope
-    }
-
-    $socket->close(); # explicitly close socket
-
-    undef $socket;    # ditto
+See L</CLEANUP> below
 
 =head2 die_on_error
 
@@ -461,7 +447,7 @@ directly as it is called automatically for you when the object gets reaped
     $socket->die_on_error(1);
 
 controls whether error handling should be exceptional or not. This is set to
-true by default. See L<ERROR HANDLING> below
+true by default. See L</ERROR HANDLING> below
 
 =head2 has_error
 
@@ -475,12 +461,63 @@ was no error
 
 =head2 last_strerror
 
-returns the system error string associated with the current socket C<errno>
+returns the human readable system error message associated with the socket
+C<last_errno>
+
+=head1 CLEANUP
+
+With respect to cleanup C<ZMQ::FFI> follows either the L<zeromq guide|http://zguide.zeromq.org/page:all#Making-a-Clean-Exit>
+recommendations or the behavior of other zmq bindings.
+That is:
+
+=over 4
+
+=item * it uses 0 linger by default (this is the default used by L<czmq|https://github.com/zeromq/czmq> and L<jzmq|https://github.com/zeromq/jzmq>)
+
+=item * during object destruction it will call close/destroy for you
+
+=item * it arranges the reference hierarchy such that sockets will be properly
+      cleaned up before their associated contexts
+
+=item * it detects fork/thread situations and ensures sockets/contexts are only
+      cleaned up in their originating process/thread
+
+=item * it guards against double closes/destroys
+
+=back
+
+Given the above you're probably better off letting C<ZMQ::FFI> handle cleanup
+for you. But if for some reason you want to do explicit cleanup yourself you
+can. All the below will accomplish the same thing:
+
+    # implicit cleanup
+    {
+        my $context = ZMQ::FFI->new();
+        my $socket  = $ctx->socket($type);
+        ...
+        # close/destroy called in destructors at end of scope
+    }
+
+    # explicit cleanup
+    $socket->close();
+    $context->destroy();
+
+    # ditto
+    undef $socket;
+    undef $context;
+
+Regarding C<linger>, you can always set this to a value you prefer if
+you don't like the default. Once set the new value will be used when the
+socket is subsequently closed (either implicitly or explicitly):
+
+    $socket->set_linger(-1); # infinite linger
+                             # $context->destroy will block forever
+                             # (or until all pending messages have been sent)
 
 =head1 ERROR HANDLING
 
 By default, ZMQ::FFI checks the return codes of underlying zmq functions for
-you, and in the case of an error it will die with the plain english system
+you, and in the case of an error it will die with the human readable system
 error message.
 
     $ctx->socket(-1);

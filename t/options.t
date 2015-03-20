@@ -42,7 +42,7 @@ sub {
     my $ctx = ZMQ::FFI->new();
     my $s   = $ctx->socket(ZMQ_DEALER);
 
-    is $s->get_linger(), -1, 'got default linger';
+    is $s->get_linger(), 0, 'got default linger';
 
     $s->set_linger(42);
     is $s->get_linger(), 42, 'set linger';
