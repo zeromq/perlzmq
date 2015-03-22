@@ -587,7 +587,7 @@ L<https://gist.github.com/calid/17df5bcfb81c83786d6f>
 =head1 BUGS
 
 C<ZMQ::FFI> is free as in beer in addition to being free as in speech. While
-I've done my best to ensure it's high quality beer, it probably isn't perfect.
+I've done my best to ensure it's tasty, high quality beer, it probably isn't perfect.
 If you encounter problems, or otherwise see room for improvement, please open
 an issue (or even better a pull request!) on L<github|https://github.com/calid/zmq-ffi>
 
