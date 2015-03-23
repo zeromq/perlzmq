@@ -103,8 +103,9 @@ sub send {
     if ( -1 == zmq_send($_[0]->_socket, $_[1], $length, ($_[2] // 0)) ) {
         $_[0]->{last_errno} = zmq_errno();
 
-        $_[0]->fatal('zmq_send')
-            if $_[0]->die_on_error;
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_send');
+        }
 
         return;
     }
@@ -124,8 +125,10 @@ sub recv {
     if ( $msg_size == -1 ) {
         $_[0]->{last_errno} = zmq_errno();
 
-        $_[0]->fatal('zmq_msg_recv')
-            if $_[0]->die_on_error;
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_msg_recv');
+        }
+
 
         return;
     }

@@ -49,8 +49,9 @@ sub check_error {
     if ( $rc == -1 ) {
         $self->{last_errno} = $errno;
 
-        $self->fatal($func)
-            if $self->die_on_error;
+        if ($self->die_on_error) {
+            $self->fatal($func)
+        }
     }
 }
 
@@ -69,8 +70,9 @@ sub check_null {
     unless ($obj) {
         $self->{last_errno} = $errno;
 
-        $self->fatal($func)
-            if $self->die_on_error;
+        if ($self->die_on_error) {
+            $self->fatal($func)
+        }
     }
 }
 
