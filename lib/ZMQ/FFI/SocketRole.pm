@@ -35,7 +35,6 @@ has _socket => (
 has _zmq_msg_t => (
     is        => 'ro',
     lazy      => 1,
-    predicate => 'has_zmq_msg_t',
     builder   => '_build_zmq_msg_t',
 );
 

@@ -48,6 +48,9 @@ sub BUILD {
         die $_;
     };
 
+    # force init zmq_msg_t
+    $self->_zmq_msg_t;
+
     # ensure clean edge state
     while ( $self->has_pollin ) {
         $self->recv();
@@ -118,7 +121,7 @@ sub recv {
     $_[0]->{last_errno} = 0;
 
     # retval = msg size
-    my $retval = zmq_msg_recv($_[0]->_zmq_msg_t, $_[0]->_socket, $_[1] // 0);
+    my $retval = zmq_msg_recv($_[0]->{"_zmq_msg_t"}, $_[0]->_socket, $_[1] // 0);
 
     if ( $retval == -1 ) {
         $_[0]->{last_errno} = zmq_errno();
@@ -132,7 +135,7 @@ sub recv {
     }
 
     if ($retval) {
-        return buffer_to_scalar(zmq_msg_data($_[0]->_zmq_msg_t), $retval);
+        return buffer_to_scalar(zmq_msg_data($_[0]->{"_zmq_msg_t"}), $retval);
     }
 
     return '';

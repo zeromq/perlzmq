@@ -48,6 +48,9 @@ sub BUILD {
         die $_;
     };
 
+    # force init zmq_msg_t
+    $self->_zmq_msg_t;
+
     # ensure clean edge state
     while ( $self->has_pollin ) {
         $self->recv();
@@ -94,7 +97,7 @@ sub send {
     ($data_ptr, $data_size) = scalar_to_buffer($data);
     no bytes;
 
-    if ( -1 == zmq_msg_init_size($_[0]->_zmq_msg_t, $data_size) ) {
+    if ( -1 == zmq_msg_init_size($_[0]->{"_zmq_msg_t"}, $data_size) ) {
         $_[0]->{last_errno} = zmq_errno();
 
         if ($_[0]->die_on_error) {
@@ -104,10 +107,10 @@ sub send {
         return;
     }
 
-    my $msg_data_ptr = zmq_msg_data($_[0]->_zmq_msg_t);
+    my $msg_data_ptr = zmq_msg_data($_[0]->{"_zmq_msg_t"});
     memcpy($msg_data_ptr, $data_ptr, $data_size);
 
-    if ( -1 == zmq_send($_[0]->_socket, $_[0]->_zmq_msg_t, $_[2] // 0) ) {
+    if ( -1 == zmq_send($_[0]->_socket, $_[0]->{"_zmq_msg_t"}, $_[2] // 0) ) {
         $_[0]->{last_errno} = zmq_errno();
 
         if ($_[0]->die_on_error) {
@@ -124,7 +127,7 @@ sub recv {
 
     $_[0]->{last_errno} = 0;
 
-    if ( -1 == zmq_recv($_[0]->_socket, $_[0]->_zmq_msg_t, $_[1] // 0) ) {
+    if ( -1 == zmq_recv($_[0]->_socket, $_[0]->{"_zmq_msg_t"}, $_[1] // 0) ) {
         $_[0]->{last_errno} = zmq_errno();
 
         if ($_[0]->die_on_error) {
@@ -135,10 +138,10 @@ sub recv {
     }
 
     # retval = msg size
-    my $retval = zmq_msg_size($_[0]->_zmq_msg_t);
+    my $retval = zmq_msg_size($_[0]->{"_zmq_msg_t"});
 
     if ($retval) {
-        return buffer_to_scalar(zmq_msg_data($_[0]->_zmq_msg_t), $retval);
+        return buffer_to_scalar(zmq_msg_data($_[0]->{"_zmq_msg_t"}), $retval);
     }
 
     return '';
