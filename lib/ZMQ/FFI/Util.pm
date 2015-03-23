@@ -44,7 +44,9 @@ sub zmq_soname {
             undef $soname;
         }
 
-        last FIND_SONAME if $soname;
+        if ($soname) {
+            last FIND_SONAME;
+        }
     }
 
     if ( !$soname && $die ) {

@@ -46,7 +46,9 @@ sub send_multipart {
 
         # don't need to explicitly check die_on_error
         # since send would have exploded if it was true
-        return if $_[0]->has_error;
+        if ($_[0]->has_error) {
+            return;
+        }
     }
 
     $_[0]->send($parts[$#parts], $_[2] // 0);
@@ -57,7 +59,10 @@ sub recv_multipart {
     # 1: flags
 
     my @parts = ( $_[0]->recv($_[1]) );
-    return if $_[0]->has_error;
+
+    if ($_[0]->has_error) {
+        return;
+    }
 
     my $type = ($_[0]->version)[0] == 2 ? 'int64_t' : 'int';
 
@@ -66,7 +71,9 @@ sub recv_multipart {
 
         # don't need to explicitly check die_on_error
         # since recv would have exploded if it was true
-        return if $_[0]->has_error;
+        if ($_[0]->has_error) {
+            return;
+        }
     }
 
     return @parts;
@@ -208,8 +215,11 @@ sub get {
         }
     }
 
-    return if $optval eq '';
-    return $optval;
+    if ($optval ne '') {
+        return $optval;
+    }
+
+    return;
 }
 
 sub set {
@@ -291,6 +301,11 @@ sub DEMOLISH {
     my ($self) = @_;
 
     unless ($self->_socket == -1) {
+        $self->check_error(
+            'zmq_msg_close',
+            zmq_msg_close($self->_zmq_msg_t)
+        );
+
         $self->close();
     }
 };

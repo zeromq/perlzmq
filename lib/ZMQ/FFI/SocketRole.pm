@@ -1,6 +1,9 @@
 package ZMQ::FFI::SocketRole;
 
 use FFI::Platypus;
+use FFI::Platypus::Memory qw(malloc);
+
+use ZMQ::FFI::Constants qw(zmq_msg_t_size);
 
 use Moo::Role;
 
@@ -28,6 +31,13 @@ has _socket => (
     default => -1,
 );
 
+# message struct to reuse when sending/receiving
+has _zmq_msg_t => (
+    is        => 'ro',
+    lazy      => 1,
+    builder   => '_build_zmq_msg_t',
+);
+
 # used to make sure we handle fork situations correctly
 has _pid => (
     is      => 'ro',
@@ -39,6 +49,20 @@ has sockopt_sizes => (
     lazy    => 1,
     builder => '_build_sockopt_sizes'
 );
+
+sub _build_zmq_msg_t {
+    my ($self) = @_;
+
+    my $msg_ptr;
+    {
+        no strict q/refs/;
+        my $class = ref $self;
+        $msg_ptr = malloc(zmq_msg_t_size);
+        &{"$class\::zmq_msg_init"}($msg_ptr);
+    }
+
+    return $msg_ptr;
+}
 
 sub _build_sockopt_sizes {
     my $ffi = FFI::Platypus->new();

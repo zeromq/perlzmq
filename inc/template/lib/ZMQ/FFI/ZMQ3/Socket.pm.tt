@@ -48,6 +48,9 @@ sub BUILD {
         die $_;
     };
 
+    # force init zmq_msg_t
+    $self->_zmq_msg_t;
+
     # ensure clean edge state
     while ( $self->has_pollin ) {
         $self->recv();
@@ -103,8 +106,9 @@ sub send {
     if ( -1 == zmq_send($_[0]->_socket, $_[1], $length, ($_[2] // 0)) ) {
         $_[0]->{last_errno} = zmq_errno();
 
-        $_[0]->fatal('zmq_send')
-            if $_[0]->die_on_error;
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_send');
+        }
 
         return;
     }
@@ -116,34 +120,25 @@ sub recv {
 
     $_[0]->{last_errno} = 0;
 
-    my $msg_ptr = malloc zmq_msg_t_size;
-    zmq_msg_init($msg_ptr);
+    # retval = msg size
+    my $retval = zmq_msg_recv($_[0]->{"_zmq_msg_t"}, $_[0]->_socket, $_[1] // 0);
 
-    my $msg_size = zmq_msg_recv($msg_ptr, $_[0]->_socket, $_[1] // 0);
-
-    if ( $msg_size == -1 ) {
+    if ( $retval == -1 ) {
         $_[0]->{last_errno} = zmq_errno();
 
-        $_[0]->fatal('zmq_msg_recv')
-            if $_[0]->die_on_error;
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_msg_recv');
+        }
+
 
         return;
     }
 
-    my $rv = $msg_size ?
-                buffer_to_scalar(zmq_msg_data($msg_ptr), $msg_size)
-                : '';
-
-    if ( -1 == zmq_msg_close($msg_ptr) ) {
-        $_[0]->{last_errno} = zmq_errno();
-
-        $_[0]->fatal('zmq_msg_close')
-            if $_[0]->die_on_error;
-
-        return;
+    if ($retval) {
+        return buffer_to_scalar(zmq_msg_data($_[0]->{"_zmq_msg_t"}), $retval);
     }
 
-    return $rv;
+    return '';
 }
 
 sub disconnect {

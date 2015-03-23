@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - more performance improvements, incl. 30% faster recv rate in some tests
+      see 83f0013, f834fe9, and 394e164
     - use a default linger of 0 (default used by czmq/jzmq)
     - don't clobber user linger value (GH#18)
     - properly localize redefines in tests
