@@ -301,6 +301,13 @@ sub DEMOLISH {
     my ($self) = @_;
 
     unless ($self->_socket == -1) {
+        if ($self->has_zmq_msg_t) {
+            $self->check_error(
+                'zmq_msg_close',
+                zmq_msg_close($self->_zmq_msg_t)
+            );
+        }
+
         $self->close();
     }
 };
