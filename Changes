@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+1.04      2015-03-24 03:02:20-05:00 America/Chicago
+
     - require FFI::Platypus 0.33 which fixes potential segfaults during global
       destruction (GH#19)
     - don't install on unthreaded BSD perls (GH#13)
