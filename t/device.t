@@ -9,6 +9,7 @@ use ZMQ::FFI::Constants qw(ZMQ_STREAMER ZMQ_PUSH ZMQ_PULL);
 use ZMQ::FFI::Util qw(zmq_version);
 
 use Time::HiRes q(usleep);
+use POSIX ":sys_wait_h";
 
 my $server_address = "ipc://test-zmq-ffi-$$-front";
 my $worker_address = "ipc://test-zmq-ffi-$$-back";
@@ -76,8 +77,11 @@ subtest 'device', sub {
 
 if ($device) {
     # tear down the device
-    kill TERM => $device;
-    waitpid $device, 0;
+    do {
+        # see the reason for this workaround in proxy.t
+
+        kill TERM => $device;
+    } while (waitpid($device, WNOHANG) > 0);
 }
 
 done_testing;
