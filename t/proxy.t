@@ -7,6 +7,7 @@ use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
 
 use Time::HiRes q(usleep);
+use POSIX ":sys_wait_h";
 
 my $server_address = "ipc://test-zmq-ffi-$$-front";
 my $worker_address = "ipc://test-zmq-ffi-$$-back";
@@ -56,8 +57,17 @@ subtest 'proxy', sub {
 };
 
 # tear down the proxy
-kill TERM => $proxy;
-waitpid $proxy, 0;
+do {
+    # XXX
+    # Occasionally the TERM signal handler does not actually fire, even
+    # though kill returns 1 (indicating the child was successfully signaled).
+    # As a result waitpid blocks, hanging the test.
+    #
+    # As a workaround until the problem is understood, check waitpid in a loop
+    # and kill until the process actually exits
+
+    kill TERM => $proxy;
+} while (waitpid($proxy, WNOHANG) > 0);
 
 done_testing;
 
