@@ -1,6 +1,11 @@
 
 {{$NEXT}}
 
+    - Add 4.1 to xt/test_versions.sh
+    - Add missing 4.1 stable constants. Update constants generation script
+      to handle hex constant values.
+    - Add workaround for hang in device.t and proxy.t
+
 1.06      2015-03-28 11:30:15-05:00 America/Chicago
 
     - Update FreeBSD check
