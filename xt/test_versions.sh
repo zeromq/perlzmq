@@ -10,43 +10,34 @@ function zmq_version {
     )
 }
 
+function buildzmq {
+    version="$1"
+    tmpdir=`mktemp -d`
+    if [[ "$version" == "libzmq" ]]; then
+        git clone "https://github.com/zeromq/libzmq.git" $tmpdir
+    else
+        git clone "https://github.com/zeromq/zeromq${version}.git" $tmpdir
+    fi
+    ( cd $tmpdir
+        ./autogen.sh
+        ./configure --without-libsodium
+        make -j2 )
+    export LD_LIBRARY_PATH=$tmpdir/src/.libs
+}
+
 function travis_test {
-    major_version=$1
+    test_version=$1
 
     # install the libzmq version we need
-    case $major_version in
-
-        2)
-            wget https://launchpad.net/ubuntu/+archive/primary/+files/libzmq1_2.1.11-1ubuntu1_amd64.deb -qO /tmp/libzmq1.deb
-            sudo dpkg -i /tmp/libzmq1.deb
-            ;;
-        3)
-            sudo add-apt-repository -y ppa:bpaquet/zeromq3-precise
-            sudo apt-get -y update
-            sudo apt-get -y install libzmq1
-            ;;
-        4)
-            sudo add-apt-repository -y ppa:bpaquet/zeromq4-precise
-            sudo apt-get -y update
-            sudo apt-get -y install libzmq1
-            ;;
-
-        devel)
-            tmpdir=`mktemp -d`
-            git clone https://github.com/zeromq/libzmq.git $tmpdir
-            ( cd $tmpdir
-              ./autogen.sh
-              ./configure --without-libsodium
-              make -j2 )
-            export LD_LIBRARY_PATH=$tmpdir/src/.libs
-            ;;
-    esac
+    buildzmq $test_version
 
     # sanity test
     ver=($(zmq_version))
-    if [[ "${ver[0]}" != "$major_version" && "$major_version" != "devel" ]];
+    realmajor=${ver[0]}
+    testmajor="$(echo $test_version | sed -e "s/-x//")"
+    if [[ "$realmajor" != "$testmajor" && "$test_version" != "libzmq" ]];
     then
-        echo "unexpected version ${ver[0]} != $major_version"
+        echo "unexpected major version $realmajor != $testmajor"
         exit 1
     fi
 
@@ -57,16 +48,13 @@ function travis_test {
 }
 
 function local_test {
-    major_version=$1
+    test_version=$1
 
-    case $major_version in
-        [2-4])
-            export LD_LIBRARY_PATH="$HOME/git/zeromq$1-x/src/.libs"
-            ;;
-        devel)
-            export LD_LIBRARY_PATH="$HOME/git/libzmq/src/.libs"
-            ;;
-    esac
+    if [[ "$test_version" == "libzmq" ]]; then
+        export LD_LIBRARY_PATH="$HOME/git/libzmq/src/.libs"
+    else
+        export LD_LIBRARY_PATH="$HOME/git/zeromq$test_version/src/.libs"
+    fi
 
     echo -e "\nTesting zeromq" \
         "$(zmq_version | tr ' ' '.')"
@@ -81,7 +69,7 @@ function run_prove {
     LANG=fr_FR.utf8 prove -lvr t
 }
 
-for v in 2 3 4 devel
+for v in "2-x" "3-x" "4-x" "4-1" "libzmq"
 do
     if [[ -n $TRAVIS ]]
     then
