@@ -25,28 +25,6 @@ function buildzmq {
     export LD_LIBRARY_PATH=$tmpdir/src/.libs
 }
 
-function travis_test {
-    test_version=$1
-
-    # install the libzmq version we need
-    buildzmq $test_version
-
-    # sanity test
-    ver=($(zmq_version))
-    realmajor=${ver[0]}
-    testmajor="$(echo $test_version | sed -e "s/-x//")"
-    if [[ "$realmajor" != "$testmajor" && "$test_version" != "libzmq" ]];
-    then
-        echo "unexpected major version $realmajor != $testmajor"
-        exit 1
-    fi
-
-    echo -e "\nTesting zeromq" \
-        "$(echo ${ver[@]} | tr ' ' '.')"
-
-    run_prove
-}
-
 function local_test {
     test_version=$1
 
@@ -71,24 +49,13 @@ function run_prove {
 
 for v in "2-x" "3-x" "4-x" "4-1" "libzmq"
 do
-    if [[ -n $TRAVIS ]]
-    then
-        travis_test $v
-    else
-        local_test $v
-    fi
+    local_test $v
 done
 
 # extra test to verify sonames arg is honored
-if [[ -z $TRAVIS ]]
-then
-    LD_LIBRARY_PATH="$HOME/git/zeromq2-x/src/.libs:"
-    LD_LIBRARY_PATH+="$HOME/git/zeromq3-x/src/.libs:"
-    export LD_LIBRARY_PATH
-else
-    sudo dpkg -i /tmp/libzmq1.deb
-    sudo apt-get -y install libzmq3
-fi
+LD_LIBRARY_PATH="$HOME/git/zeromq2-x/src/.libs:"
+LD_LIBRARY_PATH+="$HOME/git/zeromq3-x/src/.libs:"
+export LD_LIBRARY_PATH
 
 PERL5LIB=lib:$PERL5LIB perl xt/sonames.pl
 
