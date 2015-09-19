@@ -11,8 +11,8 @@ use List::Util q(max);
 
 my @versions;
 my %zmq_constants;
-for my $major (2,3,4) {
-    chdir "$ENV{HOME}/git/zeromq$major-x";
+for my $stable ('2-x','3-x','4-x','4-1') {
+    chdir "$ENV{HOME}/git/zeromq$stable";
 
     for my $version (qx(git tag)) {
         chomp $version;
@@ -21,10 +21,15 @@ for my $major (2,3,4) {
         my %constants =
             map  { split '\s+' }
             grep { !/ZMQ_VERSION/ }
-            grep { /\b(ZMQ_[^ ]+\s+\d+)/; $_ = $1; }
+            grep { /\b(ZMQ_[^ ]+\s+(0x)?\d+)/; $_ = $1; }
             qx(git show $version:include/zmq.h);
 
         while ( my ($constant,$value) = each %constants ) {
+
+            # handle hex values
+            if ( $value =~ m/^0x/ ) {
+                $value = hex($value);
+            }
 
             if ( exists $zmq_constants{$constant} && $constant !~ m/DFLT/ ) {
                 my $oldvalue   = $zmq_constants{$constant}->[0];
@@ -60,9 +65,9 @@ while ( my ($constant,$data) = each %zmq_constants ) {
 my @zmq_h_versions;
 my @zmq_msg_sizes;
 
-for my $major (2,3,4) {
+for my $stable ('2-x','3-x','4-x','4-1') {
     push @zmq_h_versions,
-            "$ENV{HOME}/git/zeromq$major-x/include/zmq.h";
+            "$ENV{HOME}/git/zeromq$stable/include/zmq.h";
 }
 
 push @zmq_h_versions, "$ENV{HOME}/git/libzmq/include/zmq.h";
