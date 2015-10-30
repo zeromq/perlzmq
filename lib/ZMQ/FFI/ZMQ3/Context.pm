@@ -151,7 +151,7 @@ sub destroy {
     );
 
     $self->_ctx(-1);
-};
+}
 
 sub DEMOLISH {
     my ($self) = @_;

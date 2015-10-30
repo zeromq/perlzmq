@@ -308,7 +308,7 @@ sub DEMOLISH {
 
         $self->close();
     }
-};
+}
 
 sub _load_common_ffi {
     my ($soname) = @_;
