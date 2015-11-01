@@ -13,7 +13,7 @@ my $THREAD_COUNT = 10;
 
 my $can_use_threads = eval 'use threads; 1';
 if (!$can_use_threads) {
-    plan skip_all => 'This Perl not build to support threads';
+    plan skip_all => 'This Perl not built to support threads';
 }
 else {
     # three tests per thread plus NoWarnings test
