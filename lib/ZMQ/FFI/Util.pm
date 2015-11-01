@@ -13,6 +13,7 @@ use Sub::Exporter -setup => {
         zmq_soname
         zmq_version
         valid_soname
+        current_tid
     )],
 };
 
@@ -95,6 +96,17 @@ sub valid_soname {
     );
 
     return defined $zmq_version;
+}
+
+sub current_tid {
+    if (eval 'use threads; 1') {
+        require threads;
+        threads->import();
+        return threads->tid;
+    }
+    else {
+        return -1;
+    }
 }
 
 1;
