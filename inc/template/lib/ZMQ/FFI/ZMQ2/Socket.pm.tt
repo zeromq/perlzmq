@@ -167,3 +167,5 @@ sub unbind {
 
 [% zmq_common_api %]
 1;
+
+# vim:ft=perl
