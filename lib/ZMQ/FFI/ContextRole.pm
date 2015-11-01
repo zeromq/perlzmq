@@ -2,6 +2,8 @@ package ZMQ::FFI::ContextRole;
 
 use Moo::Role;
 
+use ZMQ::FFI::Util qw(current_tid);
+
 # real underlying zmq ctx pointer
 has _ctx => (
     is      => 'rw',
@@ -12,6 +14,12 @@ has _ctx => (
 has _pid => (
     is      => 'ro',
     default => sub { $$ },
+);
+
+# used to make sure we handle thread situations correctly
+has _tid => (
+    is      => 'ro',
+    default => sub { current_tid() },
 );
 
 has soname => (

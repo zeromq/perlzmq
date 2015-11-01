@@ -1,7 +1,7 @@
 package ZMQ::FFI::ZMQ2::Context;
 
 use FFI::Platypus;
-use ZMQ::FFI::Util qw(zmq_soname);
+use ZMQ::FFI::Util qw(zmq_soname current_tid);
 use ZMQ::FFI::Constants qw(ZMQ_STREAMER);
 use ZMQ::FFI::ZMQ2::Socket;
 use Try::Tiny;
@@ -136,7 +136,10 @@ sub device {
 sub destroy {
     my ($self) = @_;
 
-    # don't try to cleanup context cloned from another process (fork)
+    # don't try to cleanup context cloned from another thread
+    return unless $self->_tid == current_tid();
+
+    # don't try to cleanup context copied from another process (fork)
     return unless $self->_pid == $$;
 
     $self->check_error(

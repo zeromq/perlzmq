@@ -4,6 +4,7 @@ use FFI::Platypus;
 use FFI::Platypus::Memory qw(malloc);
 
 use ZMQ::FFI::Constants qw(zmq_msg_t_size);
+use ZMQ::FFI::Util qw(current_tid);
 
 use Moo::Role;
 
@@ -42,6 +43,12 @@ has _zmq_msg_t => (
 has _pid => (
     is      => 'ro',
     default => sub { $$ },
+);
+
+# used to make sure we handle thread situations correctly
+has _tid => (
+    is      => 'ro',
+    default => sub { current_tid() },
 );
 
 has sockopt_sizes => (

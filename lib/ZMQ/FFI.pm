@@ -30,7 +30,7 @@ sub new {
         require ZMQ::FFI::ZMQ3::Context;
         return ZMQ::FFI::ZMQ3::Context->new(%args);
     }
-};
+}
 
 1;
 

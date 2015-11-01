@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - Fix cleanup handling when using Perl threads
+
 1.07      2015-09-19 12:38:32-05:00 America/Chicago
 
     - Add 4.1 to xt/test_versions.sh

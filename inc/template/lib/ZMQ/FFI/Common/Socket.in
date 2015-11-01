@@ -1,6 +1,8 @@
 
 ### ZMQ COMMON API ###
 
+use ZMQ::FFI::Util qw(current_tid);
+
 sub connect {
     my ($self, $endpoint) = @_;
 
@@ -286,7 +288,15 @@ sub set {
 sub close {
     my ($self) = @_;
 
-    # don't try to cleanup socket cloned from another process (fork)
+    # don't try to cleanup socket or zmq_msg_t cloned from another thread
+    return unless $self->_tid == current_tid();
+
+    $self->check_error(
+        'zmq_msg_close',
+        zmq_msg_close($self->_zmq_msg_t)
+    );
+
+    # don't try to cleanup socket copied from another process (fork)
     return unless $self->_pid == $$;
 
     $self->check_error(
@@ -301,14 +311,9 @@ sub DEMOLISH {
     my ($self) = @_;
 
     unless ($self->_socket == -1) {
-        $self->check_error(
-            'zmq_msg_close',
-            zmq_msg_close($self->_zmq_msg_t)
-        );
-
         $self->close();
     }
-};
+}
 
 sub _load_common_ffi {
     my ($soname) = @_;
