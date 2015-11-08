@@ -38,6 +38,14 @@ function local_test {
         "$(zmq_version | tr ' ' '.')"
 
     run_prove
+
+    # extra test to check that out-of-order cleanup during global destruction
+    # is handled and doesn't cause a program hang
+    PERL5LIB=lib:$PERL5LIB timeout 1 perl xt/gc_global_destruction.pl \
+        || (\
+            echo "xt/gc_global_destruction.pl timed out during cleanup" >&2 \
+            && exit 1 \
+           )
 }
 
 function run_prove {
