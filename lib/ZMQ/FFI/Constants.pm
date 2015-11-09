@@ -285,7 +285,7 @@ __END__
 
 This module includes every zmq constant from every stable version of zeromq.
 Currently that is v2.1.0-v4.1.3.  It was generated using the zeromq2-x,
-zeromq3-x, and zeromq4-x git repos at L<https://github.com/zeromq>.
+zeromq3-x, zeromq4-x, and zeromq4-1 git repos at L<https://github.com/zeromq>.
 
 =head1 SEE ALSO
 
