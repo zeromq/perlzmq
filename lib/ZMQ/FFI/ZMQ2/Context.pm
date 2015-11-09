@@ -136,6 +136,8 @@ sub device {
 sub destroy {
     my ($self) = @_;
 
+    return if $self->_ctx == -1;
+
     # don't try to cleanup context cloned from another thread
     return unless $self->_tid == current_tid();
 
@@ -153,9 +155,9 @@ sub destroy {
 sub DEMOLISH {
     my ($self) = @_;
 
-    unless ($self->_ctx == -1) {
-        $self->destroy();
-    }
+    return if $self->_ctx == -1;
+
+    $self->destroy();
 }
 
 1;

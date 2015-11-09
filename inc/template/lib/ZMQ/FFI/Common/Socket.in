@@ -288,6 +288,8 @@ sub set {
 sub close {
     my ($self) = @_;
 
+    return if $self->_socket == -1;
+
     # don't try to cleanup socket or zmq_msg_t cloned from another thread
     return unless $self->_tid == current_tid();
 
@@ -310,9 +312,9 @@ sub close {
 sub DEMOLISH {
     my ($self) = @_;
 
-    unless ($self->_socket == -1) {
-        $self->close();
-    }
+    return if $self->_socket == -1;
+
+    $self->close();
 }
 
 sub _load_common_ffi {
