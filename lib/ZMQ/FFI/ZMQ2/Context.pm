@@ -38,11 +38,11 @@ sub BUILD {
     }
 
     try {
-        $self->_ctx( zmq_init($self->threads) );
-        $self->check_null('zmq_init', $self->_ctx);
+        $self->context_ptr( zmq_init($self->threads) );
+        $self->check_null('zmq_init', $self->context_ptr);
     }
     catch {
-        $self->_ctx(-1);
+        $self->context_ptr(-1);
         die $_;
     };
 }
@@ -55,6 +55,11 @@ sub _load_zmq2_ffi {
     $ffi->attach(
         # void *zmq_init(int io_threads)
         'zmq_init' => ['int'] => 'pointer'
+    );
+
+    $ffi->attach(
+        # void *zmq_socket(void *context, int type)
+        'zmq_socket' => ['pointer', 'int'] => 'pointer'
     );
 
     $ffi->attach(
@@ -99,11 +104,26 @@ sub set {
 sub socket {
     my ($self, $type) = @_;
 
-    return ZMQ::FFI::ZMQ2::Socket->new(
-        ctx          => $self,
-        type         => $type,
-        soname       => $self->soname,
-    );
+    my $socket;
+
+    try {
+        my $socket_ptr = zmq_socket($self->context_ptr, $type);
+
+        $self->check_null('zmq_socket', $socket_ptr);
+
+        $socket = ZMQ::FFI::ZMQ2::Socket->new(
+            socket_ptr   => $socket_ptr,
+            type         => $type,
+            soname       => $self->soname,
+        );
+    }
+    catch {
+        die $_;
+    };
+
+    push @{$self->sockets}, $socket;
+
+    return $socket;
 }
 
 # zeromq v2 does not provide zmq_proxy
@@ -120,7 +140,7 @@ sub proxy {
 
     $self->check_error(
         'zmq_device',
-        zmq_device(ZMQ_STREAMER, $frontend->_socket, $backend->_socket)
+        zmq_device(ZMQ_STREAMER, $frontend->socket_ptr, $backend->socket_ptr)
     );
 }
 
@@ -129,14 +149,14 @@ sub device {
 
     $self->check_error(
         'zmq_device',
-        zmq_device($type, $frontend->_socket, $backend->_socket)
+        zmq_device($type, $frontend->socket_ptr, $backend->socket_ptr)
     );
 }
 
 sub destroy {
     my ($self) = @_;
 
-    return if $self->_ctx == -1;
+    return if $self->context_ptr == -1;
 
     # don't try to cleanup context cloned from another thread
     return unless $self->_tid == current_tid();
@@ -146,16 +166,25 @@ sub destroy {
 
     $self->check_error(
         'zmq_term',
-        zmq_term($self->_ctx)
+        zmq_term($self->context_ptr)
     );
 
-    $self->_ctx(-1);
+    $self->context_ptr(-1);
 }
 
 sub DEMOLISH {
     my ($self) = @_;
 
-    return if $self->_ctx == -1;
+    return if $self->context_ptr == -1;
+
+    # check defined to guard against
+    # undef objects during global destruction
+    if (defined $self->sockets) {
+        for my $socket (@{$self->sockets}) {
+            $socket->close()
+                if defined $socket && $socket->socket_ptr != -1;
+        }
+    }
 
     $self->destroy();
 }

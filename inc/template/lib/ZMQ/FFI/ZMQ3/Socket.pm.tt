@@ -34,20 +34,6 @@ sub BUILD {
         $FFI_LOADED = 1;
     }
 
-    try {
-        # XXX
-        # not clear why this is necessary, but the setter doesn't actually
-        # take affect if you directly nest the zmq_socket call in the _socket
-        # call... some Class::XSAccessor weirdness/bug? Need to investigate.
-        my $s = zmq_socket($self->ctx->_ctx, $self->type);
-        $self->_socket($s);
-        $self->check_null('zmq_socket', $self->_socket);
-    }
-    catch {
-        $self->_socket(-1);
-        die $_;
-    };
-
     # force init zmq_msg_t
     $self->_zmq_msg_t;
 
@@ -103,7 +89,7 @@ sub send {
     my $length = length($_[1]);
     no bytes;
 
-    if ( -1 == zmq_send($_[0]->_socket, $_[1], $length, ($_[2] // 0)) ) {
+    if ( -1 == zmq_send($_[0]->socket_ptr, $_[1], $length, ($_[2] // 0)) ) {
         $_[0]->{last_errno} = zmq_errno();
 
         if ($_[0]->die_on_error) {
@@ -121,7 +107,7 @@ sub recv {
     $_[0]->{last_errno} = 0;
 
     # retval = msg size
-    my $retval = zmq_msg_recv($_[0]->{"_zmq_msg_t"}, $_[0]->_socket, $_[1] // 0);
+    my $retval = zmq_msg_recv($_[0]->{"_zmq_msg_t"}, $_[0]->socket_ptr, $_[1] // 0);
 
     if ( $retval == -1 ) {
         $_[0]->{last_errno} = zmq_errno();
@@ -150,7 +136,7 @@ sub disconnect {
 
     $self->check_error(
         'zmq_disconnect',
-        zmq_disconnect($self->_socket, $endpoint)
+        zmq_disconnect($self->socket_ptr, $endpoint)
     );
 }
 
@@ -163,7 +149,7 @@ sub unbind {
 
     $self->check_error(
         'zmq_unbind',
-        zmq_unbind($self->_socket, $endpoint)
+        zmq_unbind($self->socket_ptr, $endpoint)
     );
 }
 

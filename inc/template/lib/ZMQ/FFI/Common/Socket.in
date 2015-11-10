@@ -12,7 +12,7 @@ sub connect {
 
     $self->check_error(
         'zmq_connect',
-        zmq_connect($self->_socket, $endpoint)
+        zmq_connect($self->socket_ptr, $endpoint)
     );
 }
 
@@ -25,7 +25,7 @@ sub bind {
 
     $self->check_error(
         'zmq_bind',
-        zmq_bind($self->_socket, $endpoint)
+        zmq_bind($self->socket_ptr, $endpoint)
     );
 }
 
@@ -148,7 +148,7 @@ sub get {
             $self->check_error(
                 'zmq_getsockopt',
                 zmq_getsockopt_binary(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     $optval_ptr,
                     \$optval_len
@@ -178,7 +178,7 @@ sub get {
             $self->check_error(
                 'zmq_getsockopt',
                 zmq_getsockopt_int(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     \$optval,
                     \$optval_len
@@ -191,7 +191,7 @@ sub get {
             $self->check_error(
                 'zmq_getsockopt',
                 zmq_getsockopt_int64(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     \$optval,
                     \$optval_len
@@ -204,7 +204,7 @@ sub get {
             $self->check_error(
                 'zmq_getsockopt',
                 zmq_getsockopt_uint64(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     \$optval,
                     \$optval_len
@@ -233,7 +233,7 @@ sub set {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_binary(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     $optval_ptr,
                     $optval_len
@@ -245,7 +245,7 @@ sub set {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_int(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     \$optval,
                     $self->sockopt_sizes->{'int'}
@@ -257,7 +257,7 @@ sub set {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_int64(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     \$optval,
                     $self->sockopt_sizes->{'sint64'}
@@ -269,7 +269,7 @@ sub set {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_uint64(
-                    $self->_socket,
+                    $self->socket_ptr,
                     $opt,
                     \$optval,
                     $self->sockopt_sizes->{'uint64'}
@@ -288,7 +288,7 @@ sub set {
 sub close {
     my ($self) = @_;
 
-    return if $self->_socket == -1;
+    return if $self->socket_ptr == -1;
 
     # don't try to cleanup socket or zmq_msg_t cloned from another thread
     return unless $self->_tid == current_tid();
@@ -303,16 +303,16 @@ sub close {
 
     $self->check_error(
         'zmq_close',
-        zmq_close($self->_socket)
+        zmq_close($self->socket_ptr)
     );
 
-    $self->_socket(-1);
+    $self->socket_ptr(-1);
 }
 
 sub DEMOLISH {
     my ($self) = @_;
 
-    return if $self->_socket == -1;
+    return if $self->socket_ptr == -1;
 
     $self->close();
 }
@@ -322,12 +322,6 @@ sub _load_common_ffi {
 
     my $ffi   = FFI::Platypus->new( lib => $soname );
     my $class = caller;
-
-    $ffi->attach(
-        # void *zmq_socket(void *context, int type)
-        ['zmq_socket' => "${class}::zmq_socket"]
-            => ['pointer', 'int'] => 'pointer'
-    );
 
     # for get/set sockopt create ffi functions for each possible opt type
 

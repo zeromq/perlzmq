@@ -31,11 +31,11 @@ sub BUILD {
         # take affect if you directly nest the zmq_ctx_new call in the _ctx
         # call... some Class::XSAccessor weirdness/bug? Need to investigate.
         my $c = zmq_ctx_new();
-        $self->_ctx($c);
-        $self->check_null('zmq_ctx_new', $self->_ctx);
+        $self->context_ptr($c);
+        $self->check_null('zmq_ctx_new', $self->context_ptr);
     }
     catch {
-        $self->_ctx(-1);
+        $self->context_ptr(-1);
         die $_;
     };
 
@@ -69,6 +69,11 @@ sub _load_zmq3_ffi {
     );
 
     $ffi->attach(
+        # void *zmq_socket(void *context, int type)
+        'zmq_socket' => ['pointer', 'int'] => 'pointer'
+    );
+
+    $ffi->attach(
         # int zmq_proxy(const void *front, const void *back, const void *cap)
         'zmq_proxy' => ['pointer', 'pointer', 'pointer'] => 'int'
     );
@@ -92,7 +97,7 @@ sub _load_zmq3_ffi {
 sub get {
     my ($self, $option) = @_;
 
-    my $option_val = zmq_ctx_get($self->_ctx, $option);
+    my $option_val = zmq_ctx_get($self->context_ptr, $option);
     $self->check_error('zmq_ctx_get', $option_val);
 
     return $option_val;
@@ -103,18 +108,33 @@ sub set {
 
     $self->check_error(
         'zmq_ctx_set',
-        zmq_ctx_set($self->_ctx, $option, $option_val)
+        zmq_ctx_set($self->context_ptr, $option, $option_val)
     );
 }
 
 sub socket {
     my ($self, $type) = @_;
 
-    return ZMQ::FFI::ZMQ3::Socket->new(
-        ctx          => $self,
-        type         => $type,
-        soname       => $self->soname,
-    );
+    my $socket;
+
+    try {
+        my $socket_ptr = zmq_socket($self->context_ptr, $type);
+
+        $self->check_null('zmq_socket', $socket_ptr);
+
+        $socket = ZMQ::FFI::ZMQ3::Socket->new(
+            socket_ptr   => $socket_ptr,
+            type         => $type,
+            soname       => $self->soname,
+        );
+    }
+    catch {
+        die $_;
+    };
+
+    push @{$self->sockets}, $socket;
+
+    return $socket;
 }
 
 sub proxy {
@@ -123,9 +143,9 @@ sub proxy {
     $self->check_error(
         'zmq_proxy',
         zmq_proxy(
-            $frontend->_socket,
-            $backend->_socket,
-            defined $capture ? $capture->_socket : undef,
+            $frontend->socket_ptr,
+            $backend->socket_ptr,
+            defined $capture ? $capture->socket_ptr : undef,
         )
     );
 }
@@ -142,7 +162,7 @@ sub device {
 sub destroy {
     my ($self) = @_;
 
-    return if $self->_ctx == -1;
+    return if $self->context_ptr == -1;
 
     # don't try to cleanup context cloned from another thread
     return unless $self->_tid == current_tid();
@@ -152,16 +172,25 @@ sub destroy {
 
     $self->check_error(
         'zmq_ctx_destroy',
-        zmq_ctx_destroy($self->_ctx)
+        zmq_ctx_destroy($self->context_ptr)
     );
 
-    $self->_ctx(-1);
+    $self->context_ptr(-1);
 }
 
 sub DEMOLISH {
     my ($self) = @_;
 
-    return if $self->_ctx == -1;
+    return if $self->context_ptr == -1;
+
+    # check defined to guard against
+    # undef objects during global destruction
+    if (defined $self->sockets) {
+        for my $socket (@{$self->sockets}) {
+            $socket->close()
+                if defined $socket && $socket->socket_ptr != -1;
+        }
+    }
 
     $self->destroy();
 }
