@@ -290,16 +290,16 @@ sub close {
 
     return if $self->socket_ptr == -1;
 
-    # don't try to cleanup socket or zmq_msg_t cloned from another thread
+    # don't try to cleanup socket cloned from another thread
     return unless $self->_tid == current_tid();
+
+    # don't try to cleanup socket copied from another process (fork)
+    return unless $self->_pid == $$;
 
     $self->check_error(
         'zmq_msg_close',
         zmq_msg_close($self->_zmq_msg_t)
     );
-
-    # don't try to cleanup socket copied from another process (fork)
-    return unless $self->_pid == $$;
 
     $self->check_error(
         'zmq_close',
