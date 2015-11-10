@@ -17,57 +17,67 @@ my ($major) = zmq_version;
 if ($major == 2) {
     no warnings q/redefine/;
 
-    local *ZMQ::FFI::ZMQ2::Context::DEMOLISH = sub {
-        push @gc_stack, 'ctx'
+    local *ZMQ::FFI::ZMQ2::Context::destroy = sub {
+        my ($self) = @_;
+        $self->context_ptr(-1);
+        push @gc_stack, 'destroy'
     };
 
-    local *ZMQ::FFI::ZMQ2::Socket::DEMOLISH = sub {
-        push @gc_stack, 'socket'
+    local *ZMQ::FFI::ZMQ2::Socket::close = sub {
+        my ($self) = @_;
+        $self->socket_ptr(-1);
+        push @gc_stack, 'close'
     };
 
     use warnings;
 
-    usesocket();
+    mkcontext();
 
     is_deeply
         \@gc_stack,
-        ['socket', 'ctx'],
+        ['close', 'close', 'close', 'destroy'],
         q(socket reaped before context);
 }
 else {
     no warnings q/redefine/;
 
-    local *ZMQ::FFI::ZMQ3::Context::DEMOLISH = sub {
-        push @gc_stack, 'ctx'
+    local *ZMQ::FFI::ZMQ3::Context::destroy = sub {
+        my ($self) = @_;
+        $self->context_ptr(-1);
+        push @gc_stack, 'destroy'
     };
 
-    local *ZMQ::FFI::ZMQ3::Socket::DEMOLISH  = sub {
-        push @gc_stack, 'socket'
+    local *ZMQ::FFI::ZMQ3::Socket::close  = sub {
+        my ($self) = @_;
+        $self->socket_ptr(-1);
+        push @gc_stack, 'close'
     };
 
     use warnings;
 
-    usesocket();
+    mkcontext();
 
     is_deeply
         \@gc_stack,
-        ['socket', 'ctx'],
-        q(socket reaped before context);
+        ['close', 'close', 'close', 'destroy'],
+        q(sockets closed before context destroyed);
 }
 
-sub usesocket {
-    my $s = mksocket();
+sub mkcontext {
+    my $context = ZMQ::FFI->new();
 
-    # socket should get reaped, then ctx
+    mksockets($context);
     return;
 }
 
-sub mksocket {
-    my $ctx = ZMQ::FFI->new();
-    my $s = $ctx->socket(ZMQ_REQ);
+sub mksockets {
+    my ($context) = @_;
 
-    # ctx should not get reaped
-    return $s;
+    my $s1 = $context->socket(ZMQ_REQ);
+    my $s2 = $context->socket(ZMQ_REQ);
+    my $s3 = $context->socket(ZMQ_REQ);
+
+    return;
 }
 
 done_testing;
