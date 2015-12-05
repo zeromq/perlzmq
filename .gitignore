@@ -3,3 +3,4 @@ ZMQ-FFI-*/
 .build/
 lib/ZMQ/FFI/ZMQ2/Socket.pm
 lib/ZMQ/FFI/ZMQ3/Socket.pm
+lib/ZMQ/FFI/Constants.pm

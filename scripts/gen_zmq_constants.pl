@@ -4,15 +4,21 @@ use strict;
 use warnings;
 use feature 'say';
 
+use Path::Class qw(file);
 use FFI::TinyCC;
 use FFI::Platypus;
 use List::Util q(max);
+use autodie qw(system);
 
+my $constants_pm = 'lib/ZMQ/FFI/Constants.pm';
+say "Generating '$constants_pm'";
+$constants_pm = file($constants_pm)->absolute;
 
 my @versions;
 my %zmq_constants;
 for my $stable ('2-x','3-x','4-x','4-1') {
     chdir "$ENV{HOME}/git/zeromq$stable";
+    system('git pull');
 
     for my $version (qx(git tag)) {
         chomp $version;
@@ -150,4 +156,4 @@ zeromq3-x, zeromq4-x, and zeromq4-1 git repos at L<https://github.com/zeromq>.
 
 END
 
-print $module;
+$constants_pm->spew($module);
