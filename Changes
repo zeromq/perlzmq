@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - add more robust cleanup handling for ooo global destruction scenarios.
+
 1.08      2015-11-07 10:47:10-06:00 America/Chicago
 
     - Fix cleanup handling when using Perl threads
