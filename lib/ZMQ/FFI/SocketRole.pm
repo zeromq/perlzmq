@@ -13,13 +13,6 @@ has soname => (
     required => 1,
 );
 
-# context to associate socket instance with.
-# reference necessary to guard against premature object destruction
-has ctx => (
-    is       => 'ro',
-    required => 1,
-);
-
 # zmq constant socket type, e.g. ZMQ_REQ
 has type => (
     is       => 'ro',
@@ -27,7 +20,7 @@ has type => (
 );
 
 # real underlying zmq socket pointer
-has _socket => (
+has socket_ptr => (
     is      => 'rw',
     default => -1,
 );

@@ -4,8 +4,8 @@ use Moo::Role;
 
 use ZMQ::FFI::Util qw(current_tid);
 
-# real underlying zmq ctx pointer
-has _ctx => (
+# real underlying zmq context pointer
+has context_ptr => (
     is      => 'rw',
     default => -1,
 );
@@ -35,6 +35,12 @@ has threads => (
 has max_sockets => (
     is        => 'ro',
     predicate => 'has_max_sockets',
+);
+
+has sockets => (
+    is        => 'rw',
+    lazy      => 1,
+    default   => sub { [] },
 );
 
 requires qw(

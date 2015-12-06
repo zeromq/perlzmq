@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Warnings;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ);
@@ -21,7 +22,7 @@ my $fake_close = sub {
     $self->set_linger(0);
 
     my $class = ref $self;
-    &{"$class\::zmq_close"}($self->_socket);
+    &{"$class\::zmq_close"}($self->socket_ptr);
 };
 
 local *ZMQ::FFI::ZMQ2::Socket::close = $fake_close;

@@ -3,6 +3,7 @@ use warnings;
 
 use utf8;
 use Test::More;
+use Test::Warnings;
 use List::Util qw(sum);
 
 use ZMQ::FFI;

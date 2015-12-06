@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Warnings;
 use Sys::SigAction qw(timeout_call);
 
 use ZMQ::FFI;

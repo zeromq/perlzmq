@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Warnings;
 use Math::BigInt;
 
 use ZMQ::FFI;

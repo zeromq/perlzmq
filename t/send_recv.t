@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Warnings;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
@@ -22,12 +23,12 @@ is
     'received message';
 
 $s1->close();
-is $s1->_socket, -1, 's1 socket ptr set to -1 after explicit close';
+is $s1->socket_ptr, -1, 's1 socket ptr set to -1 after explicit close';
 
 $s2->close();
-is $s2->_socket, -1, 's2 socket ptr set to -1 after explicit close';
+is $s2->socket_ptr, -1, 's2 socket ptr set to -1 after explicit close';
 
 $ctx->destroy();
-is $ctx->_ctx, -1, 'ctx ptr set to -1 after explicit destroy';
+is $ctx->context_ptr, -1, 'ctx ptr set to -1 after explicit destroy';
 
 done_testing;
