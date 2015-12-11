@@ -368,17 +368,23 @@ get the file descriptor associated with the socket
 
 =head2 get
 
+    my $option_value = $socket->get($option_name, $option_type);
+
     my $linger = $socket->get(ZMQ_LINGER, 'int');
 
-return the value for the specified socket option. C<$option_type> is the type
-associated with the option value in the zeromq API (C<zmq_getsockopt> man page)
+generic method to get the value for any socket option. C<$option_type> is the
+type associated with C<$option_value> in the zeromq API (C<zmq_getsockopt> man
+page)
 
 =head2 set
 
+    $socket->set($option_name, $option_type, $option_value);
+
     $socket->set(ZMQ_IDENTITY, 'binary', 'foo');
 
-set the socket option to the specified value. C<$option_type> is the type
-associated with the option value in the zeromq API (C<zmq_setsockopt> man page)
+generic method to set the value for any socket option.  C<$option_type> is the
+type associated with C<$option_value> in the zeromq API (C<zmq_setsockopt> man
+page)
 
 =head2 subscribe
 
