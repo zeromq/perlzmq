@@ -99,6 +99,11 @@ sub _load_zmq4_ffi {
         # int zmq_curve_keypair (char *z85_public_key, char *z85_secret_key);
         'zmq_curve_keypair' => ['opaque', 'opaque'] => 'int'
     );
+    
+    $ffi->attach(
+        # int zmq_has (const char *capability);
+        'zmq_has' => ['string'] => 'int'
+    );
 }
 
 sub curve_keypair {
@@ -108,8 +113,8 @@ sub curve_keypair {
     my $secret_key_buf = malloc(41);
 
     $self->check_error(
-	'zmq_curve_keypair',
-	zmq_curve_keypair($public_key_buf, $secret_key_buf)
+	    'zmq_curve_keypair',
+	    zmq_curve_keypair($public_key_buf, $secret_key_buf)
     );
     
     my $public_key = buffer_to_scalar($public_key_buf, 41);
@@ -118,6 +123,21 @@ sub curve_keypair {
     free($secret_key_buf);
     
     return ($public_key, $secret_key);
+}
+
+sub has_capability {
+    my ($self, $capability) = @_;
+    
+    my (undef, $minor) = $self->version();
+    if ($minor < 1) {
+        $self->bad_version(
+            $self->verstr,
+            "has_capability not available in zmq 4.0"
+        );   
+    } 
+    else {
+        return zmq_has($capability);
+    }
 }
 
 sub get {
