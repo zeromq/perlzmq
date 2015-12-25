@@ -294,6 +294,25 @@ I<zmq 2.x only>
 
 sets up and runs a C<zmq_device> with specified frontend and backend sockets
 
+=head2 curve_keypair
+
+I<requires zmq E<gt>= 4.x compiled with libsodium>
+
+    my ($public_key, $secret_key) = $ctx->curve_keypair();
+
+generates a new public and secret key pair for use with Curve encryption
+
+=head2 has_capability
+
+I<requires zmq E<gt>= 4.1>
+
+    if ($ctx->has_capability('curve')) {
+        # ...
+    }
+
+abstracts the C<zmq_has> method for determining the capabilities of the
+underlying zmq library
+
 =head2 destroy
 
 destroy the underlying zmq context. In general you shouldn't have to call this
