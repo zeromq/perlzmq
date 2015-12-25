@@ -113,8 +113,8 @@ sub curve_keypair {
     my $secret_key_buf = malloc(41);
 
     $self->check_error(
-	    'zmq_curve_keypair',
-	    zmq_curve_keypair($public_key_buf, $secret_key_buf)
+	'zmq_curve_keypair',
+	zmq_curve_keypair($public_key_buf, $secret_key_buf)
     );
     
     my $public_key = buffer_to_scalar($public_key_buf, 41);
