@@ -26,9 +26,13 @@ sub new {
         require ZMQ::FFI::ZMQ2::Context;
         return ZMQ::FFI::ZMQ2::Context->new(%args);
     }
-    else {
+    elsif ($major == 3) {
         require ZMQ::FFI::ZMQ3::Context;
         return ZMQ::FFI::ZMQ3::Context->new(%args);
+    }
+    else {
+        require ZMQ::FFI::ZMQ4::Context;
+        return ZMQ::FFI::ZMQ4::Context->new(%args);
     }
 }
 
