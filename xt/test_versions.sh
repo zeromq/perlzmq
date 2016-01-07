@@ -10,21 +10,6 @@ function zmq_version {
     )
 }
 
-function buildzmq {
-    version="$1"
-    tmpdir=`mktemp -d`
-    if [[ "$version" == "libzmq" ]]; then
-        git clone "https://github.com/zeromq/libzmq.git" $tmpdir
-    else
-        git clone "https://github.com/zeromq/zeromq${version}.git" $tmpdir
-    fi
-    ( cd $tmpdir
-        ./autogen.sh
-        ./configure --without-libsodium
-        make -j2 )
-    export LD_LIBRARY_PATH=$tmpdir/src/.libs
-}
-
 function local_test {
     test_version=$1
 
