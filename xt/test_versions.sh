@@ -10,14 +10,30 @@ function zmq_version {
     )
 }
 
+function get_ld_dir {
+    repodir="$HOME/git/$1"
+
+    libzmq="$(find $repodir -type l -name libzmq.so)"
+
+    if test -z "$libzmq"; then
+        echo "No libzmq.so found in $repodir" >&2
+        return
+    fi
+
+    libzmq_dir="$(dirname $libzmq)"
+    echo "$libzmq_dir"
+}
+
 function local_test {
     test_version=$1
 
     if [[ "$test_version" == "libzmq" ]]; then
-        export LD_LIBRARY_PATH="$HOME/git/libzmq/src/.libs"
+        export LD_LIBRARY_PATH="$(get_ld_dir libzmq)"
     else
-        export LD_LIBRARY_PATH="$HOME/git/zeromq$test_version/src/.libs"
+        export LD_LIBRARY_PATH="$(get_ld_dir zeromq$test_version)"
     fi
+
+    test -z "$LD_LIBRARY_PATH" && exit 1
 
     echo -e "\nTesting zeromq" \
         "$(zmq_version | tr ' ' '.')"
@@ -46,8 +62,8 @@ do
 done
 
 # extra test to verify sonames arg is honored
-LD_LIBRARY_PATH="$HOME/git/zeromq2-x/src/.libs:"
-LD_LIBRARY_PATH+="$HOME/git/zeromq3-x/src/.libs:"
+LD_LIBRARY_PATH="$(get_ld_dir zeromq2-x)"
+LD_LIBRARY_PATH+=":$(get_ld_dir zeromq3-x)"
 export LD_LIBRARY_PATH
 
 PERL5LIB=lib:$PERL5LIB perl xt/sonames.pl
