@@ -462,4 +462,6 @@ sub _load_common_ffi {
     );
 }
 
+1;
+
 # vim:ft=perl
