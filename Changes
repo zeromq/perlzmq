@@ -1,6 +1,9 @@
 
 {{$NEXT}}
 
+    - don't execute operations on closed sockets and emit appropriate warnings
+      (GH#23)
+
 1.09      2015-12-09 04:55:20-06:00 America/Chicago
 
     - add more robust cleanup handling for ooo global destruction scenarios.
