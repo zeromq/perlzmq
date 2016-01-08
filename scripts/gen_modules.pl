@@ -16,9 +16,18 @@ my @templates = (
 
 my $common_ffi = file('inc/template/lib/ZMQ/FFI/Common/Socket.in');
 
+my $closed_socket_check = <<'END';
+
+    if ($_[0]->socket_ptr == -1) {
+        carp "Operation on closed socket";
+        return;
+    }
+END
+
 my $vars = {
-    date           => split("\n", scalar(qx{date -u})),
-    zmq_common_api => scalar $common_ffi->slurp()
+    date                => split("\n", scalar(qx{date -u})),
+    zmq_common_api      => scalar $common_ffi->slurp(),
+    closed_socket_check => $closed_socket_check,
 };
 
 for my $template (@templates) {
@@ -31,6 +40,7 @@ for my $template (@templates) {
     my $output;
 
     $tt->process(\$input, $vars, \$output);
+    $tt->process(\$output, $vars, \$output);
 
     say "Generating '$target'\n\tfrom '$template'\n\tusing $common_ffi";
     $target->spew($output);

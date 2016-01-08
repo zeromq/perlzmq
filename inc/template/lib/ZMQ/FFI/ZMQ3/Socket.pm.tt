@@ -8,7 +8,7 @@ use FFI::Platypus;
 use FFI::Platypus::Buffer;
 use FFI::Platypus::Memory qw(malloc free memcpy);
 use ZMQ::FFI::Constants qw(:all);
-use Carp;
+use Carp qw(croak carp);
 use Try::Tiny;
 
 use Moo;
@@ -83,6 +83,8 @@ sub send {
     # 1: data
     # 2: flags
 
+    [% closed_socket_check %]
+
     $_[0]->{last_errno} = 0;
 
     use bytes;
@@ -103,6 +105,8 @@ sub send {
 sub recv {
     # 0: self
     # 1: flags
+
+    [% closed_socket_check %]
 
     $_[0]->{last_errno} = 0;
 
@@ -130,6 +134,8 @@ sub recv {
 sub disconnect {
     my ($self, $endpoint) = @_;
 
+    [% closed_socket_check %]
+
     unless ($endpoint) {
         croak 'usage: $socket->disconnect($endpoint)';
     }
@@ -142,6 +148,8 @@ sub disconnect {
 
 sub unbind {
     my ($self, $endpoint) = @_;
+
+    [% closed_socket_check %]
 
     unless ($endpoint) {
         croak 'usage: $socket->unbind($endpoint)';

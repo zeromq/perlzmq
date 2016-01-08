@@ -6,6 +6,8 @@ use ZMQ::FFI::Util qw(current_tid);
 sub connect {
     my ($self, $endpoint) = @_;
 
+    [% closed_socket_check %]
+
     unless ($endpoint) {
         croak 'usage: $socket->connect($endpoint)';
     }
@@ -18,6 +20,8 @@ sub connect {
 
 sub bind {
     my ($self, $endpoint) = @_;
+
+    [% closed_socket_check %]
 
     unless ($endpoint) {
         croak 'usage: $socket->bind($endpoint)'
@@ -37,6 +41,8 @@ sub send_multipart {
     # 0: self
     # 1: partsref
     # 2: flags
+
+    [% closed_socket_check %]
 
     my @parts = @{$_[1] // []};
     unless (@parts) {
@@ -60,6 +66,8 @@ sub recv_multipart {
     # 0: self
     # 1: flags
 
+    [% closed_socket_check %]
+
     my @parts = ( $_[0]->recv($_[1]) );
 
     if ($_[0]->has_error) {
@@ -82,31 +90,43 @@ sub recv_multipart {
 }
 
 sub get_fd {
+    [% closed_socket_check %]
+
     return $_[0]->get(ZMQ_FD, 'int');
 }
 
 sub set_linger {
     my ($self, $linger) = @_;
 
+    [% closed_socket_check %]
+
     $self->set(ZMQ_LINGER, 'int', $linger);
 }
 
 sub get_linger {
+    [% closed_socket_check %]
+
     return $_[0]->get(ZMQ_LINGER, 'int');
 }
 
 sub set_identity {
     my ($self, $id) = @_;
 
+    [% closed_socket_check %]
+
     $self->set(ZMQ_IDENTITY, 'binary', $id);
 }
 
 sub get_identity {
+    [% closed_socket_check %]
+
     return $_[0]->get(ZMQ_IDENTITY, 'binary');
 }
 
 sub subscribe {
     my ($self, $topic) = @_;
+
+    [% closed_socket_check %]
 
     $self->set(ZMQ_SUBSCRIBE, 'binary', $topic);
 }
@@ -114,19 +134,27 @@ sub subscribe {
 sub unsubscribe {
     my ($self, $topic) = @_;
 
+    [% closed_socket_check %]
+
     $self->set(ZMQ_UNSUBSCRIBE, 'binary', $topic);
 }
 
 sub has_pollin {
+    [% closed_socket_check %]
+
     return $_[0]->get(ZMQ_EVENTS, 'int') & ZMQ_POLLIN;
 }
 
 sub has_pollout {
+    [% closed_socket_check %]
+
     return $_[0]->get(ZMQ_EVENTS, 'int') & ZMQ_POLLOUT;
 }
 
 sub get {
     my ($self, $opt, $opt_type) = @_;
+
+    [% closed_socket_check %]
 
     my $optval;
     my $optval_len;
@@ -227,6 +255,8 @@ sub get {
 sub set {
     my ($self, $opt, $opt_type, $optval) = @_;
 
+    [% closed_socket_check %]
+
     for ($opt_type) {
         when (/^(binary|string)$/) {
             my ($optval_ptr, $optval_len) = scalar_to_buffer($optval);
@@ -288,7 +318,7 @@ sub set {
 sub close {
     my ($self) = @_;
 
-    return if $self->socket_ptr == -1;
+    [% closed_socket_check %]
 
     # don't try to cleanup socket cloned from another thread
     return unless $self->_tid == current_tid();
