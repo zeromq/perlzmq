@@ -81,8 +81,8 @@ sub _load_zmq4_ffi {
     );
 
     $ffi->attach(
-        # int zmq_ctx_destroy (void *context)
-        'zmq_ctx_destroy' => ['pointer'] => 'int'
+        # int zmq_ctx_term (void *context)
+        'zmq_ctx_term' => ['pointer'] => 'int'
     );
 
     $ffi->attach(
@@ -217,8 +217,8 @@ sub destroy {
     return unless $self->_pid == $$;
 
     $self->check_error(
-        'zmq_ctx_destroy',
-        zmq_ctx_destroy($self->context_ptr)
+        'zmq_ctx_term',
+        zmq_ctx_term($self->context_ptr)
     );
 
     $self->context_ptr(-1);

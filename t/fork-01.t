@@ -56,7 +56,7 @@ else {
         $parent_s_closed = 1;
     };
 
-    local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_destroy = sub {
+    local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_term = sub {
         $parent_c_destroyed = 1;
     };
 
