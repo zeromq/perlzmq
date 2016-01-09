@@ -8,8 +8,7 @@ use Test::Exception;
 use FFI::Platypus;
 use Errno qw(EINVAL EAGAIN);
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(:all);
+use ZMQ::FFI qw(:all);
 use ZMQ::FFI::Util qw(zmq_soname);
 
 subtest 'socket errors' => sub {

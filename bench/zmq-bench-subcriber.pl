@@ -2,8 +2,7 @@ use v5.10;
 use strict;
 use warnings;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_SUB);
+use ZMQ::FFI qw(ZMQ_SUB);
 use Try::Tiny;
 
 my $count = 0;

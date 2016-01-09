@@ -5,8 +5,7 @@ use Test::More;
 use Test::Deep;
 use Test::Warnings qw(warnings);
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ);
+use ZMQ::FFI qw(ZMQ_REQ);
 use ZMQ::FFI::SocketRole;
 
 my @socket_methods = ZMQ::FFI::SocketRole->meta->get_required_method_list();

@@ -6,8 +6,7 @@ use Test::More;
 
 use Time::HiRes qw(usleep);
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_ROUTER);
+use ZMQ::FFI qw(ZMQ_REQ ZMQ_ROUTER);
 
 my $THREAD_COUNT = 10;
 

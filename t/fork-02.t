@@ -4,8 +4,7 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ);
+use ZMQ::FFI qw(ZMQ_REQ);
 
 #
 # Test that we _do_ clean up contexts/sockets created in forked children

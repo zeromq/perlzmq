@@ -5,8 +5,7 @@ use Test::More;
 use Test::Warnings;
 use Sys::SigAction qw(timeout_call);
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ);
+use ZMQ::FFI qw(ZMQ_REQ);
 
 subtest 'close with unsent messages', sub {
     my $timed_out = timeout_call 5, sub {

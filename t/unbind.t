@@ -4,8 +4,7 @@ use Test::More;
 use Test::Warnings;
 use Test::Exception;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP ZMQ_LAST_ENDPOINT);
+use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP ZMQ_LAST_ENDPOINT);
 
 my $e = "ipc://test-zmq-ffi-$$";
 

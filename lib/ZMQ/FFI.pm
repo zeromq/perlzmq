@@ -8,6 +8,15 @@ use warnings;
 use ZMQ::FFI::Util qw(zmq_soname zmq_version valid_soname);
 use Carp;
 
+use Import::Into;
+
+sub import {
+    my ($pkg, @import_args) = @_;
+
+    my $target = caller;
+    ZMQ::FFI::Constants->import::into($target, @import_args);
+}
+
 sub new {
     my ($self, %args) = @_;
 
@@ -41,8 +50,7 @@ __END__
     #### send/recv ####
 
     use v5.10;
-    use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
+    use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP);
 
     my $endpoint = "ipc://zmq-ffi-$$";
     my $ctx      = ZMQ::FFI->new();
@@ -62,8 +70,7 @@ __END__
     #### pub/sub ####
 
     use v5.10;
-    use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_PUB ZMQ_SUB);
+    use ZMQ::FFI qw(ZMQ_PUB ZMQ_SUB);
     use Time::HiRes q(usleep);
 
     my $endpoint = "ipc://zmq-ffi-$$";
@@ -113,8 +120,7 @@ __END__
     #### multipart ####
 
     use v5.10;
-    use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_DEALER ZMQ_ROUTER);
+    use ZMQ::FFI qw(ZMQ_DEALER ZMQ_ROUTER);
 
     my $endpoint = "ipc://zmq-ffi-$$";
     my $ctx      = ZMQ::FFI->new();
@@ -136,8 +142,7 @@ __END__
     #### nonblocking ####
 
     use v5.10;
-    use ZMQ::FFI;
-    use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
+    use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
     use AnyEvent;
     use EV;
 

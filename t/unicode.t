@@ -6,8 +6,7 @@ use Test::More;
 use Test::Warnings;
 use List::Util qw(sum);
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
+use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
 my $endpoint = "ipc://test-zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new();
