@@ -11,7 +11,8 @@ my $tt = Template::Tiny->new();
 
 my @socket_templates = (
     file('inc/template/lib/ZMQ/FFI/ZMQ2/Socket.pm.tt'),
-    file('inc/template/lib/ZMQ/FFI/ZMQ3/Socket.pm.tt')
+    file('inc/template/lib/ZMQ/FFI/ZMQ3/Socket.pm.tt'),
+    file('inc/template/lib/ZMQ/FFI/ZMQ4/Socket.pm.tt')
 );
 
 my $common_tt = file('inc/template/lib/ZMQ/FFI/Common/Socket.tt');

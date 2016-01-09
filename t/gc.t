@@ -9,6 +9,7 @@ use ZMQ::FFI::ZMQ2::Socket;
 use ZMQ::FFI::ZMQ3::Context;
 use ZMQ::FFI::ZMQ3::Socket;
 use ZMQ::FFI::ZMQ4::Context;
+use ZMQ::FFI::ZMQ4::Socket;
 
 use ZMQ::FFI::Constants qw(ZMQ_REQ);
 use ZMQ::FFI::Util qw(zmq_version);
@@ -73,7 +74,7 @@ else {
         push @gc_stack, 'destroy'
     };
 
-    local *ZMQ::FFI::ZMQ3::Socket::close  = sub {
+    local *ZMQ::FFI::ZMQ4::Socket::close  = sub {
         my ($self) = @_;
         $self->socket_ptr(-1);
         push @gc_stack, 'close'

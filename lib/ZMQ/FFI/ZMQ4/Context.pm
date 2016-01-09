@@ -5,7 +5,7 @@ use FFI::Platypus::Buffer;
 use FFI::Platypus::Memory qw(malloc free);
 use ZMQ::FFI::Util qw(zmq_soname current_tid);
 use ZMQ::FFI::Constants qw(ZMQ_IO_THREADS ZMQ_MAX_SOCKETS);
-use ZMQ::FFI::ZMQ3::Socket;
+use ZMQ::FFI::ZMQ4::Socket;
 use Try::Tiny;
 
 use Moo;
@@ -28,12 +28,7 @@ sub BUILD {
     }
 
     try {
-        # XXX
-        # not clear why this is necessary, but the setter doesn't actually
-        # take affect if you directly nest the zmq_ctx_new call in the _ctx
-        # call... some Class::XSAccessor weirdness/bug? Need to investigate.
-        my $c = zmq_ctx_new();
-        $self->context_ptr($c);
+        $self->context_ptr( zmq_ctx_new() );
         $self->check_null('zmq_ctx_new', $self->context_ptr);
     }
     catch {
@@ -106,40 +101,6 @@ sub _load_zmq4_ffi {
     );
 }
 
-sub curve_keypair {
-    my ($self) = @_;
-
-    my $public_key_buf = malloc(41);
-    my $secret_key_buf = malloc(41);
-
-    $self->check_error(
-	'zmq_curve_keypair',
-	zmq_curve_keypair($public_key_buf, $secret_key_buf)
-    );
-    
-    my $public_key = buffer_to_scalar($public_key_buf, 41);
-    my $secret_key = buffer_to_scalar($secret_key_buf, 41);
-    free($public_key_buf);
-    free($secret_key_buf);
-    
-    return ($public_key, $secret_key);
-}
-
-sub has_capability {
-    my ($self, $capability) = @_;
-    
-    my (undef, $minor) = $self->version();
-    if ($minor < 1) {
-        $self->bad_version(
-            $self->verstr,
-            "has_capability not available in zmq 4.0"
-        );   
-    } 
-    else {
-        return zmq_has($capability);
-    }
-}
-
 sub get {
     my ($self, $option) = @_;
 
@@ -168,7 +129,7 @@ sub socket {
 
         $self->check_null('zmq_socket', $socket_ptr);
 
-        $socket = ZMQ::FFI::ZMQ3::Socket->new(
+        $socket = ZMQ::FFI::ZMQ4::Socket->new(
             socket_ptr   => $socket_ptr,
             type         => $type,
             soname       => $self->soname,
@@ -222,6 +183,40 @@ sub destroy {
     );
 
     $self->context_ptr(-1);
+}
+
+sub curve_keypair {
+    my ($self) = @_;
+
+    my $public_key_buf = malloc(41);
+    my $secret_key_buf = malloc(41);
+
+    $self->check_error(
+	'zmq_curve_keypair',
+	zmq_curve_keypair($public_key_buf, $secret_key_buf)
+    );
+    
+    my $public_key = buffer_to_scalar($public_key_buf, 41);
+    my $secret_key = buffer_to_scalar($secret_key_buf, 41);
+    free($public_key_buf);
+    free($secret_key_buf);
+    
+    return ($public_key, $secret_key);
+}
+
+sub has_capability {
+    my ($self, $capability) = @_;
+    
+    my (undef, $minor) = $self->version();
+    if ($minor < 1) {
+        $self->bad_version(
+            $self->verstr,
+            "has_capability not available in zmq 4.0"
+        );   
+    } 
+    else {
+        return zmq_has($capability);
+    }
 }
 
 sub DEMOLISH {

@@ -79,7 +79,7 @@ if ($child_pid) {
     else {
         no warnings qw/redefine once/;
 
-        local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
+        local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
             $parent_s_closed = 1;
         };
 
@@ -162,7 +162,7 @@ else {
     else {
         no warnings qw/redefine once/;
 
-        local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
+        local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
             $child_s_closed = 1;
         };
 

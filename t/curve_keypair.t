@@ -47,16 +47,27 @@ if ($major == 4) {
                 'received message';
             
         } else {
-            # libsodium is not installed
+            # zmq >= 4.1 - libsodium is not installed, do nothing
         }
     } else {
-        # zmq 4.0 (can't assume libsodium is installed)
+        # zmq == 4.0 - can't assume libsodium is installed or uninstalled
+	# so we can't run the curve_keypair() method
+	
+	# verify that has capability is not implemented before 4.1
+	throws_ok { $c->has_capability() }
+	            qr'has_capability not available in zmq',
+                    'threw unimplemented error for < 4.1';
     }
 } 
 else {
+    # zmq < 4.x - curve keypair and has capability are not implemented
     throws_ok { $c->curve_keypair() }
                 qr'curve_keypair not available in zmq',
-                'threw unimplemented error for < 4.x';
+                'threw unimplemented error for < 4.x';   
+
+    throws_ok { $c->has_capability() }
+                qr'has_capability not available in zmq',
+                'threw unimplemented error for < 4.1';
 }
 
 done_testing;

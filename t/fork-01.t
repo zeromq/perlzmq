@@ -51,7 +51,7 @@ elsif ($major == 3) {
 else {
     no warnings qw/redefine once/;
 
-    local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
+    local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
         $parent_s_closed = 1;
     };
 
