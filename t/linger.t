@@ -4,8 +4,7 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ);
+use ZMQ::FFI qw(ZMQ_REQ);
 
 my $ctx = ZMQ::FFI->new();
 my $s   = $ctx->socket(ZMQ_REQ);

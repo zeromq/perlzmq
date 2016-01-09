@@ -1,8 +1,7 @@
 use strict;
 use warnings;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ);
+use ZMQ::FFI qw(ZMQ_REQ);
 
 my $context = ZMQ::FFI->new();
 my $socket = $context->socket(ZMQ_REQ);

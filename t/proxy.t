@@ -4,8 +4,7 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
+use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
 use Time::HiRes q(usleep);
 use POSIX ":sys_wait_h";

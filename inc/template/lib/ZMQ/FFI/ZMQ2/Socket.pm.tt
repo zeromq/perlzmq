@@ -8,7 +8,7 @@ use FFI::Platypus;
 use FFI::Platypus::Buffer;
 use FFI::Platypus::Memory qw(malloc free memcpy);
 use ZMQ::FFI::Constants qw(:all);
-use Carp;
+use Carp qw(croak carp);
 use Try::Tiny;
 
 use Moo;
@@ -73,6 +73,8 @@ sub send {
     # 1: data
     # 2: flags
 
+    [% closed_socket_check %]
+
     my $data_ptr;
     my $data_size;
     my $data = $_[1];
@@ -111,6 +113,8 @@ sub recv {
     # 0: self
     # 1: flags
 
+    [% closed_socket_check %]
+
     $_[0]->{last_errno} = 0;
 
     if ( -1 == zmq_recv($_[0]->socket_ptr, $_[0]->{"_zmq_msg_t"}, $_[1] // 0) ) {
@@ -136,6 +140,8 @@ sub recv {
 sub disconnect {
     my ($self) = @_;
 
+    [% closed_socket_check %]
+
     $self->bad_version(
         $self->verstr,
         "disconnect not available in zmq 2.x"
@@ -145,13 +151,12 @@ sub disconnect {
 sub unbind {
     my ($self) = @_;
 
+    [% closed_socket_check %]
+
     $self->bad_version(
         $self->verstr,
         "unbind not available in zmq 2.x"
     );
 }
-
-[% zmq_common_api %]
-1;
 
 # vim:ft=perl

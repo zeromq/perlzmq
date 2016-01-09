@@ -5,8 +5,7 @@ use Test::More;
 use Test::Warnings;
 use Test::Exception;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_STREAMER ZMQ_PUSH ZMQ_PULL);
+use ZMQ::FFI qw(ZMQ_STREAMER ZMQ_PUSH ZMQ_PULL);
 use ZMQ::FFI::Util qw(zmq_version);
 
 use Time::HiRes q(usleep);

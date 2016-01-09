@@ -5,8 +5,7 @@ use Test::More;
 use Test::Warnings;
 use Math::BigInt;
 
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(:all);
+use ZMQ::FFI qw(:all);
 use ZMQ::FFI::Util qw(zmq_version);
 
 subtest 'ctx version',

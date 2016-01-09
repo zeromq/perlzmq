@@ -11,8 +11,7 @@ ZMQ::FFI is implemented using [FFI::Platypus](https://github.com/plicease/FFI-Pl
 #### send/recv ####
 ```perl
 use v5.10;
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP);
+use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP);
 
 my $endpoint = "ipc://zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new();
@@ -32,8 +31,7 @@ say $s2->recv();
 #### pub/sub ####
 ```perl
 use v5.10;
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_PUB ZMQ_SUB);
+use ZMQ::FFI qw(ZMQ_PUB ZMQ_SUB);
 use Time::HiRes q(usleep);
 
 my $endpoint = "ipc://zmq-ffi-$$";
@@ -83,8 +81,7 @@ $p->bind($endpoint);
 #### multipart ####
 ```perl
 use v5.10;
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_DEALER ZMQ_ROUTER);
+use ZMQ::FFI qw(ZMQ_DEALER ZMQ_ROUTER);
 
 my $endpoint = "ipc://zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new();
@@ -106,8 +103,7 @@ say join ' ', $r->recv_multipart;
 #### nonblocking ####
 ```perl
 use v5.10;
-use ZMQ::FFI;
-use ZMQ::FFI::Constants qw(ZMQ_PUSH ZMQ_PULL);
+use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 use AnyEvent;
 use EV;
 
