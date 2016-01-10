@@ -172,6 +172,24 @@ sub destroy {
     $self->context_ptr(-1);
 }
 
+sub curve_keypair {
+    my ($self) = @_;
+
+    $self->bad_version(
+        $self->verstr,
+        "curve_keypair not available in zmq 2.x"
+    );
+}
+
+sub has_capability {
+    my ($self) = @_;
+    
+    $self->bad_version(
+        $self->verstr,
+        "has_capability not available in zmq 2.x"
+    );
+}
+
 sub DEMOLISH {
     my ($self) = @_;
 

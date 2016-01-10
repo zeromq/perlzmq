@@ -1,9 +1,11 @@
-package ZMQ::FFI::ZMQ3::Context;
+package ZMQ::FFI::ZMQ4::Context;
 
 use FFI::Platypus;
+use FFI::Platypus::Buffer;
+use FFI::Platypus::Memory qw(malloc free);
 use ZMQ::FFI::Util qw(zmq_soname current_tid);
 use ZMQ::FFI::Constants qw(ZMQ_IO_THREADS ZMQ_MAX_SOCKETS);
-use ZMQ::FFI::ZMQ3::Socket;
+use ZMQ::FFI::ZMQ4::Socket;
 use Try::Tiny;
 
 use Moo;
@@ -21,7 +23,7 @@ sub BUILD {
     my ($self) = @_;
 
     unless ($FFI_LOADED) {
-        _load_zmq3_ffi($self->soname);
+        $self->_load_zmq4_ffi($self->soname);
         $FFI_LOADED = 1;
     }
 
@@ -43,8 +45,8 @@ sub BUILD {
     }
 }
 
-sub _load_zmq3_ffi {
-    my ($soname) = @_;
+sub _load_zmq4_ffi {
+    my ($self, $soname) = @_;
 
     my $ffi = FFI::Platypus->new( lib => $soname );
 
@@ -74,8 +76,8 @@ sub _load_zmq3_ffi {
     );
 
     $ffi->attach(
-        # int zmq_ctx_destroy (void *context)
-        'zmq_ctx_destroy' => ['pointer'] => 'int'
+        # int zmq_ctx_term (void *context)
+        'zmq_ctx_term' => ['pointer'] => 'int'
     );
 
     $ffi->attach(
@@ -87,6 +89,20 @@ sub _load_zmq3_ffi {
         # int zmq_errno(void)
         'zmq_errno' => [] => 'int'
     );
+
+    $ffi->attach(
+        # int zmq_curve_keypair (char *z85_public_key, char *z85_secret_key);
+        'zmq_curve_keypair' => ['opaque', 'opaque'] => 'int'
+    );
+
+    # zmq_has doesnt exist in 4.0, so we can't load it in the namespace
+    my (undef, $minor) = $self->version();
+    if ($minor > 0) {
+	$ffi->attach(
+	    # int zmq_has (const char *capability);
+	    'zmq_has' => ['string'] => 'int'
+        );
+    }
 }
 
 sub get {
@@ -117,7 +133,7 @@ sub socket {
 
         $self->check_null('zmq_socket', $socket_ptr);
 
-        $socket = ZMQ::FFI::ZMQ3::Socket->new(
+        $socket = ZMQ::FFI::ZMQ4::Socket->new(
             socket_ptr   => $socket_ptr,
             type         => $type,
             soname       => $self->soname,
@@ -166,8 +182,8 @@ sub destroy {
     return unless $self->_pid == $$;
 
     $self->check_error(
-        'zmq_ctx_destroy',
-        zmq_ctx_destroy($self->context_ptr)
+        'zmq_ctx_term',
+        zmq_ctx_term($self->context_ptr)
     );
 
     $self->context_ptr(-1);
@@ -176,19 +192,35 @@ sub destroy {
 sub curve_keypair {
     my ($self) = @_;
 
-    $self->bad_version(
-        $self->verstr,
-        "curve_keypair not available in zmq 3.x"
+    my $public_key_buf = malloc(41);
+    my $secret_key_buf = malloc(41);
+
+    $self->check_error(
+	'zmq_curve_keypair',
+	zmq_curve_keypair($public_key_buf, $secret_key_buf)
     );
+    
+    my $public_key = buffer_to_scalar($public_key_buf, 41);
+    my $secret_key = buffer_to_scalar($secret_key_buf, 41);
+    free($public_key_buf);
+    free($secret_key_buf);
+    
+    return ($public_key, $secret_key);
 }
 
 sub has_capability {
-    my ($self) = @_;
+    my ($self, $capability) = @_;
     
-    $self->bad_version(
-        $self->verstr,
-        "has_capability not available in zmq 3.x"
-    );
+    my (undef, $minor) = $self->version();
+    if ($minor < 1) {
+        $self->bad_version(
+            $self->verstr,
+            "has_capability not available in zmq 4.0"
+        );   
+    } 
+    else {
+        return zmq_has($capability);
+    }
 }
 
 sub DEMOLISH {

@@ -61,7 +61,7 @@ if ($child_pid) {
 
         $parent_pid_check->();
     }
-    else {
+    elsif ($major == 3) {
         no warnings qw/redefine once/;
 
         local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
@@ -69,6 +69,21 @@ if ($child_pid) {
         };
 
         local *ZMQ::FFI::ZMQ3::Context::zmq_ctx_destroy = sub {
+            $parent_c_destroyed = 1;
+        };
+
+        use warnings;
+
+        $parent_pid_check->();
+    }
+    else {
+        no warnings qw/redefine once/;
+
+        local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
+            $parent_s_closed = 1;
+        };
+
+        local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_term = sub {
             $parent_c_destroyed = 1;
         };
 
@@ -129,7 +144,7 @@ else {
 
         $child_pid_check->();
     }
-    else {
+    elsif ($major == 3) {
         no warnings qw/redefine once/;
 
         local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
@@ -137,6 +152,21 @@ else {
         };
 
         local *ZMQ::FFI::ZMQ3::Context::zmq_ctx_destroy = sub {
+            $child_c_destroyed = 1;
+        };
+
+        use warnings;
+
+        $child_pid_check->();
+    }
+    else {
+        no warnings qw/redefine once/;
+
+        local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
+            $child_s_closed = 1;
+        };
+
+        local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_term = sub {
             $child_c_destroyed = 1;
         };
 

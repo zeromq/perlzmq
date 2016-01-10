@@ -8,7 +8,7 @@ use Test::Warnings qw(warnings);
 use ZMQ::FFI qw(ZMQ_REQ);
 use ZMQ::FFI::SocketRole;
 
-my @socket_methods = @{$Moo::Role::INFO{ZMQ::FFI::SocketRole}->{requires}};
+my @socket_methods = @{$Moo::Role::INFO{'ZMQ::FFI::SocketRole'}->{requires}};
 
 my @expected_warnings;
 push @expected_warnings, re('Operation on closed socket')
