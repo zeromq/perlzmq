@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+1.10      2016-01-09 15:50:59-05:00 America/New_York
+
     - support importing zmq constants directly through ZMQ::FFI (GH#24)
     - don't execute operations on closed sockets and emit appropriate warnings
       (GH#23)
