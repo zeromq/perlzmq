@@ -23,7 +23,7 @@ sub BUILD {
     my ($self) = @_;
 
     unless ($FFI_LOADED) {
-        _load_zmq4_ffi($self->soname);
+        $self->_load_zmq4_ffi($self->soname);
         $FFI_LOADED = 1;
     }
 
@@ -46,7 +46,7 @@ sub BUILD {
 }
 
 sub _load_zmq4_ffi {
-    my ($soname) = @_;
+    my ($self, $soname) = @_;
 
     my $ffi = FFI::Platypus->new( lib => $soname );
 
@@ -94,11 +94,15 @@ sub _load_zmq4_ffi {
         # int zmq_curve_keypair (char *z85_public_key, char *z85_secret_key);
         'zmq_curve_keypair' => ['opaque', 'opaque'] => 'int'
     );
-    
-    $ffi->attach(
-        # int zmq_has (const char *capability);
-        'zmq_has' => ['string'] => 'int'
-    );
+
+    # zmq_has doesnt exist in 4.0, so we can't load it in the namespace
+    my (undef, $minor) = $self->version();
+    if ($minor > 0) {
+	$ffi->attach(
+	    # int zmq_has (const char *capability);
+	    'zmq_has' => ['string'] => 'int'
+        );
+    }
 }
 
 sub get {
