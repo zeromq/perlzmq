@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - Fix bareword error in closed_socket.t (GH#27 - thanks @rhrhunter)
+
 1.10      2016-01-09 15:50:59-05:00 America/New_York
 
     - support importing zmq constants directly through ZMQ::FFI (GH#24)
