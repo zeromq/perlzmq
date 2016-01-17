@@ -44,6 +44,7 @@ has sockets => (
 );
 
 requires qw(
+    init
     get
     set
     socket

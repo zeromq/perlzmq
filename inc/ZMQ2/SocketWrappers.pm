@@ -1,8 +1,17 @@
+package inc::ZMQ2::SocketWrappers;
 
-### ZMQ COMMON API ###
+use Moo;
+use namespace::clean;
 
-use ZMQ::FFI::Util qw(current_tid);
+with 'inc::SocketWrapperRole';
 
+#
+# for zmq wrappers below that are hot spots (e.g. send/recv) we sacrifice
+# readability for performance (by for example not assigning method params
+# to local variables)
+#
+
+sub connect_tt {q(
 sub connect {
     my ($self, $endpoint) = @_;
 
@@ -17,7 +26,22 @@ sub connect {
         zmq_connect($self->socket_ptr, $endpoint)
     );
 }
+)}
 
+sub disconnect_tt {q(
+sub disconnect {
+    my ($self) = @_;
+
+    [% closed_socket_check %]
+
+    $self->bad_version(
+        $self->verstr,
+        "disconnect not available in zmq 2.x"
+    );
+}
+)}
+
+sub bind_tt {q(
 sub bind {
     my ($self, $endpoint) = @_;
 
@@ -32,11 +56,65 @@ sub bind {
         zmq_bind($self->socket_ptr, $endpoint)
     );
 }
+)}
 
-#
-# send/recv are hot spots, so sacrificing some readability for performance
-#
+sub unbind_tt {q(
+sub unbind {
+    my ($self) = @_;
 
+    [% closed_socket_check %]
+
+    $self->bad_version(
+        $self->verstr,
+        "unbind not available in zmq 2.x"
+    );
+}
+)}
+
+sub send_tt {q(
+sub send {
+    # 0: self
+    # 1: data
+    # 2: flags
+
+    [% closed_socket_check %]
+
+    my $data_ptr;
+    my $data_size;
+    my $data = $_[1];
+
+    $_[0]->{last_errno} = 0;
+
+    use bytes;
+    ($data_ptr, $data_size) = scalar_to_buffer($data);
+    no bytes;
+
+    if ( -1 == zmq_msg_init_size($_[0]->{"_zmq_msg_t"}, $data_size) ) {
+        $_[0]->{last_errno} = zmq_errno();
+
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_msg_init_size');
+        }
+
+        return;
+    }
+
+    my $msg_data_ptr = zmq_msg_data($_[0]->{"_zmq_msg_t"});
+    memcpy($msg_data_ptr, $data_ptr, $data_size);
+
+    if ( -1 == zmq_send($_[0]->socket_ptr, $_[0]->{"_zmq_msg_t"}, $_[2] // 0) ) {
+        $_[0]->{last_errno} = zmq_errno();
+
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_send');
+        }
+
+        return;
+    }
+}
+)}
+
+sub send_multipart_tt {q(
 sub send_multipart {
     # 0: self
     # 1: partsref
@@ -61,7 +139,39 @@ sub send_multipart {
 
     $_[0]->send($parts[$#parts], $_[2] // 0);
 }
+)}
 
+sub recv_tt {q(
+sub recv {
+    # 0: self
+    # 1: flags
+
+    [% closed_socket_check %]
+
+    $_[0]->{last_errno} = 0;
+
+    if ( -1 == zmq_recv($_[0]->socket_ptr, $_[0]->{"_zmq_msg_t"}, $_[1] // 0) ) {
+        $_[0]->{last_errno} = zmq_errno();
+
+        if ($_[0]->die_on_error) {
+            $_[0]->fatal('zmq_recv');
+        }
+
+        return;
+    }
+
+    # retval = msg size
+    my $retval = zmq_msg_size($_[0]->{"_zmq_msg_t"});
+
+    if ($retval) {
+        return buffer_to_scalar(zmq_msg_data($_[0]->{"_zmq_msg_t"}), $retval);
+    }
+
+    return '';
+}
+)}
+
+sub recv_multipart_tt {q(
 sub recv_multipart {
     # 0: self
     # 1: flags
@@ -88,13 +198,25 @@ sub recv_multipart {
 
     return @parts;
 }
+)}
 
+sub get_fd_tt {q(
 sub get_fd {
     [% closed_socket_check %]
 
     return $_[0]->get(ZMQ_FD, 'int');
 }
+)}
 
+sub get_linger_tt {q(
+sub get_linger {
+    [% closed_socket_check %]
+
+    return $_[0]->get(ZMQ_LINGER, 'int');
+}
+)}
+
+sub set_linger_tt {q(
 sub set_linger {
     my ($self, $linger) = @_;
 
@@ -102,13 +224,17 @@ sub set_linger {
 
     $self->set(ZMQ_LINGER, 'int', $linger);
 }
+)}
 
-sub get_linger {
+sub get_identity_tt {q(
+sub get_identity {
     [% closed_socket_check %]
 
-    return $_[0]->get(ZMQ_LINGER, 'int');
+    return $_[0]->get(ZMQ_IDENTITY, 'binary');
 }
+)}
 
+sub set_identity_tt {q(
 sub set_identity {
     my ($self, $id) = @_;
 
@@ -116,13 +242,9 @@ sub set_identity {
 
     $self->set(ZMQ_IDENTITY, 'binary', $id);
 }
+)}
 
-sub get_identity {
-    [% closed_socket_check %]
-
-    return $_[0]->get(ZMQ_IDENTITY, 'binary');
-}
-
+sub subscribe_tt {q(
 sub subscribe {
     my ($self, $topic) = @_;
 
@@ -130,7 +252,9 @@ sub subscribe {
 
     $self->set(ZMQ_SUBSCRIBE, 'binary', $topic);
 }
+)}
 
+sub unsubscribe_tt {q(
 sub unsubscribe {
     my ($self, $topic) = @_;
 
@@ -138,19 +262,25 @@ sub unsubscribe {
 
     $self->set(ZMQ_UNSUBSCRIBE, 'binary', $topic);
 }
+)}
 
+sub has_pollin_tt {q(
 sub has_pollin {
     [% closed_socket_check %]
 
     return $_[0]->get(ZMQ_EVENTS, 'int') & ZMQ_POLLIN;
 }
+)}
 
+sub has_pollout_tt {q(
 sub has_pollout {
     [% closed_socket_check %]
 
     return $_[0]->get(ZMQ_EVENTS, 'int') & ZMQ_POLLOUT;
 }
+)}
 
+sub get_tt {q(
 sub get {
     my ($self, $opt, $opt_type) = @_;
 
@@ -251,7 +381,9 @@ sub get {
 
     return;
 }
+)}
 
+sub set_tt {q(
 sub set {
     my ($self, $opt, $opt_type, $optval) = @_;
 
@@ -314,7 +446,9 @@ sub set {
 
     return;
 }
+)}
 
+sub close_tt {q(
 sub close {
     my ($self) = @_;
 
@@ -338,130 +472,6 @@ sub close {
 
     $self->socket_ptr(-1);
 }
-
-sub DEMOLISH {
-    my ($self) = @_;
-
-    return if $self->socket_ptr == -1;
-
-    $self->close();
-}
-
-sub _load_common_ffi {
-    my ($soname) = @_;
-
-    my $ffi   = FFI::Platypus->new( lib => $soname );
-    my $class = caller;
-
-    # for get/set sockopt create ffi functions for each possible opt type
-
-    # int zmq_getsockopt(void *sock, int opt, void *val, size_t *len)
-
-    $ffi->attach(
-        ['zmq_getsockopt' => "${class}::zmq_getsockopt_binary"]
-            => ['pointer', 'int', 'pointer', 'size_t*'] => 'int'
-    );
-
-    $ffi->attach(
-        ['zmq_getsockopt' => "${class}::zmq_getsockopt_int"]
-            => ['pointer', 'int', 'int*', 'size_t*'] => 'int'
-    );
-
-    $ffi->attach(
-        ['zmq_getsockopt' => "${class}::zmq_getsockopt_int64"]
-            => ['pointer', 'int', 'sint64*', 'size_t*'] => 'int'
-    );
-
-    $ffi->attach(
-        ['zmq_getsockopt' => "${class}::zmq_getsockopt_uint64"]
-            => ['pointer', 'int', 'uint64*', 'size_t*'] => 'int'
-    );
-
-
-    # int zmq_setsockopt(void *sock, int opt, const void *val, size_t len)
-
-    $ffi->attach(
-        ['zmq_setsockopt' => "${class}::zmq_setsockopt_binary"]
-            => ['pointer', 'int', 'pointer', 'size_t'] => 'int'
-    );
-
-    $ffi->attach(
-        ['zmq_setsockopt' => "${class}::zmq_setsockopt_int"]
-            => ['pointer', 'int', 'int*', 'size_t'] => 'int'
-    );
-
-    $ffi->attach(
-        ['zmq_setsockopt' => "${class}::zmq_setsockopt_int64"]
-            => ['pointer', 'int', 'sint64*', 'size_t'] => 'int'
-    );
-
-    $ffi->attach(
-        ['zmq_setsockopt' => "${class}::zmq_setsockopt_uint64"]
-            => ['pointer', 'int', 'uint64*', 'size_t'] => 'int'
-    );
-
-
-    $ffi->attach(
-        # int zmq_connect(void *socket, const char *endpoint)
-        ['zmq_connect' => "${class}::zmq_connect"]
-            => ['pointer', 'string'] => 'int'
-    );
-
-    $ffi->attach(
-        # int zmq_bind(void *socket, const char *endpoint)
-        ['zmq_bind' => "${class}::zmq_bind"]
-            => ['pointer', 'string'] => 'int'
-    );
-
-    $ffi->attach(
-        # int zmq_msg_init(zmq_msg_t *msg)
-        ['zmq_msg_init' => "${class}::zmq_msg_init"]
-            => ['pointer'] => 'int'
-    );
-
-    $ffi->attach(
-        # int zmq_msg_init_size(zmq_msg_t *msg, size_t size)
-        ['zmq_msg_init_size' => "${class}::zmq_msg_init_size"]
-            => ['pointer', 'int'] => 'int'
-    );
-
-    $ffi->attach(
-        # size_t zmq_msg_size(zmq_msg_t *msg)
-        ['zmq_msg_size' => "${class}::zmq_msg_size"]
-            => ['pointer'] => 'int'
-    );
-
-    $ffi->attach(
-        # void *zmq_msg_data(zmq_msg_t *msg)
-        ['zmq_msg_data' => "${class}::zmq_msg_data"]
-            => ['pointer'] => 'pointer'
-    );
-
-    $ffi->attach(
-        # int zmq_msg_close(zmq_msg_t *msg)
-        ['zmq_msg_close' => "${class}::zmq_msg_close"]
-            => ['pointer'] => 'int'
-    );
-
-    $ffi->attach(
-        # int zmq_close(void *socket)
-        ['zmq_close' => "${class}::zmq_close"]
-            => ['pointer'] => 'int'
-    );
-
-    $ffi->attach(
-        # const char *zmq_strerror(int errnum)
-        ['zmq_strerror' => "${class}::zmq_strerror"]
-            => ['int'] => 'string'
-    );
-
-    $ffi->attach(
-        # int zmq_errno(void)
-        ['zmq_errno' => "${class}::zmq_errno"]
-            => [] => 'int'
-    );
-}
+)}
 
 1;
-
-# vim:ft=perl
