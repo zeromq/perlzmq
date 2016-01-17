@@ -51,26 +51,9 @@ sub BUILD {
     $self->set_linger(0);
 }
 
-[% connect        %]
-[% disconnect     %]
-[% bind           %]
-[% unbind         %]
-[% send           %]
-[% send_multipart %]
-[% recv           %]
-[% recv_multipart %]
-[% get_fd         %]
-[% get_linger     %]
-[% set_linger     %]
-[% get_identity   %]
-[% set_identity   %]
-[% subscribe      %]
-[% unsubscribe    %]
-[% has_pollin     %]
-[% has_pollout    %]
-[% get            %]
-[% set            %]
-[% close          %]
+[% FOREACH method IN api_methods %]
+[%- [%- method -%] -%]
+[% END %]
 
 sub DEMOLISH {
     my ($self) = @_;

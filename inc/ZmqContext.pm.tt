@@ -35,13 +35,9 @@ sub BUILD {
     $self->init()
 }
 
-[% init    %]
-[% get     %]
-[% set     %]
-[% socket  %]
-[% proxy   %]
-[% device  %]
-[% destroy %]
+[% FOREACH method IN api_methods %]
+[%- [%- method -%] -%]
+[% END %]
 
 sub DEMOLISH {
     my ($self) = @_;
