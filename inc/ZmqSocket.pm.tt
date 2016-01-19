@@ -15,7 +15,7 @@ use ZMQ::FFI::[% zmqver %]::Raw;
 use ZMQ::FFI::Custom::Raw;
 use ZMQ::FFI::Constants qw(:all);
 use ZMQ::FFI::Util qw(current_tid);
-
+[% lib_imports %]
 use Moo;
 use namespace::clean;
 

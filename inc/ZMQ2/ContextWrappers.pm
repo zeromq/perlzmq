@@ -133,4 +133,24 @@ sub destroy {
 }
 )}
 
+sub curve_keypair_tt {q(
+sub curve_keypair {
+    my ($self) = @_;
+    $self->bad_version(
+        $self->verstr,
+       "curve_keypair not available in < zmq 4.x"
+    );
+}
+)}
+
+sub has_capability_tt {q(
+sub has_capability {
+    my ($self) = @_;
+    $self->bad_version(
+        $self->verstr,
+       "has_capability not available in < zmq 4.1"
+    );
+}
+)}
+
 1;

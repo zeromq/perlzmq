@@ -45,7 +45,7 @@ if ($child_pid) {
         ok $parent_c_destroyed, "parent context destroyed in parent";
     };
 
-    my ($major) = $parent_c->version;
+    my ($major, $minor) = $parent_c->version;
     if ($major == 2) {
         no warnings qw/redefine once/;
 
@@ -61,7 +61,7 @@ if ($child_pid) {
 
         $parent_pid_check->();
     }
-    else {
+    elsif ($major == 3) {
         no warnings qw/redefine once/;
 
         local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
@@ -75,6 +75,38 @@ if ($child_pid) {
         use warnings;
 
         $parent_pid_check->();
+    }
+    else {
+	if ($major == 4 and $minor == 0) {
+	    no warnings qw/redefine once/;
+	    
+	    local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
+		$parent_s_closed = 1;
+	    };
+	    
+	    local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_term = sub {
+		$parent_c_destroyed = 1;
+	    };
+	    
+	    use warnings;
+	    
+	    $parent_pid_check->();
+	}
+	else {
+	    no warnings qw/redefine once/;
+	    
+	    local *ZMQ::FFI::ZMQ4_1::Socket::zmq_close = sub {
+		$parent_s_closed = 1;
+	    };
+	    
+	    local *ZMQ::FFI::ZMQ4_1::Context::zmq_ctx_term = sub {
+		$parent_c_destroyed = 1;
+	    };
+	    
+	    use warnings;
+	    
+	    $parent_pid_check->();
+	}
     }
 }
 else {
@@ -113,7 +145,7 @@ else {
         print 'ok';
     };
 
-    my ($major) = $child_c->version;
+    my ($major, $minor) = $child_c->version;
     if ($major == 2) {
         no warnings qw/redefine once/;
 
@@ -129,7 +161,7 @@ else {
 
         $child_pid_check->();
     }
-    else {
+    elsif ($major == 3) {
         no warnings qw/redefine once/;
 
         local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
@@ -143,6 +175,38 @@ else {
         use warnings;
 
         $child_pid_check->();
+    }
+    else {
+	if ($major == 4 and $minor == 0) {
+	    no warnings qw/redefine once/;
+	    
+	    local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
+		$child_s_closed = 1;
+	    };
+	    
+	    local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_term = sub {
+		$child_c_destroyed = 1;
+	    };
+	    
+	    use warnings;
+	    
+	    $child_pid_check->();
+	}
+	else {
+	    no warnings qw/redefine once/;
+	    
+	    local *ZMQ::FFI::ZMQ4_1::Socket::zmq_close = sub {
+		$child_s_closed = 1;
+	    };
+	    
+	    local *ZMQ::FFI::ZMQ4_1::Context::zmq_ctx_term = sub {
+		$child_c_destroyed = 1;
+	    };
+	    
+	    use warnings;
+	    
+	    $child_pid_check->();
+	}
     }
 
     exit;

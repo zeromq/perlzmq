@@ -47,6 +47,7 @@ sub gen_module {
         zmqver              => $wrapper->zmqver,
         closed_socket_check => $socket_check,
         api_methods         => $wrapper->api_methods,
+        lib_imports         => $wrapper->lib_imports,
         %$api_wrappers,
     );
 

@@ -51,6 +51,8 @@ requires qw(
     proxy
     device
     destroy
+    curve_keypair
+    has_capability
 );
 
 1;

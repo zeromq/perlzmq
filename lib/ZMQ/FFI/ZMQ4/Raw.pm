@@ -130,7 +130,8 @@ sub load {
 
     $ffi->attach(
         # int zmq_curve_keypair (char *z85_public_key, char *z85_secret_key);
-        'zmq_curve_keypair' => ['opaque', 'opaque'] => 'int'
+        ['zmq_curve_keypair' => "${target}::zmq_curve_keypair"]
+            => ['opaque', 'opaque'] => 'int'
     );
 }
 

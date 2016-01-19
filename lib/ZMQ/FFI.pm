@@ -29,15 +29,25 @@ sub new {
         $args{soname} = zmq_soname( die => 1 );
     }
 
-    my ($major) = zmq_version($args{soname});
+    my ($major, $minor) = zmq_version($args{soname});
 
     if ($major == 2) {
         require ZMQ::FFI::ZMQ2::Context;
         return ZMQ::FFI::ZMQ2::Context->new(%args);
     }
-    else {
+    elsif ($major == 3) {
         require ZMQ::FFI::ZMQ3::Context;
         return ZMQ::FFI::ZMQ3::Context->new(%args);
+    } 
+    else {
+	if ($major == 4 and $minor == 0) {
+            require ZMQ::FFI::ZMQ4::Context;
+            return ZMQ::FFI::ZMQ4::Context->new(%args);
+        }
+        else {
+            require ZMQ::FFI::ZMQ4_1::Context;
+            return ZMQ::FFI::ZMQ4_1::Context->new(%args);
+        }
     }
 }
 

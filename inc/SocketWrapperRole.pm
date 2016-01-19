@@ -30,6 +30,11 @@ has target => (
     is => 'lazy',
 );
 
+has lib_imports => (
+    is  => 'ro',
+    default => '',
+);
+
 sub _build_target {
     my ($self) = @_;
 

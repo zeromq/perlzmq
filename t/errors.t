@@ -51,8 +51,10 @@ subtest 'util errors' => sub {
 subtest 'fatal socket error' => sub {
     no warnings qw/redefine once/;
 
-    local *ZMQ::FFI::ZMQ2::Socket::zmq_send = sub { return -1; };
-    local *ZMQ::FFI::ZMQ3::Socket::zmq_send = sub { return -1; };
+    local *ZMQ::FFI::ZMQ2::Socket::zmq_send   = sub { return -1; };
+    local *ZMQ::FFI::ZMQ3::Socket::zmq_send   = sub { return -1; };
+    local *ZMQ::FFI::ZMQ4::Socket::zmq_send   = sub { return -1; };
+    local *ZMQ::FFI::ZMQ4_1::Socket::zmq_send = sub { return -1; };
 
     my $ctx = ZMQ::FFI->new();
     my $socket = $ctx->socket(ZMQ_REQ);

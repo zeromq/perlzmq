@@ -11,7 +11,7 @@ use ZMQ::FFI::[% zmqver %]::Socket;
 use ZMQ::FFI::[% zmqver %]::Raw;
 use ZMQ::FFI::Custom::Raw;
 use Try::Tiny;
-
+[% lib_imports %]
 use Moo;
 use namespace::clean;
 
