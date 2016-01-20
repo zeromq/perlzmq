@@ -7,38 +7,60 @@ use v5.10;
 use Template::Tiny;
 use Path::Class qw(file);
 
-my $tt = Template::Tiny->new();
+use inc::ZMQ2::ContextWrappers;
+use inc::ZMQ2::SocketWrappers;
 
-my @socket_templates = (
-    file('inc/template/lib/ZMQ/FFI/ZMQ2/Socket.pm.tt'),
-    file('inc/template/lib/ZMQ/FFI/ZMQ3/Socket.pm.tt')
-);
+use inc::ZMQ3::ContextWrappers;
+use inc::ZMQ3::SocketWrappers;
 
-my $common_tt = file('inc/template/lib/ZMQ/FFI/Common/Socket.tt');
+use inc::ZMQ4::ContextWrappers;
+use inc::ZMQ4::SocketWrappers;
 
-my $socket_check = q(if ($_[0]->socket_ptr == -1) {
+use inc::ZMQ4_1::ContextWrappers;
+use inc::ZMQ4_1::SocketWrappers;
+
+my @wrappers;
+
+for my $zmqver (qw(ZMQ2 ZMQ3 ZMQ4 ZMQ4_1)) {
+    my $context_wrapper = "inc::${zmqver}::ContextWrappers";
+    my $socket_wrapper  = "inc::${zmqver}::SocketWrappers";
+
+    push @wrappers, $context_wrapper->new( zmqver => $zmqver );
+    push @wrappers, $socket_wrapper->new( zmqver => $zmqver );
+}
+
+gen_module($_) for @wrappers;
+
+sub gen_module {
+    my ($wrapper) = @_;
+
+    my $socket_check =
+    q(if ($_[0]->socket_ptr == -1) {
         carp "Operation on closed socket";
         return;
     });
 
-my $vars = {
-    date                => split("\n", scalar(qx{date -u})),
-    closed_socket_check => $socket_check,
-};
+    my $api_wrappers = $wrapper->wrappers;
 
-for my $socket_tt (@socket_templates) {
-    my $target = "$socket_tt";
-    $target =~ s{^inc/template/}{}g;
-    $target =~ s{\.tt$}{}g;
-    $target = file($target);
+    my %tt_vars = (
+        date                => split("\n", scalar(qx{date -u})),
+        zmqver              => $wrapper->zmqver,
+        closed_socket_check => $socket_check,
+        api_methods         => $wrapper->api_methods,
+        lib_imports         => $wrapper->lib_imports,
+        %$api_wrappers,
+    );
 
-    my $input = $socket_tt->slurp();
-    $input   .= $common_tt->slurp();
+    my $input = $wrapper->template->slurp();
 
+    # Processing twice so template tokens used in
+    # zmq function wrappers also get interoplated
     my $output;
-    $tt->process(\$input, $vars, \$output);
+    Template::Tiny->new->process(\$input,  \%tt_vars, \$output);
+    Template::Tiny->new->process(\$output, \%tt_vars, \$output);
 
-    say "Generating '$target' from templates";
-    $target->spew($output);
+    my $target = $wrapper->target;
+    say "Generating '$target'";
+    $target->spew($output)
 }
 

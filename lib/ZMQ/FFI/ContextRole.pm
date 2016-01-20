@@ -44,12 +44,15 @@ has sockets => (
 );
 
 requires qw(
+    init
     get
     set
     socket
     proxy
     device
     destroy
+    curve_keypair
+    has_capability
 );
 
 1;

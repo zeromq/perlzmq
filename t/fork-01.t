@@ -17,7 +17,7 @@ my $parent_s = $parent_c->socket(ZMQ_REQ);
 my $parent_s_closed;
 my $parent_c_destroyed;
 
-my ($major) = $parent_c->version;
+my ($major, $minor) = $parent_c->version;
 if ($major == 2) {
     no warnings qw/redefine once/;
 
@@ -33,7 +33,7 @@ if ($major == 2) {
 
     pid_test();
 }
-else {
+elsif ($major == 3) {
     no warnings qw/redefine once/;
 
     local *ZMQ::FFI::ZMQ3::Socket::zmq_close = sub {
@@ -47,6 +47,38 @@ else {
     use warnings;
 
     pid_test();
+}
+else {
+    if ($major == 4 and $minor == 0) {
+        no warnings qw/redefine once/;
+
+        local *ZMQ::FFI::ZMQ4::Socket::zmq_close = sub {
+            $parent_s_closed = 1;
+        };
+
+	local *ZMQ::FFI::ZMQ4::Context::zmq_ctx_term = sub {
+	    $parent_c_destroyed = 1;
+	};
+	
+	use warnings;
+	
+	pid_test();
+    }
+    else {
+	no warnings qw/redefine once/;
+
+        local *ZMQ::FFI::ZMQ4_1::Socket::zmq_close = sub {
+            $parent_s_closed = 1;
+        };
+
+	local *ZMQ::FFI::ZMQ4_1::Context::zmq_ctx_term = sub {
+	    $parent_c_destroyed = 1;
+	};
+	
+	use warnings;
+	
+	pid_test();
+    }
 }
 
 sub pid_test {
