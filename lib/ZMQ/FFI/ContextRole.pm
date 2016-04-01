@@ -40,7 +40,7 @@ has max_sockets => (
 has sockets => (
     is        => 'rw',
     lazy      => 1,
-    default   => sub { [] },
+    default   => sub { {} },
 );
 
 requires qw(

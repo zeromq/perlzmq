@@ -67,6 +67,7 @@ sub socket {
 
         $socket = ZMQ::FFI::[% zmqver %]::Socket->new(
             socket_ptr   => $socket_ptr,
+            context      => $self, # this will become a weak ref
             type         => $type,
             soname       => $self->soname,
         );
@@ -75,7 +76,8 @@ sub socket {
         die $_;
     };
 
-    push @{$self->sockets}, $socket;
+    # add the socket to the socket hash
+    $self->_add_socket($socket);
 
     return $socket;
 }

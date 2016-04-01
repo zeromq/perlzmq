@@ -58,6 +58,9 @@ sub BUILD {
 sub DEMOLISH {
     my ($self) = @_;
 
+    # remove ourselves from the context object so that we dont leak
+    $self->context->_remove_socket($self) if (defined $self->context);
+
     return if $self->socket_ptr == -1;
 
     $self->close();
