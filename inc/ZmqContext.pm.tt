@@ -11,6 +11,7 @@ use ZMQ::FFI::[% zmqver %]::Socket;
 use ZMQ::FFI::[% zmqver %]::Raw;
 use ZMQ::FFI::Custom::Raw;
 use Try::Tiny;
+use Scalar::Util qw(weaken);
 [% lib_imports %]
 use Moo;
 use namespace::clean;
@@ -39,6 +40,16 @@ sub BUILD {
 [%- [%- method -%] -%]
 [% END %]
 
+sub _add_socket {
+    my ($self, $socket) = @_;
+    weaken($self->sockets->{$socket} = $socket);
+}
+
+sub _remove_socket {
+    my ($self, $socket) = @_;
+    delete($self->sockets->{$socket});
+}
+
 sub DEMOLISH {
     my ($self) = @_;
 
@@ -47,7 +58,8 @@ sub DEMOLISH {
     # check defined to guard against
     # undef objects during global destruction
     if (defined $self->sockets) {
-        for my $socket (@{$self->sockets}) {
+        for my $socket_k (keys %{$self->sockets}) {
+            my $socket = $self->_remove_socket($socket_k);
             $socket->close()
                 if defined $socket && $socket->socket_ptr != -1;
         }

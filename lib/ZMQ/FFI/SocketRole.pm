@@ -25,6 +25,13 @@ has socket_ptr => (
     default => -1,
 );
 
+# a weak reference to the context object
+has context => (
+    is       => 'ro',
+    required => 1,
+    weak_ref => 1,
+);
+
 # message struct to reuse when sending/receiving
 has _zmq_msg_t => (
     is        => 'ro',
