@@ -32,7 +32,7 @@ sub zmq_soname {
     # If Linux extensions fail also try platform specific
     # extensions (e.g. OS X) before giving up.
     my @sonames = qw(
-        libzmq.so    libzmq.so.4    libzmq.so.3    libzmq.so.1
+        libzmq.so    libzmq.so.5    libzmq.so.4    libzmq.so.3    libzmq.so.1
         libzmq.dylib libzmq.4.dylib libzmq.3.dylib libzmq.1.dylib
     );
 
@@ -127,6 +127,7 @@ __END__
 Tries to load the following sonames (in order):
 
     libzmq.so
+    libzmq.so.5
     libzmq.so.4
     libzmq.so.3
     libzmq.so.1
