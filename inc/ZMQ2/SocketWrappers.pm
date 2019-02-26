@@ -331,7 +331,7 @@ sub get {
             }
         }
 
-        when (/^int$/) {
+        when ('int') {
             $optval_len = $self->sockopt_sizes->{'int'};
             $self->check_error(
                 'zmq_getsockopt',
@@ -344,7 +344,7 @@ sub get {
             );
         }
 
-        when (/^int64_t$/) {
+        when ('int64_t') {
             $optval_len = $self->sockopt_sizes->{'sint64'};
             $self->check_error(
                 'zmq_getsockopt',
@@ -357,7 +357,7 @@ sub get {
             );
         }
 
-        when (/^uint64_t$/) {
+        when ('uint64_t') {
             $optval_len = $self->sockopt_sizes->{'uint64'};
             $self->check_error(
                 'zmq_getsockopt',
@@ -403,7 +403,7 @@ sub set {
             );
         }
 
-        when (/^int$/) {
+        when ('int') {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_int(
@@ -415,7 +415,7 @@ sub set {
             );
         }
 
-        when (/^int64_t$/) {
+        when ('int64_t') {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_int64(
@@ -427,7 +427,7 @@ sub set {
             );
         }
 
-        when (/^uint64_t$/) {
+        when ('uint64_t') {
             $self->check_error(
                 'zmq_setsockopt',
                 zmq_setsockopt_uint64(
