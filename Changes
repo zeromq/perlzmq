@@ -1,6 +1,7 @@
 
 {{$NEXT}}
 
+    - Fix potential memleak around socket cleanup (GH#33 - thanks @rhrhunter!)
     - Use string literals for matching option types (GH#30 - thanks @bbkr)
 
 1.12      2019-02-26 05:16:15-05:00 America/New_York
