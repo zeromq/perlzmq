@@ -10,3 +10,8 @@ parallel --will-cite \
     docker build -f docker/Dockerfile.{} \
                  -t calid/{}:alpine \
                  docker ::: zeromq2-x zeromq3-x zeromq4-x zeromq4-1 libzmq
+
+# docker build -f docker/Dockerfile.zmq-ffi \
+#              -t calid/zmq-ffi:alpine \
+#              docker
+#

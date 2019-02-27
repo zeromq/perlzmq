@@ -13,9 +13,9 @@ dir('docker')->mkpath();
 my $alpine_base_docker = file('docker/Dockerfile.alpine-base');
 $alpine_base_docker->spew(q(
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates && apk update
-RUN apk add git gcc g++ tar file libuuid make autoconf automake libtool \
-            pkgconfig util-linux-dev
+RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add git gcc g++ tar file libuuid make autoconf automake \
+                       libtool pkgconfig util-linux-dev
 ));
 
 # now generate zmq specific dockerfiles
@@ -24,12 +24,10 @@ FROM calid/alpine-base:latest as builder
 RUN git clone https://github.com/zeromq/[% zmq %].git
 WORKDIR [% zmq %]
 RUN ./autogen.sh && ./configure --disable-static --prefix=/usr/local/[% zmq %] \
-    && make install
-WORKDIR /
-RUN rm -rf [% zmq %]
+    && make install && strip --strip-unneeded /usr/local/[% zmq %]/lib/libzmq.so
 
 FROM scratch
-COPY --from=builder /usr/local/[% zmq %] .
+COPY --from=builder /usr/local/[% zmq %]/lib/libzmq.so [% zmq %]/
 END
 
 my @zmqs = qw(zeromq2-x zeromq3-x zeromq4-x zeromq4-1 libzmq);
@@ -47,10 +45,34 @@ for my $z (@zmqs) {
 }
 
 # finally generate zmq-ffi testing environment dockerfile
-my $zmq_ffi_test_docker = file('docker/Dockerfile.zmq-ffi');
-$zmq_ffi_test_docker->spew(qw(
-FROM alpine-base:latest
-RUN apk add wget openssl-dev zlib-dev musl-dev \
-        perl-dev perl-net-ssleay perl-app-cpanminus \
-    && cpanm -v Dist::Zilla
-));
+my $zmq_ffi_test_docker_tt = <<'END';
+FROM calid/alpine-base:latest as perl-base
+RUN apk --no-cache add wget openssl-dev tzdata zlib-dev musl-dev zeromq-dev \
+                       perl-dev perl-net-ssleay perl-app-cpanminus
+
+FROM perl-base as dzil-base
+RUN cpanm -v Dist::Zilla
+
+FROM dzil-base as zmq-ffi-base
+RUN git clone https://github.com/calid/zmq-ffi.git
+WORKDIR zmq-ffi
+RUN dzil authordeps --missing | cpanm -v \
+    && dzil listdeps --missing | cpanm -v
+WORKDIR /
+RUN rm -rf ~/.cpanm zmq-ffi
+
+FROM zmq-ffi-base
+[% FOREACH zmq IN zmqs %]
+COPY --from=calid/[% zmq %]:alpine [% zmq %]/libzmq.so [% zmq %]/libzmq.so
+[% END %]
+END
+
+my $output;
+my %tt_vars = (
+    zmqs => \@zmqs
+);
+
+Template::Tiny->new->process(\$zmq_ffi_test_docker_tt, \%tt_vars, \$output);
+
+my $target = file('docker/Dockerfile.zmq-ffi');
+$target->spew($output);
