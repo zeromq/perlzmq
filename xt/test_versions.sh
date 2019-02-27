@@ -10,17 +10,18 @@ function zmq_version {
     )
 }
 
+# This assumes libzmqs have been installed to
+# ~/.zmq-ffi/usr/<zmq_version>/lib/libzmq.so, e.g.
+# ~/.zmq-ffi/usr/zeromq2-x/lib/libzmq.so. A docker testing environment is
+# provided that sets this up according, see the BUILD section in the readme
 function get_ld_dir {
-    repodir="$HOME/git/$1"
+    libzmq_dir="$HOME/.zmq-ffi/usr/$1/lib"
 
-    libzmq="$(find $repodir -type l -name libzmq.so)"
-
-    if test -z "$libzmq"; then
-        echo "No libzmq.so found in $repodir" >&2
-        return
+    if test -z "$libzmq_dir/libzmq.so"; then
+        echo "No libzmq.so found in $libzmq_dir" >&2
+        exit 1
     fi
 
-    libzmq_dir="$(dirname $libzmq)"
     echo "$libzmq_dir"
 }
 
@@ -32,8 +33,6 @@ function local_test {
     else
         export LD_LIBRARY_PATH="$(get_ld_dir zeromq$test_version)"
     fi
-
-    test -z "$LD_LIBRARY_PATH" && exit 1
 
     echo -e "\nTesting zeromq" \
         "$(zmq_version | tr ' ' '.')"

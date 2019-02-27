@@ -1,0 +1,6 @@
+language: generic
+services:
+    - docker
+
+script:
+    - ./docker-run dzil test

@@ -9,7 +9,7 @@ use ZMQ::FFI qw(ZMQ_ROUTER ZMQ_REQ);
 use Time::HiRes q(usleep);
 
 subtest 'router-req', sub {
-    my $endpoint = "ipc://test-zmq-ffi-$$";
+    my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
 
     my $ctx = ZMQ::FFI->new();
 

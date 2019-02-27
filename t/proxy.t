@@ -9,8 +9,8 @@ use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 use Time::HiRes q(usleep);
 use POSIX ":sys_wait_h";
 
-my $server_address = "ipc://test-zmq-ffi-$$-front";
-my $worker_address = "ipc://test-zmq-ffi-$$-back";
+my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
+my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
 
 # Set up the proxy in its own process
 my $proxy = fork;

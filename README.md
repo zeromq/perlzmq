@@ -1,4 +1,4 @@
-# ZMQ::FFI #
+# ZMQ::FFI [![Build Status](https://travis-ci.org/calid/zmq-ffi.svg?branch=master)](https://travis-ci.org/calid/zmq-ffi)
 
 ## version agnostic Perl bindings for ØMQ using ffi ##
 
@@ -164,6 +164,24 @@ my ($major, $minor, $patch) = $ctx->version;
 ### INSTALL ###
 
     cpanm -v ZMQ::FFI
+
+### BUILD ###
+
+A docker image is provided with a pre-configured testing environment. To test the module:
+
+    ./docker-run dzil test
+
+To build a dist tarball:
+
+    ./docker-run dzil build
+
+To clean build artifacts:
+
+    ./docker-run dzil clean
+
+Tests will run against every stable version of zeromq as well as master.  If you would like an interactive shell inside the container run `./docker-shell`
+
+If you would prefer a native local setup refer to the Dockerfile and translate the setup steps accordingly for your distribution/platform (I personally use the docker container, and this is also how tests run under Travis).
 
 ### DOCUMENTATION ###
 

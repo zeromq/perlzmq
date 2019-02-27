@@ -4,9 +4,7 @@ use strict;
 use warnings;
 use feature 'say';
 
-use Path::Class qw(file);
-use FFI::TinyCC;
-use FFI::Platypus;
+use Path::Class qw(file dir);
 use List::Util q(max);
 use autodie qw(system);
 
@@ -16,12 +14,30 @@ $constants_pm = file($constants_pm)->absolute;
 
 my @versions;
 my %zmq_constants;
-for my $stable ('2-x','3-x','4-x','4-1') {
-    chdir "$ENV{HOME}/git/zeromq$stable";
-    system('git pull');
+my $builddir = dir("$ENV{HOME}/.zmq-ffi");
+my @repos = map { "zeromq$_" } qw(2-x 3-x 4-x 4-1);
+push @repos, 'libzmq';
+
+# We need to iterate each stable version of each zmq mainline to get the
+# complete set of all zeromq constants across versions. Some sanity checking
+# is also done to verify constants weren't redefined in subsequent versions
+for my $r (@repos) {
+    say "\nGetting releases for $r";
+
+    my $repo_dir = $builddir->subdir("$r");
+
+    if ( ! -d "$repo_dir" ) {
+        say "$repo_dir doesn't exist";
+        my $repo_url = "https://github.com/zeromq/$r.git";
+        say "Cloning $repo_url to $repo_dir";
+        system("git clone -q $repo_url $repo_dir");
+    }
+
+    chdir "$repo_dir";
 
     for my $version (qx(git tag)) {
         chomp $version;
+        say "Getting constants for $version";
         push @versions, $version;
 
         my %constants =
@@ -51,6 +67,8 @@ for my $stable ('2-x','3-x','4-x','4-1') {
             }
         }
     }
+
+    chdir '..'
 }
 
 my @exports;
@@ -67,42 +85,12 @@ while ( my ($constant,$data) = each %zmq_constants ) {
 # Also add dynamically generated zmq_msg_t size.  we use 2x the largest
 # size of zmq_msg_t among all zeromq versions, including dev. This
 # should hopefully be large enough to accomodate fluctuations in size
-# between releases.
-my @zmq_h_versions;
-my @zmq_msg_sizes;
-
-for my $stable ('2-x','3-x','4-x','4-1') {
-    push @zmq_h_versions,
-            "$ENV{HOME}/git/zeromq$stable/include/zmq.h";
-}
-
-push @zmq_h_versions, "$ENV{HOME}/git/libzmq/include/zmq.h";
-
-my $ffi = FFI::Platypus->new();
-for my $zmq_h (@zmq_h_versions) {
-    my $tcc = FFI::TinyCC->new();
-    $tcc->detect_sysinclude_path();
-
-    $tcc->compile_string(qq{
-        #include "$zmq_h"
-
-        size_t sizeof_zmq_msg_t(void)
-        {
-            return sizeof(zmq_msg_t);
-        }
-    });
-
-    my $f = $ffi->function(
-        $tcc->get_symbol('sizeof_zmq_msg_t') => [] => 'size_t'
-    );
-
-    push @zmq_msg_sizes, $f->call();
-}
-
+# between releases. Note this assumes the generated zmq_msg_sizes file exists
+my @zmq_msg_sizes = file("$builddir/zmq_msg_size/zmq_msg_sizes")
+                        ->slurp(chomp => 1);
 my $zmq_msg_size = 2 * max(@zmq_msg_sizes);
 push @exports, 'zmq_msg_t_size';
 push @subs, "sub zmq_msg_t_size { $zmq_msg_size }";
-
 
 my $exports = join "\n", sort @exports;
 my $subs    = join "\n", sort @subs;
@@ -156,4 +144,6 @@ zeromq3-x, zeromq4-x, and zeromq4-1 git repos at L<https://github.com/zeromq>.
 
 END
 
+say "\nWriting module file";
 $constants_pm->spew($module);
+say "Done!\n";

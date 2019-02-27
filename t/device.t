@@ -11,8 +11,8 @@ use ZMQ::FFI::Util qw(zmq_version);
 use Time::HiRes q(usleep);
 use POSIX ":sys_wait_h";
 
-my $server_address = "ipc://test-zmq-ffi-$$-front";
-my $worker_address = "ipc://test-zmq-ffi-$$-back";
+my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
+my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
 
 my $device;
 

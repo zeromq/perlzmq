@@ -48,8 +48,8 @@ sub
         'bad soname throws error';
 
 
-    my $v2_endpoint = "ipc://zmq-ffi-ctx2-$$";
-    my $v3_endpoint = "ipc://zmq-ffi-ctx3-$$";
+    my $v2_endpoint = "ipc:///tmp/zmq-ffi-ctx2-$$";
+    my $v3_endpoint = "ipc:///tmp/zmq-ffi-ctx3-$$";
 
     my $s_v2_req = $ctx_v2->socket(ZMQ_REQ);
     $s_v2_req->connect($v2_endpoint);

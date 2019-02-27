@@ -10,7 +10,7 @@ use Time::HiRes q(usleep);
 
 subtest 'pubsub',
 sub {
-    my $endpoint = "ipc://test-zmq-ffi-$$";
+    my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
 
     my $ctx = ZMQ::FFI->new();
 
