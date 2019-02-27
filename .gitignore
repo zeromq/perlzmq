@@ -1,3 +1,4 @@
+docker/
 ZMQ-FFI-*.tar.gz
 ZMQ-FFI-*/
 .build/
