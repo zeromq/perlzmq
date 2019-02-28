@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - Update ZMQ::FFI::Constants pod to also list libzmq as one of the repos
+      used
     - Don't prune constants generation script from release tarball
 
 1.14      2019-02-28 18:49:49+00:00 UTC
