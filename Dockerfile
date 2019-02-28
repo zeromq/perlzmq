@@ -84,8 +84,8 @@ RUN cd /zmq-ffi && dzil listdeps --missing | cpanm -v
 RUN apt-get -y purge gcc g++ autoconf automake libtool-bin pkg-config \
     libssl-dev zlib1g-dev uuid-dev \
     && apt -y autoremove \
-    && rm -r /var/lib/apt/lists/* ~/.cpanm /zmq-ffi /usr/local/share/man \
-             /usr/share/doc
+    && rm -r /var/lib/apt/lists/* ~/.cpanm /zmq-ffi /usr/local/share/man/* \
+             /usr/share/doc/*
 
 FROM scratch
 COPY --from=zmq-ffi-base / /
