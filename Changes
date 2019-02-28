@@ -1,8 +1,11 @@
 
 {{$NEXT}}
 
+    - The ZMQ::FFI::Constants generation script wasn't using stable releases
+      tagged in the libzmq main repo, this is fixed
     - FFI::TinyCC is no longer an author dep and has been replaced by a docker
-      based solution
+      based solution for generating ZMQ::FFI::Constants, including calculating
+      zmq_msg_t sizes
     - Fix potential memleak around socket cleanup (GH#33 - thanks @rhrhunter!)
     - Use string literals for matching option types (GH#30 - thanks @bbkr)
 
