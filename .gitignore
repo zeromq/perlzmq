@@ -5,3 +5,5 @@ ZMQ-FFI-*/
 lib/ZMQ/FFI/*/Context.pm
 lib/ZMQ/FFI/*/Socket.pm
 lib/ZMQ/FFI/Constants.pm
+libzmq/
+zeromq*-*/

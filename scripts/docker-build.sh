@@ -4,14 +4,19 @@ perl scripts/gen_dockerfiles.pl
 
 docker build -f docker/Dockerfile.alpine-base \
              -t calid/alpine-base:latest \
-             docker
+             .
 
 parallel --will-cite \
     docker build -f docker/Dockerfile.{} \
                  -t calid/{}:alpine \
-                 docker ::: zeromq2-x zeromq3-x zeromq4-x zeromq4-1 libzmq
+                 . ::: zeromq2-x zeromq3-x zeromq4-x zeromq4-1 libzmq
 
-# docker build -f docker/Dockerfile.zmq-ffi \
-#              -t calid/zmq-ffi:alpine \
-#              docker
-#
+docker build -f docker/Dockerfile.zmq-all -t calid/zmq-all:alpine .
+
+docker build -f docker/Dockerfile.zmq-ffi-test-base \
+             -t calid/zmq-ffi-test-base:alpine \
+             .
+
+docker build -f docker/Dockerfile.zmq-ffi-testenv \
+             -t calid/zmq-ffi-testenv:alpine \
+             .
