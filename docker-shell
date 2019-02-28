@@ -1,5 +1,6 @@
 #!/bin/bash
 docker run --rm -i -t \
+    -e SHELL=/bin/bash \
     -v $(pwd):/zmq-ffi \
     -w /zmq-ffi \
     calid/zmq-ffi-testenv:ubuntu /bin/bash
