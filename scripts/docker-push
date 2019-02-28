@@ -3,7 +3,7 @@
 version=$1
 
 if [ -z "$version" ]; then
-    echo "docker-release.sh <version>"
+    echo "docker-push <version>"
     exit 1
 fi
 
