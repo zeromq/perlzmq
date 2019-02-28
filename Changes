@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - Don't prune constants generation script from release tarball
+
 1.14      2019-02-28 18:49:49+00:00 UTC
 
     - The ZMQ::FFI::Constants generation script wasn't using stable releases
