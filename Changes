@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - FFI::TinyCC is no longer an author dep and has been replaced by a docker
+      based solution
     - Fix potential memleak around socket cleanup (GH#33 - thanks @rhrhunter!)
     - Use string literals for matching option types (GH#30 - thanks @bbkr)
 
