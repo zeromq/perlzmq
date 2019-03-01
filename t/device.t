@@ -17,9 +17,6 @@ my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
 my $device;
 
 sub mkdevice {
-    # make sure child shuts down cleanly
-    $SIG{TERM} = sub { exit 0 };
-
     my $ctx = ZMQ::FFI->new();
 
     my $front = $ctx->socket(ZMQ_PULL);
@@ -30,6 +27,7 @@ sub mkdevice {
 
     $ctx->device(ZMQ_STREAMER, $front, $back);
     warn "device exited: $!";
+
     exit 0;
 }
 
@@ -73,16 +71,11 @@ subtest 'device', sub {
 
     my $payload = $worker->recv;
     is $payload, $message, "Message received";
+
+    kill TERM => $device;
+    waitpid($device,0);
 };
 
-if ($device) {
-    # tear down the device
-    do {
-        # see the reason for this workaround in proxy.t
-
-        kill TERM => $device;
-    } while (waitpid($device, WNOHANG) > 0);
-}
 
 done_testing;
 
