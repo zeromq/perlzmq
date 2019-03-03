@@ -74,7 +74,8 @@ RUN cd zmq_msg_size \
     && ./print_libzmq_msg_size >> zmq_msg_sizes
 
 FROM zmq-base as dzil-base
-RUN apt-get install -y cpanminus libdist-zilla-perl && apt-get clean
+RUN apt-get install -y cpanminus libdist-zilla-perl libterm-ui-perl \
+    && apt-get clean
 
 FROM dzil-base as zmq-ffi-base
 COPY . /zmq-ffi/
