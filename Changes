@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+    - Bump FFI::Platypus dependency version to 0.86
+      https://github.com/Perl5-FFI/FFI-Platypus/issues/117
     - Fix t/device.t hang, seems to be same cause/fix as GH#37
     - Update ZMQ::FFI::Constants pod to also list libzmq as one of the repos
       used
