@@ -8,5 +8,6 @@ if [ -z "$version" ]; then
 fi
 
 for t in $version latest ubuntu; do
+    docker push calid/perl-zmq-base:$t
     docker push calid/zmq-ffi-testenv:$t
 done

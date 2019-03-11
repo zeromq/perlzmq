@@ -3,9 +3,14 @@
 version=$1
 
 if [ -z "$version" ]; then
-    echo "docker-push <version>"
+    echo "docker-build <version>"
     exit 1
 fi
+
+docker build scripts -f scripts/Dockerfile.perl-zmq-base \
+    -t calid/perl-zmq-base:$version \
+    -t calid/perl-zmq-base:latest \
+    -t calid/perl-zmq-base:ubuntu
 
 docker build . \
     -t calid/zmq-ffi-testenv:$version \

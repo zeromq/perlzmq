@@ -1,0 +1,10 @@
+#!/bin/bash
+docker run --rm \
+    -v $(pwd):/zmq-ffi \
+    -w /zmq-ffi \
+    calid/zmq-ffi-testenv:ubuntu sh -c "dzil clean && dzil build"
+
+docker run --rm \
+    -v $(pwd):/zmq-ffi \
+    -w /zmq-ffi \
+    calid/perl-zmq-base:ubuntu sh -c "cpanm -v ZMQ-FFI-*.tar.gz"

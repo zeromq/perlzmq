@@ -1,10 +1,9 @@
-FROM ubuntu:latest as base
+FROM calid/perl-zmq-base:ubuntu as base
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PREFIX=/root/.zmq-ffi/usr
 RUN apt-get update \
-    && apt-get install -y git gcc g++ make autoconf automake libtool-bin \
-        pkg-config libssl-dev zlib1g-dev uuid-dev tzdata libanyevent-perl \
-        locales libzmq5 \
+    && apt-get install -y git g++ autoconf automake libtool-bin pkg-config \
+        uuid-dev tzdata locales \
     && locale-gen fr_FR.utf8 && update-locale \
     && apt-get clean
 WORKDIR /root/.zmq-ffi
@@ -74,7 +73,7 @@ RUN cd zmq_msg_size \
     && ./print_libzmq_msg_size >> zmq_msg_sizes
 
 FROM zmq-base as dzil-base
-RUN apt-get install -y cpanminus libdist-zilla-perl libterm-ui-perl \
+RUN apt-get install -y libdist-zilla-perl libterm-ui-perl libanyevent-perl \
     && apt-get clean
 
 FROM dzil-base as zmq-ffi-base
@@ -82,7 +81,7 @@ COPY . /zmq-ffi/
 RUN cd /zmq-ffi && dzil authordeps --missing | cpanm -v
 RUN cd /zmq-ffi && dzil listdeps --missing | cpanm -v
 RUN apt-get -y purge gcc g++ autoconf automake libtool-bin pkg-config \
-    libssl-dev zlib1g-dev uuid-dev \
+        libssl-dev zlib1g-dev uuid-dev \
     && apt -y autoremove \
     && rm -r /var/lib/apt/lists/* ~/.cpanm /zmq-ffi /usr/local/share/man/* \
              /usr/share/doc/*

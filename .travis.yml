@@ -4,4 +4,4 @@ services:
 
 script:
     - ./docker-run dzil test
-    - ./docker-run dzil install
+    - ./scripts/docker-test-install
