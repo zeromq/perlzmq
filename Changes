@@ -1,6 +1,8 @@
 
 {{$NEXT}}
 
+1.16_01   2019-03-13 03:40:02+00:00 UTC (TRIAL RELEASE)
+
     - Need FFI::Platypus specified as a configure dependency
       (GH#42 - thanks @eserte)
 
