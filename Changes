@@ -1,6 +1,9 @@
 
 {{$NEXT}}
 
+    - Need FFI::Platypus specified as a configure dependency
+      (GH#42 - thanks @eserte)
+
 1.15      2019-03-03 10:14:00+00:00 UTC
 
     - Bump FFI::Platypus dependency version to 0.86
