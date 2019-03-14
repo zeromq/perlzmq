@@ -620,3 +620,10 @@ an issue (or even better a pull request!) on L<github|https://github.com/calid/z
 * L<FFI::Platypus>
 * L<FFI::Raw>
 * L<ZMQ::LibZMQ3>
+
+=head1 CREDITS
+
+Thank you to the following for patches, bug reports, feedback, or suggestions:
+
+Dave Lambley, Graham Ollis, Klaus Ita, Marc Mims, Parth Gandhi, Pawel Pabian,
+Robert Hunter, Sergey KHripchenko, Slaven Rezic, Whitney Jackson, pipcet
