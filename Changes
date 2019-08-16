@@ -2,6 +2,10 @@
 {{$NEXT}}
 
     - Document contributors
+    - Update repository info. Now officially part of the zeromq project at
+      https://github.com/zeromq/perlzmq
+    - Have examples and scripts use 5.12 as minimum version, which enables
+      strict by default
 
 1.17      2019-03-14 04:05:15+00:00 UTC
 
