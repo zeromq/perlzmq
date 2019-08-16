@@ -1,4 +1,4 @@
-# ZMQ::FFI [![Build Status](https://travis-ci.org/calid/zmq-ffi.svg?branch=master)](https://travis-ci.org/calid/zmq-ffi)
+# ZMQ::FFI [![Build Status](https://api.travis-ci.org/zeromq/perlzmq.svg?branch=master)](https://travis-ci.org/zeromq/perlzmq)
 
 ## version agnostic Perl bindings for ØMQ using ffi ##
 
