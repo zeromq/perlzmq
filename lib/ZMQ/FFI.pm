@@ -59,7 +59,7 @@ __END__
 
     #### send/recv ####
 
-    use v5.10;
+    use 5.012;
     use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP);
 
     my $endpoint = "ipc://zmq-ffi-$$";
@@ -79,7 +79,7 @@ __END__
 
     #### pub/sub ####
 
-    use v5.10;
+    use 5.012;
     use ZMQ::FFI qw(ZMQ_PUB ZMQ_SUB);
     use Time::HiRes q(usleep);
 
@@ -129,7 +129,7 @@ __END__
 
     #### multipart ####
 
-    use v5.10;
+    use 5.012;
     use ZMQ::FFI qw(ZMQ_DEALER ZMQ_ROUTER);
 
     my $endpoint = "ipc://zmq-ffi-$$";
@@ -151,7 +151,7 @@ __END__
 
     #### nonblocking ####
 
-    use v5.10;
+    use 5.012;
     use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
     use AnyEvent;
     use EV;

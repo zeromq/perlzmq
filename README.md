@@ -10,7 +10,7 @@ ZMQ::FFI is implemented using [FFI::Platypus](https://github.com/plicease/FFI-Pl
 
 #### send/recv ####
 ```perl
-use v5.10;
+use 5.012;
 use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP);
 
 my $endpoint = "ipc://zmq-ffi-$$";
@@ -30,7 +30,7 @@ say $s2->recv();
 
 #### pub/sub ####
 ```perl
-use v5.10;
+use 5.012;
 use ZMQ::FFI qw(ZMQ_PUB ZMQ_SUB);
 use Time::HiRes q(usleep);
 
@@ -80,7 +80,7 @@ $p->bind($endpoint);
 
 #### multipart ####
 ```perl
-use v5.10;
+use 5.012;
 use ZMQ::FFI qw(ZMQ_DEALER ZMQ_ROUTER);
 
 my $endpoint = "ipc://zmq-ffi-$$";
@@ -102,7 +102,7 @@ say join ' ', $r->recv_multipart;
 
 #### nonblocking ####
 ```perl
-use v5.10;
+use 5.012;
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 use AnyEvent;
 use EV;

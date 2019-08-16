@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use v5.10;
+use 5.012;
 
 use Template::Tiny;
 use Path::Class qw(file);

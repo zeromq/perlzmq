@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use v5.10;
+use 5.012;
 
 use FFI::Platypus::Declare;
 use ZMQ::LibZMQ3;
