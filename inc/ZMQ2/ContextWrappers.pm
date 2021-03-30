@@ -145,6 +145,26 @@ sub curve_keypair {
 }
 )}
 
+sub z85_encode_tt {q(
+sub z85_encode {
+    my ($self) = @_;
+    $self->bad_version(
+        $self->verstr,
+       "z85_encode not available in < zmq 4.x"
+    );
+}
+)}
+
+sub z85_decode_tt {q(
+sub z85_decode {
+    my ($self) = @_;
+    $self->bad_version(
+        $self->verstr,
+       "z85_decode not available in < zmq 4.x"
+    );
+}
+)}
+
 sub has_capability_tt {q(
 sub has_capability {
     my ($self) = @_;
