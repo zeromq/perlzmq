@@ -15,14 +15,14 @@ my ($major, $minor) = $c->version();
 if ($major == 4) {
     if ($minor >= 1) {
         if ($c->has_capability("curve")) {
-            my $encoded = '5B3nU@4Uu5n8+[&(Kv2]3G(5%nx:#XIb7iPP(3bc';
+            my ($encoded, $priv) = $c->curve_keypair;
             
             my $decoded = $c->z85_decode( $encoded );
             my $recoded = $c->z85_encode( $decoded );
             
             is
-                $encoded,
-                $recoded;
+                $recoded,
+                $encoded;
 
         } else {
             # zmq >= 4.1 - libsodium is not installed, do nothing
