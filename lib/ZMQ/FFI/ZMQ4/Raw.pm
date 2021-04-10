@@ -133,6 +133,18 @@ sub load {
         ['zmq_curve_keypair' => "${target}::zmq_curve_keypair"]
             => ['opaque', 'opaque'] => 'int'
     );
+    
+    $ffi->attach(
+        # char *zmq_z85_encode (char *dest, const uint8_t *data, size_t size);
+        ['zmq_z85_encode' => "${target}::zmq_z85_encode"]
+            => ['opaque', 'string', 'size_t'] => 'pointer'
+    );
+    
+    $ffi->attach(
+        # uint8_t *zmq_z85_decode (uint8_t *dest, const char *string);
+        ['zmq_z85_decode' => "${target}::zmq_z85_decode"]
+            => ['opaque', 'string'] => 'pointer'
+    );
 }
 
 1;

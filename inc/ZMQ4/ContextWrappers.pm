@@ -55,4 +55,43 @@ sub curve_keypair {
 }
 )}
 
+sub z85_encode_tt {q(
+sub z85_encode {
+    my ($self, $data) = @_;
+    
+    my $dest_buf = malloc(41);
+    
+    my $checked_data = substr($data, 0, 32);
+    
+    $self->check_null(
+        'zmq_z85_encode',
+        zmq_z85_encode( $dest_buf, $checked_data, length($checked_data) )
+    );
+    
+    my $dest = buffer_to_scalar($dest_buf, 41);
+    free($dest_buf);
+    
+    return $dest;
+}
+)}
+
+sub z85_decode_tt {q(
+sub z85_decode {
+    my ($self, $string) = @_;
+    
+    my $dest_buf = malloc(32);
+    
+    $self->check_null(
+        'zmq_z86_decode',
+        zmq_z85_decode($dest_buf, $string)
+    );
+    
+    my $dest = buffer_to_scalar($dest_buf, 32);
+    free($dest_buf);
+    
+    return $dest;
+}
+)}
+
+
 1;

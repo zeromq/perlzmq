@@ -52,6 +52,8 @@ requires qw(
     device
     destroy
     curve_keypair
+    z85_encode
+    z85_decode
     has_capability
 );
 
