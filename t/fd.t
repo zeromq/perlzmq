@@ -7,7 +7,7 @@ use Test::Warnings;
 use AnyEvent;
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = "inproc://test-zmq-ffi-$$";
 my @expected = qw(foo bar baz);
 my $ctx      = ZMQ::FFI->new();
 

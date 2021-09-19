@@ -12,7 +12,7 @@ my $c = ZMQ::FFI->new();
 
 my ($major, $minor) = $c->version();
 
-my $e = "ipc:///tmp/test-zmq-ffi-$$";
+my $e = "inproc://test-zmq-ffi-$$";
 
 if ($major == 4) {
     if ($minor >= 1) {

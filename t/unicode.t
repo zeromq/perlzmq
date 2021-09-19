@@ -8,7 +8,7 @@ use List::Util qw(sum);
 
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = "inproc://test-zmq-ffi-$$";
 my $ctx      = ZMQ::FFI->new();
 
 my $s1 = $ctx->socket(ZMQ_PUSH);
