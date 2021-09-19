@@ -204,6 +204,12 @@ sub get_fd_tt {q(
 sub get_fd {
     [% closed_socket_check %]
 
+    if( $^O eq 'MSWin32' ) {
+        my $handle = $_[0]->get(ZMQ_FD, 'uint64_t');
+        require Win32API::File;
+        require Fcntl;
+        return Win32API::File::OsFHandleOpenFd($handle, Fcntl::O_RDONLY());
+    }
     return $_[0]->get(ZMQ_FD, 'int');
 }
 )}
