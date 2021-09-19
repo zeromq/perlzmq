@@ -34,12 +34,14 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         perl: ['5']
+        perl-threaded: [false]
         include:
           - { os: 'ubuntu-latest', perl: "5.14" }
           - { os: 'ubuntu-latest', perl: "5.16" }
           - { os: 'ubuntu-latest', perl: "5.20" }
           - { os: 'ubuntu-latest', perl: "5.30" }
           - { os: 'ubuntu-latest', perl: "5.32" }
+          - { os: 'ubuntu-latest', perl: "5.32", perl-threaded: true }
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
 
     steps:
@@ -53,6 +55,7 @@ jobs:
         if: matrix.os != 'windows-latest'
         with:
           perl-version: ${{ matrix.perl }}
+          multi-thread: ${{ matrix.perl-threaded }}
       - name: Set up perl (Strawberry)
         uses: shogo82148/actions-setup-perl@v1
         if: matrix.os == 'windows-latest'
