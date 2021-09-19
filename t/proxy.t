@@ -9,6 +9,8 @@ use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 use Time::HiRes q(usleep);
 use POSIX ":sys_wait_h";
 
+plan skip_all => 'Skipping on MSWin32, no fork' if $^O eq 'MSWin32';
+
 my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
 my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
 

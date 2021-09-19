@@ -6,6 +6,8 @@ use Test::Warnings;
 
 use ZMQ::FFI qw(ZMQ_REQ);
 
+plan skip_all => 'Skipping on MSWin32, no fork' if $^O eq 'MSWin32';
+
 #
 # Test that we _do_ clean up contexts/sockets created in forked children
 #
