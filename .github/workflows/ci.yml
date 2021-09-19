@@ -1,0 +1,82 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+
+jobs:
+  dist:
+    name: Make distribution using Dist::Zilla
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Make distribution
+        shell: bash
+        run: |
+          docker run --rm \
+              -v $(pwd):/zmq-ffi \
+              -w /zmq-ffi \
+              calid/zmq-ffi-testenv:ubuntu sh -c "
+                dzil authordeps --missing | cpanm -n;
+                dzil clean && dzil build --in build-dir"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: ./build-dir
+  test:
+    needs: dist
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        perl: ['5']
+        include:
+          - { os: 'ubuntu-latest', perl: "5.14" }
+          - { os: 'ubuntu-latest', perl: "5.16" }
+          - { os: 'ubuntu-latest', perl: "5.20" }
+          - { os: 'ubuntu-latest', perl: "5.30" }
+          - { os: 'ubuntu-latest', perl: "5.32" }
+    name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
+
+    steps:
+      - name: Get dist artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1
+        if: matrix.os != 'windows-latest'
+        with:
+          perl-version: ${{ matrix.perl }}
+      - name: Set up perl (Strawberry)
+        uses: shogo82148/actions-setup-perl@v1
+        if: matrix.os == 'windows-latest'
+        with:
+          distribution: 'strawberry'
+
+      - run: perl -V
+
+      - name: Set up ZeroMQ (homebrew)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install zeromq
+
+      - name: Set up ZeroMQ (vcpkg)
+        if: matrix.os == 'windows-latest'
+        run: |
+          vcpkg install zeromq:x64-windows
+          copy C:/vcpkg/packages/zeromq_x64-windows/bin/libzmq*.dll libzmq.dll
+          echo $pwd.Path | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Install Perl deps
+        run: |
+          cpanm --notest --installdeps .
+
+      - name: Run tests
+        run: |
+          cpanm --verbose --test-only .
