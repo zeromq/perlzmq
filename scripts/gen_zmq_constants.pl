@@ -43,11 +43,14 @@ for my $r (@repos) {
         my %constants =
             map  { split '\s+' }
             grep { !/ZMQ_VERSION/ }
-            grep { /\b(ZMQ_[^ ]+\s+(0x)?\d+)/; $_ = $1; }
+            grep { /\b(ZMQ_[^ ]+\s+(0x)?[0-9A-F]+)/; $_ = $1; }
             qx(git show $version:include/zmq.h);
 
-        while ( my ($constant,$value) = each %constants ) {
+        if ($version =~ m/^v3\./ && !defined($constants{ZMQ_EVENT_ALL})) {
+            $constants{ZMQ_EVENT_ALL} = 65535;
+        }
 
+        while ( my ($constant,$value) = each %constants ) {
             # handle hex values
             if ( $value =~ m/^0x/ ) {
                 $value = hex($value);

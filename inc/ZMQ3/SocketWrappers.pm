@@ -102,4 +102,44 @@ sub recv {
 }
 )}
 
+sub monitor_tt {q(
+sub monitor {
+    my ($self, $endpoint, $event) = @_;
+
+    [% closed_socket_check %]
+
+    unless ($endpoint) {
+        croak 'usage: $socket->monitor($endpoint, $events)';
+    }
+
+    $self->check_error(
+        'zmq_socket_monitor',
+        zmq_socket_monitor($self->socket_ptr, $endpoint, $event)
+    );
+}
+)}
+
+sub recv_event_tt {q(
+sub recv_event {
+    my ($self, $flags) = @_;
+
+    [% closed_socket_check %]
+
+    my $msg = $self->recv($flags);
+    my $len = length($msg);
+
+    my ($id, $data, $value);
+
+    if ($len == $self->event_size) {
+        ($id, $data, $value) = unpack('i p i', $msg);
+    }
+    elsif ($len > $self->event_size) {
+        my $padding = ($len - $self->event_size) / 2;
+        ($id, $data, $value) = unpack("i x$padding p i x$padding", $msg);
+    }
+
+    return ($id, $value, $data);
+}
+)}
+
 1;

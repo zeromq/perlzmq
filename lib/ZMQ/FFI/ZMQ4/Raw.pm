@@ -145,6 +145,12 @@ sub load {
         ['zmq_z85_decode' => "${target}::zmq_z85_decode"]
             => ['opaque', 'string'] => 'pointer'
     );
+
+    $ffi->attach(
+        # int zmq_socket_monitor (void *socket, char *endpoint, int events);
+        ['zmq_socket_monitor' => "${target}::zmq_socket_monitor"]
+            => ['pointer', 'string', 'int'] => 'int'
+    );
 }
 
 1;
