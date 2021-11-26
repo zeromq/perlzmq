@@ -1,0 +1,21 @@
+name: Run Tests via Docker
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+
+jobs:
+  docker-test:
+    name: Test using Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: dzil test
+        run: |
+          ./docker-run dzil test
+      - name: docker-test-install
+        run: |
+          ./scripts/docker-test-install
