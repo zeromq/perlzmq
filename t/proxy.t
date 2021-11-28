@@ -3,11 +3,17 @@ use warnings;
 
 use Test::More;
 use Test::Warnings;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
 use Time::HiRes q(usleep);
 use POSIX ":sys_wait_h";
+
+if( ! ZMQTest->platform_can_fork ) {
+    plan skip_all => 'fork(2) unavailable';
+}
 
 my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
 my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";

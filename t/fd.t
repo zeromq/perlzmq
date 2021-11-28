@@ -3,6 +3,12 @@ use warnings;
 
 use Test::More;
 use Test::Warnings;
+use lib 't/lib';
+use ZMQTest;
+
+if( ! ZMQTest->platform_zmq_fd_sockopt_is_fd ) {
+    plan skip_all => 'Method get_fd() not implemented for platform';
+}
 
 use AnyEvent;
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
