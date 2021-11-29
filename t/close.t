@@ -20,7 +20,7 @@ subtest 'close with unsent messages', sub {
         my $ctx = ZMQ::FFI->new();
         my $s   = $ctx->socket(ZMQ_REQ);
 
-        $s->connect("ipc:///tmp/test-zmq-ffi-$$");
+        $s->connect(ZMQTest->endpoint("test-zmq-ffi-$$"));
         $s->send('ohhai');
     });
 

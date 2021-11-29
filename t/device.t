@@ -17,8 +17,8 @@ if( ! ZMQTest->platform_can_fork ) {
     plan skip_all => 'fork(2) unavailable';
 }
 
-my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
-my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
+my $server_address = ZMQTest->endpoint("test-zmq-ffi-$$-front");
+my $worker_address = ZMQTest->endpoint("test-zmq-ffi-$$-back");
 
 my $device;
 

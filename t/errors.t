@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 use Test::Exception;
+use lib 't/lib';
+use ZMQTest;
 
 use FFI::Platypus;
 use Errno qw(EINVAL EAGAIN);
@@ -66,7 +68,7 @@ subtest 'fatal socket error' => sub {
 subtest 'socket recv error && die_on_error => false' => sub {
     my $ctx    = ZMQ::FFI->new();
     my $socket = $ctx->socket(ZMQ_REP);
-    $socket->bind("ipc:///tmp/test-zmq-ffi-$$");
+    $socket->bind(ZMQTest->endpoint("test-zmq-ffi-$$"));
 
     check_nonfatal_eagain($socket, 'recv', ZMQ_DONTWAIT);
 };
@@ -74,7 +76,7 @@ subtest 'socket recv error && die_on_error => false' => sub {
 subtest 'socket send error && die_on_error => false' => sub {
     my $ctx    = ZMQ::FFI->new();
     my $socket = $ctx->socket(ZMQ_DEALER);
-    $socket->bind("ipc:///tmp/test-zmq-ffi-$$");
+    $socket->bind(ZMQTest->endpoint("test-zmq-ffi-$$"));
 
     check_nonfatal_eagain($socket, 'send', 'ohhai', ZMQ_DONTWAIT);
 };
@@ -82,7 +84,7 @@ subtest 'socket send error && die_on_error => false' => sub {
 subtest 'socket recv_multipart error && die_on_error => false' => sub {
     my $ctx    = ZMQ::FFI->new();
     my $socket = $ctx->socket(ZMQ_REP);
-    $socket->bind("ipc:///tmp/test-zmq-ffi-$$");
+    $socket->bind(ZMQTest->endpoint("test-zmq-ffi-$$"));
 
     check_nonfatal_eagain($socket, 'recv_multipart', ZMQ_DONTWAIT);
 };
@@ -90,7 +92,7 @@ subtest 'socket recv_multipart error && die_on_error => false' => sub {
 subtest 'socket send_multipart error && die_on_error => false' => sub {
     my $ctx    = ZMQ::FFI->new();
     my $socket = $ctx->socket(ZMQ_DEALER);
-    $socket->bind("ipc:///tmp/test-zmq-ffi-$$");
+    $socket->bind(ZMQTest->endpoint("test-zmq-ffi-$$"));
 
     check_nonfatal_eagain(
         $socket, 'send_multipart', [qw(foo bar baz)], ZMQ_DONTWAIT

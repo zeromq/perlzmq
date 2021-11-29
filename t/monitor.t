@@ -98,7 +98,7 @@ subtest 'monitor', sub {
         $ms->connect('inproc://monitor-server');
         $mc->connect('inproc://monitor-client');
 
-        my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+        my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 
         $s->bind($endpoint);
 

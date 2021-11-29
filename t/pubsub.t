@@ -3,6 +3,8 @@ use warnings;
 
 use Test::More;
 use Test::Warnings;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_PUB ZMQ_SUB ZMQ_DONTWAIT);
 
@@ -10,7 +12,7 @@ use Time::HiRes q(usleep);
 
 subtest 'pubsub',
 sub {
-    my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+    my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 
     my $ctx = ZMQ::FFI->new();
 

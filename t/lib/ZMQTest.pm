@@ -38,4 +38,33 @@ sub platform_zmq_fd_sockopt_is_fd {
 	return $^O ne 'MSWin32';
 }
 
+=head2 platform_can_transport_zmq_ipc
+
+Returns true if platform can use L<zmq_ipc(7)> transport.
+
+This is currently false on systems such as C<MSWin32> because they do not
+support Unix domain sockets.
+
+=cut
+sub platform_can_transport_zmq_ipc {
+	return $^O ne 'MSWin32';
+}
+
+=head2 endpoint
+
+  ZMQTest->endpoint($name)
+
+Returns an appropriate endpoint string that is supported on the current
+platform.
+
+=cut
+sub endpoint {
+	my ($class, $name) = @_;
+	if( $class->platform_can_transport_zmq_ipc ) {
+		return "ipc:///tmp/$name";
+	} else {
+		return "inproc://$name";
+	}
+}
+
 1;

@@ -13,7 +13,7 @@ if( ! ZMQTest->platform_zmq_fd_sockopt_is_fd ) {
 use AnyEvent;
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 my @expected = qw(foo bar baz);
 my $ctx      = ZMQ::FFI->new();
 

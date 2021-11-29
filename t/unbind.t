@@ -3,10 +3,12 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 use Test::Exception;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP ZMQ_LAST_ENDPOINT);
 
-my $e = "ipc:///tmp/test-zmq-ffi-$$";
+my $e = ZMQTest->endpoint("test-zmq-ffi-$$");
 
 my $c = ZMQ::FFI->new();
 
