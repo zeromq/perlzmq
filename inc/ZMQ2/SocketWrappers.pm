@@ -474,4 +474,30 @@ sub close {
 }
 )}
 
+sub monitor_tt {q(
+sub monitor {
+    my ($self) = @_;
+
+    [% closed_socket_check %]
+
+    $self->bad_version(
+        $self->verstr,
+        "monitor not available in zmq 2.x"
+    );
+}
+)}
+
+sub recv_event_tt {q(
+sub recv_event {
+    my ($self) = @_;
+
+    [% closed_socket_check %]
+
+    $self->bad_version(
+        $self->verstr,
+        "recv_event not available in zmq 2.x"
+    );
+}
+)}
+
 1;

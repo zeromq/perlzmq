@@ -4,7 +4,7 @@ use FFI::Platypus;
 use FFI::Platypus::Memory qw(malloc);
 
 use ZMQ::FFI::Constants qw(zmq_msg_t_size);
-use ZMQ::FFI::Util qw(current_tid);
+use ZMQ::FFI::Util qw(current_tid zmq_version);
 
 use Moo::Role;
 
@@ -57,6 +57,12 @@ has sockopt_sizes => (
     builder => '_build_sockopt_sizes'
 );
 
+has event_size => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_event_size'
+);
+
 sub _build_zmq_msg_t {
     my ($self) = @_;
 
@@ -81,6 +87,23 @@ sub _build_sockopt_sizes {
     };
 }
 
+sub _build_event_size {
+    my $ffi = FFI::Platypus->new();
+
+    my ($major, $minor, $patch) = zmq_version();
+
+    my $size;
+
+    if ($major == 3) {
+        $size = $ffi->sizeof('int') * 2 + $ffi->sizeof('opaque');
+    }
+    elsif ($major > 3) {
+        $size = $ffi->sizeof('uint16', 'sint32');
+    }
+
+    return $size;
+}
+
 requires qw(
     connect
     disconnect
@@ -102,6 +125,8 @@ requires qw(
     get
     set
     close
+    monitor
+    recv_event
 );
 
 1;

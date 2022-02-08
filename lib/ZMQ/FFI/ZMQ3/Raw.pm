@@ -127,6 +127,12 @@ sub load {
         ['zmq_errno' => "${target}::zmq_errno"]
             => [] => 'int'
     );
+
+    $ffi->attach(
+        # int zmq_socket_monitor (void *socket, char *addr, int events);
+        ['zmq_socket_monitor' => "${target}::zmq_socket_monitor"]
+            => ['pointer', 'string', 'int'] => 'int'
+    );
 }
 
 1;

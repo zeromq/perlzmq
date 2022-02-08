@@ -151,6 +151,12 @@ sub load {
         ['zmq_has' => "${target}::zmq_has"]
             => ['string'] => 'int'
     );
+
+    $ffi->attach(
+        # int zmq_socket_monitor (void *socket, char *endpoint, int events);
+        ['zmq_socket_monitor' => "${target}::zmq_socket_monitor"]
+            => ['pointer', 'string', 'int'] => 'int'
+    );
 }
 
 1;
