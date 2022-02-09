@@ -15,7 +15,12 @@ jobs:
         uses: actions/checkout@v2
       - name: dzil test
         run: |
-          ./docker-run dzil test
+          ./docker-run sh -c "
+                dzil authordeps --missing | cpanm -n;
+                dzil test"
       - name: docker-test-install
         run: |
-          ./scripts/docker-test-install
+          ./docker-run sh -c "
+                dzil authordeps --missing | cpanm -n;
+                dzil clean && dzil build;
+                cpanm -v ZMQ-FFI-*.tar.gz"

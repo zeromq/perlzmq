@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 use Test::Exception;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_STREAMER ZMQ_PUSH ZMQ_PULL);
 use ZMQ::FFI::Util qw(zmq_version);
@@ -11,8 +13,12 @@ use ZMQ::FFI::Util qw(zmq_version);
 use Time::HiRes q(usleep);
 use POSIX ":sys_wait_h";
 
-my $server_address = "ipc:///tmp/test-zmq-ffi-$$-front";
-my $worker_address = "ipc:///tmp/test-zmq-ffi-$$-back";
+if( ! ZMQTest->platform_can_fork ) {
+    plan skip_all => 'fork(2) unavailable';
+}
+
+my $server_address = ZMQTest->endpoint("test-zmq-ffi-$$-front");
+my $worker_address = ZMQTest->endpoint("test-zmq-ffi-$$-back");
 
 my $device;
 

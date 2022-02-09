@@ -3,6 +3,8 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 use Test::Exception;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI;
 use ZMQ::FFI::Constants qw(ZMQ_REQ ZMQ_REP ZMQ_CURVE_SERVER ZMQ_CURVE_SECRETKEY 
@@ -12,7 +14,7 @@ my $c = ZMQ::FFI->new();
 
 my ($major, $minor) = $c->version();
 
-my $e = "ipc:///tmp/test-zmq-ffi-$$";
+my $e = ZMQTest->endpoint("test-zmq-ffi-$$");
 
 if ($major == 4) {
     if ($minor >= 1) {

@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Test::Warnings;
 use Math::BigInt;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(:all);
 use ZMQ::FFI::Util qw(zmq_version);
@@ -63,7 +65,7 @@ sub {
     my $ctx = ZMQ::FFI->new();
     my $s   = $ctx->socket(ZMQ_DEALER);
 
-    my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+    my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
     $s->bind($endpoint);
 
     is $s->get(ZMQ_LAST_ENDPOINT, 'string'), $endpoint, 'got last endpoint';

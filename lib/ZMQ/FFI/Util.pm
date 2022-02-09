@@ -30,10 +30,11 @@ sub zmq_soname {
     # we'll try the linker_name, then the sonames.
     #
     # If Linux extensions fail also try platform specific
-    # extensions (e.g. OS X) before giving up.
+    # extensions (e.g. OS X, MSWin32) before giving up.
     my @sonames = qw(
         libzmq.so    libzmq.so.5    libzmq.so.4    libzmq.so.3    libzmq.so.1
         libzmq.dylib libzmq.4.dylib libzmq.3.dylib libzmq.1.dylib
+        libzmq.dll
     );
 
     my $soname;

@@ -5,10 +5,12 @@ use utf8;
 use Test::More;
 use Test::Warnings;
 use List::Util qw(sum);
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_PUSH ZMQ_PULL);
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 my $ctx      = ZMQ::FFI->new();
 
 my $s1 = $ctx->socket(ZMQ_PUSH);

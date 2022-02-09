@@ -3,13 +3,15 @@ use warnings;
 
 use Test::More;
 use Test::Warnings;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_DEALER ZMQ_ROUTER ZMQ_DONTWAIT ZMQ_SNDMORE);
 
 use Scalar::Util qw(blessed);
 use Sub::Override;
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 my $ctx      = ZMQ::FFI->new();
 
 my $d = $ctx->socket(ZMQ_DEALER);

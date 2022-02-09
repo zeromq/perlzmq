@@ -5,7 +5,15 @@ use v5.10;
 
 use Test::More;
 use Test::Warnings;
-use Sys::SigAction qw(timeout_call);
+use lib 't/lib';
+use ZMQTest;
+
+if( ZMQTest->platform_can_sigaction ) {
+    require Sys::SigAction;
+    Sys::SigAction->import(qw(timeout_call));
+} else {
+    plan skip_all => 'No Sys::SigAction';
+}
 
 use ZMQ::FFI qw(
     ZMQ_DEALER ZMQ_PAIR
@@ -67,7 +75,7 @@ sub dump_event {
 }
 
 subtest 'monitor', sub {
-    my $timed_out = timeout_call 5, sub {
+    my $timed_out = timeout_call(5, sub {
         my $ctx = ZMQ::FFI->new();
 
         my ($major, $minor, $patch) = $ctx->version();
@@ -90,7 +98,7 @@ subtest 'monitor', sub {
         $ms->connect('inproc://monitor-server');
         $mc->connect('inproc://monitor-client');
 
-        my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+        my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 
         $s->bind($endpoint);
 
@@ -160,7 +168,7 @@ subtest 'monitor', sub {
 
         cmp_ok $data, 'eq', $endpoint,
             "Received endpoint is $endpoint";
-    };
+    });
 
     ok !$timed_out,
        'implicit Socket close done correctly (ctx destruction does not hang)';

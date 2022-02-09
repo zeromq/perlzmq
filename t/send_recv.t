@@ -2,10 +2,12 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Warnings;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_REQ ZMQ_REP);
 
-my $endpoint = "ipc:///tmp/test-zmq-ffi-$$";
+my $endpoint = ZMQTest->endpoint("test-zmq-ffi-$$");
 my $ctx      = ZMQ::FFI->new( threads => 1 );
 
 my $s1 = $ctx->socket(ZMQ_REQ);

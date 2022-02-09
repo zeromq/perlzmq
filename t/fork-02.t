@@ -3,8 +3,14 @@ use warnings;
 
 use Test::More;
 use Test::Warnings;
+use lib 't/lib';
+use ZMQTest;
 
 use ZMQ::FFI qw(ZMQ_REQ);
+
+if( ! ZMQTest->platform_can_fork ) {
+    plan skip_all => 'fork(2) unavailable';
+}
 
 #
 # Test that we _do_ clean up contexts/sockets created in forked children
