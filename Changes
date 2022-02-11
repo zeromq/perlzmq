@@ -1,6 +1,10 @@
 
 {{$NEXT}}
 
+    - New maintainer @ghenry - welcome and thank you!
+    - Add MSWin32 support (GH#47 - thanks @zmughal!)
+    - Add zmq_socket_monitor support (GH#46 - thanks @potatogim!)
+    - Add z85_encoding support (GH#43 - thanks @juddtaylor!)
     - Document contributors
     - Update repository info. Now officially part of the zeromq project at
       https://github.com/zeromq/perlzmq
