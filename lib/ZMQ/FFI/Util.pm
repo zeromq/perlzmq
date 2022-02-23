@@ -37,6 +37,10 @@ sub zmq_soname {
         libzmq.dll
     );
 
+    if( eval { require Alien::ZMQ::latest; 1 } ) {
+        push @sonames, Alien::ZMQ::latest->dynamic_libs;
+    }
+
     my $soname;
     FIND_SONAME:
     for (@sonames) {
