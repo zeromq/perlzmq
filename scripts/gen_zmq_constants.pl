@@ -43,6 +43,17 @@ for my $r (@repos) {
         my %constants =
             map  { split '\s+' }
             grep { !/ZMQ_VERSION/ }
+            # Skip ZMQ_GROUP_MAX_LENGTH.
+            #
+            # The value for ZMQ_GROUP_MAX_LENGTH changed from 15 to 255 between
+            # libzmq versions v4.3.2 and v4.3.3.
+            #
+            # - <https://github.com/zeromq/libzmq/pull/3822>,
+            # - <https://github.com/zeromq/libzmq/commit/05194eb549b3d3e83ef1b75fa8f2d7aaa8d43c00>.
+            #
+            # This is for the RADIO-DISH protocol that was introduced as a
+            # draft in v4.2.0 <https://rfc.zeromq.org/spec/48/>.
+            grep { !/ZMQ_GROUP_MAX_LENGTH/ }
             grep { /\b(ZMQ_[^ ]+\s+(0x)?[0-9A-F]+)/; $_ = $1; }
             qx(git show $version:include/zmq.h);
 
