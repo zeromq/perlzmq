@@ -2,9 +2,9 @@
 docker run --rm -i -t \
     -e SHELL=/bin/bash \
     -v $(pwd):/zmq-ffi \
-    -v /home/calid/.ssh:/root/.ssh \
-    -v /home/calid/.pause:/root/.pause \
-    -v /home/calid/.gitconfig:/root/.gitconfig \
-    -v /home/calid/.gitignore:/root/.gitignore \
+    -v $HOME/.ssh:/root/.ssh \
+    -v $HOME/.pause:/root/.pause \
+    -v $HOME/.gitconfig:/root/.gitconfig \
+    -v $HOME/.gitignore:/root/.gitignore \
     -w /zmq-ffi \
     calid/zmq-ffi-testenv:ubuntu /bin/bash
