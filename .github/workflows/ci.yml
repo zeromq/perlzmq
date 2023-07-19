@@ -40,7 +40,9 @@ jobs:
           - { os: 'ubuntu-latest', perl: "5.20" }
           - { os: 'ubuntu-latest', perl: "5.30" }
           - { os: 'ubuntu-latest', perl: "5.32" }
-          - { os: 'ubuntu-latest', perl: "5.32", perl-threaded: true }
+          - { os: 'ubuntu-latest', perl: "5.34" }
+          - { os: 'ubuntu-latest', perl: "5.36" }
+          - { os: 'ubuntu-latest', perl: "5"    , perl-threaded: true }
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}, ${{ matrix.alien }}
 
     steps:
