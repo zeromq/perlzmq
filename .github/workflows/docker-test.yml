@@ -17,10 +17,12 @@ jobs:
         run: |
           ./docker-run sh -c "
                 dzil authordeps --missing | cpanm -n;
+                cpanm -nq Sys::SigAction; # temporary until release of new test image
                 dzil test"
       - name: docker-test-install
         run: |
           ./docker-run sh -c "
                 dzil authordeps --missing | cpanm -n;
+                cpanm -nq Sys::SigAction; # temporary until release of new test image
                 dzil clean && dzil build;
                 cpanm -v ZMQ-FFI-*.tar.gz"
