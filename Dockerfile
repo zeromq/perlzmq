@@ -79,7 +79,7 @@ RUN apt-get install -y libdist-zilla-perl libterm-ui-perl libanyevent-perl \
 FROM dzil-base as zmq-ffi-base
 COPY . /zmq-ffi/
 RUN cd /zmq-ffi && dzil authordeps --missing | cpanm -v
-RUN cd /zmq-ffi && dzil listdeps --missing | cpanm -v
+RUN cd /zmq-ffi && dzil listdeps --missing | cpanm -v && cpanm -v Sys::SigAction
 RUN apt-get -y purge gcc g++ autoconf automake libtool-bin pkg-config \
         libssl-dev zlib1g-dev uuid-dev \
     && apt -y autoremove \

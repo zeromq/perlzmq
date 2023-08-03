@@ -12,15 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: dzil test
         run: |
           ./docker-run sh -c "
                 dzil authordeps --missing | cpanm -n;
+                cpanm -nq Sys::SigAction; # temporary until release of new test image
                 dzil test"
       - name: docker-test-install
         run: |
           ./docker-run sh -c "
                 dzil authordeps --missing | cpanm -n;
+                cpanm -nq Sys::SigAction; # temporary until release of new test image
                 dzil clean && dzil build;
                 cpanm -v ZMQ-FFI-*.tar.gz"
